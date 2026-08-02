@@ -137,3 +137,96 @@ dialog { width: min(calc(100% - 30px),400px); max-height: 74vh; padding: 19px; b
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }
 }
+
+/* v0.2 — five-unit formation, expeditions, crafting and illustrated enemies */
+.operation-grid { display: grid; gap: 9px; }
+.operation-grid .operation-card { margin: 0; }
+.operation-icon.green { color: var(--green); background: rgba(95,255,176,.1); }
+
+.sound-preview { width: 100%; margin-top: 11px; padding: 12px 14px; border: 1px solid rgba(241,38,207,.22); display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 11px; color: var(--ink); text-align: left; cursor: pointer; }
+.sound-preview > span:nth-child(2) { display: flex; flex-direction: column; }
+.sound-preview small { color: var(--pink); font-size: 8px; font-weight: 950; letter-spacing: .11em; }
+.sound-preview strong { margin-top: 1px; font-size: 12px; }
+.sound-preview em { color: var(--muted); font-size: 8px; font-style: normal; }
+.sound-preview > b { color: var(--cyan); font-size: 15px; }
+.sound-preview.playing { border-color: var(--cyan); box-shadow: 0 0 24px rgba(25,230,255,.12); }
+.sound-bars { height: 34px; display: flex; align-items: center; justify-content: center; gap: 3px; border-radius: 12px; background: linear-gradient(145deg,rgba(25,230,255,.12),rgba(241,38,207,.12)); }
+.sound-bars i { width: 3px; height: 8px; border-radius: 9px; background: linear-gradient(var(--cyan),var(--pink)); }
+.sound-preview.playing .sound-bars i { animation: soundbar .55s ease-in-out infinite alternate; }
+.sound-bars i:nth-child(2) { height: 18px; animation-delay: -.2s !important; }.sound-bars i:nth-child(3) { height: 26px; animation-delay: -.4s !important; }.sound-bars i:nth-child(4) { height: 15px; animation-delay: -.1s !important; }.sound-bars i:nth-child(5) { height: 22px; animation-delay: -.3s !important; }
+@keyframes soundbar { to { transform: scaleY(.35); filter: brightness(1.8); } }
+
+.mini-team { min-width: 82px; height: 54px; position: relative; }
+.mini-team img,.mini-team .mini-symbol { position: absolute; top: 0; width: 34px; height: 49px; border: 2px solid #19102a; border-radius: 11px; object-fit: cover; background: #30204d; display: grid; place-items: center; font-size: 13px; box-shadow: 0 5px 12px rgba(0,0,0,.35); }
+.mini-team > :nth-child(1) { left: 0; z-index: 5; }.mini-team > :nth-child(2) { left: 12px; z-index: 4; }.mini-team > :nth-child(3) { left: 24px; z-index: 3; }.mini-team > :nth-child(4) { left: 36px; z-index: 2; }.mini-team > :nth-child(5) { left: 48px; z-index: 1; }
+.squad-strip { align-items: center; }.squad-strip > div:nth-child(2) { min-width: 0; }
+
+.mission-card.has-image { min-height: 118px; grid-template-columns: 86px 1fr; padding: 0; gap: 0; }
+.mission-card.has-image::before { z-index: 3; width: 3px; }
+.mission-thumb { position: relative; align-self: stretch; min-height: 118px; overflow: hidden; }
+.mission-thumb img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; }
+.mission-thumb::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg,transparent 50%,rgba(22,13,37,.9)); }
+.mission-thumb b { position: absolute; left: 8px; bottom: 8px; z-index: 2; color: white; font-size: 17px; text-shadow: 0 2px 8px #000; }
+.mission-body { min-width: 0; padding: 12px 10px 11px 6px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.mission-main h3 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mission-drops { display: flex; gap: 5px !important; flex-wrap: wrap; }
+.mission-drops i { padding: 3px 5px; border-radius: 5px; background: rgba(255,255,255,.05); }
+
+.raid-hero { background: #10071d; }
+.raid-hero > img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
+.raid-shade { position: absolute; inset: 0; background: linear-gradient(180deg,rgba(7,3,14,.05),rgba(7,3,14,.15) 38%,rgba(7,3,14,.94)); }
+.raid-copy { z-index: 2; }.raid-copy p { color: #d9cfdf; }
+.raid-cta { width: 100%; margin-top: 11px; }
+
+.formation-summary { padding: 13px; display: flex; align-items: center; gap: 12px; }
+.formation-summary > div { display: flex; flex-direction: column; }.formation-summary small { color: var(--cyan); font-size: 7px; font-weight: 900; }.formation-summary strong { font-size: 25px; line-height: 1; }
+.formation-summary > span { flex: 1; color: var(--muted); font-size: 8px; line-height: 1.4; }
+.formation-summary button { padding: 7px 9px; border: 1px solid rgba(25,230,255,.26); border-radius: 9px; background: rgba(25,230,255,.08); color: var(--cyan); font-size: 9px; font-weight: 900; cursor: pointer; }
+.team-slots { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; margin: 11px 0 17px; }
+.team-slot { min-width: 0; padding: 0; position: relative; overflow: hidden; aspect-ratio: .68; border: 1px solid var(--line); border-radius: 15px; background: #171027; color: white; cursor: pointer; }
+.team-slot.active { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan),0 0 18px rgba(25,230,255,.18); transform: translateY(-3px); }
+.team-slot img,.team-slot .slot-symbol { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: grid; place-items: center; font-size: 23px; }
+.team-slot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 35%,rgba(5,2,10,.97)); }
+.team-slot .slot-number { position: absolute; left: 5px; top: 5px; z-index: 2; width: 17px; height: 17px; display: grid; place-items: center; border-radius: 50%; background: rgba(0,0,0,.66); color: var(--cyan); font-size: 7px; font-weight: 950; }
+.team-slot strong { position: absolute; left: 3px; right: 3px; bottom: 6px; z-index: 2; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; text-shadow: 0 1px 4px #000; }
+.roster-heading { align-items: center; }.roster-heading > small,.section-heading > small { color: var(--muted); font-size: 8px; }
+.unit-card { border: 1px solid transparent; width: 100%; color: var(--ink); text-align: left; cursor: pointer; }
+.unit-card.in-team { border-color: rgba(25,230,255,.3); background: linear-gradient(100deg,rgba(25,230,255,.08),rgba(241,38,207,.05)); }
+.unit-card.selected-target { animation: roster-pulse .5s ease-out; }
+@keyframes roster-pulse { 50% { border-color: var(--gold); filter: brightness(1.25); } }
+.unit-copy .formation-tag { color: var(--cyan); font-size: 8px; font-style: normal; }
+
+.material-wallet { display: grid; grid-template-columns: repeat(2,1fr); gap: 1px; overflow: hidden; background: var(--line); }
+.material-item { padding: 12px; background: #171027; display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 7px; }
+.material-item > i { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: color-mix(in srgb,var(--material) 15%,transparent); color: var(--material); font-size: 15px; font-style: normal; }
+.material-item span { display: flex; flex-direction: column; min-width: 0; }.material-item small { color: var(--muted); font-size: 7px; white-space: nowrap; }.material-item b { color: var(--material); font-size: 16px; }
+.expedition-list,.recipe-list { display: grid; gap: 9px; }
+.expedition-card,.recipe-card { position: relative; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #171027; }
+.expedition-card { min-height: 132px; padding: 14px; background: var(--expedition-bg),#171027; }
+.expedition-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg,rgba(9,4,20,.96),rgba(9,4,20,.62) 70%,rgba(9,4,20,.2)); }
+.expedition-card > * { position: relative; z-index: 1; }.expedition-card small,.recipe-card small { color: var(--cyan); font-size: 8px; font-weight: 900; letter-spacing: .08em; }.expedition-card h3,.recipe-card h3 { margin: 3px 0; font-size: 15px; }.expedition-card p,.recipe-card p { margin: 0; color: var(--muted); font-size: 8px; }
+.expedition-card button { position: absolute; right: 12px; bottom: 12px; z-index: 2; padding: 9px 12px; border: 1px solid rgba(25,230,255,.3); border-radius: 11px; background: rgba(9,4,20,.82); color: var(--cyan); font-size: 9px; font-weight: 900; cursor: pointer; }
+.expedition-card button:disabled { opacity: .45; }
+.drop-chips { display: flex; gap: 5px; margin-top: 9px; }.drop-chips i { padding: 4px 6px; border-radius: 7px; background: rgba(255,255,255,.08); color: #eee9f3; font-size: 8px; font-style: normal; }
+.recipe-card { padding: 13px; display: grid; grid-template-columns: 43px 1fr auto; gap: 10px; align-items: center; }
+.recipe-icon { width: 43px; height: 49px; display: grid; place-items: center; border-radius: 13px; background: linear-gradient(145deg,rgba(25,230,255,.18),rgba(241,38,207,.18)); font-size: 21px; }
+.recipe-card .recipe-copy { min-width: 0; }.recipe-card h3 { display: flex; align-items: center; gap: 5px; }.recipe-card h3 b { color: var(--gold); font-size: 8px; }.recipe-cost { display: flex; gap: 4px; margin-top: 7px; flex-wrap: wrap; }.recipe-cost i { padding: 3px 5px; border-radius: 5px; background: rgba(255,255,255,.06); color: var(--muted); font-size: 7px; font-style: normal; }.recipe-cost i.ready { color: var(--green); }
+.recipe-card button { padding: 9px 10px; border: 0; border-radius: 10px; background: linear-gradient(110deg,var(--cyan),var(--pink)); color: #090414; font-size: 9px; font-weight: 950; cursor: pointer; }.recipe-card button:disabled { filter: grayscale(1); opacity: .4; }
+
+.menu-shortcut { width: 100%; margin-top: 13px; padding: 13px; display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 11px; color: var(--ink); text-align: left; cursor: pointer; }
+.menu-shortcut > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: rgba(95,255,176,.1); color: var(--green); font-size: 20px; }.menu-shortcut div { display: flex; flex-direction: column; }.menu-shortcut small { color: var(--green); font-size: 7px; font-weight: 900; letter-spacing: .1em; }.menu-shortcut strong { font-size: 12px; }.menu-shortcut > b { color: var(--muted); font-size: 22px; }
+
+.battle-visual { width: min(100%,400px); height: 180px; margin: 0 auto; position: relative; overflow: hidden; border: 1px solid rgba(255,66,105,.22); border-radius: 20px; background: #13091d; }
+.battle-visual > img { width: 100%; height: 100%; object-fit: cover; object-position: center 38%; }
+.battle-visual-shade { position: absolute; inset: 0; background: linear-gradient(180deg,transparent 30%,rgba(8,4,17,.92)); }
+.battle-versus { position: absolute; left: 13px; right: 13px; bottom: 10px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 8px; }.battle-versus span { color: var(--cyan); font-size: 9px; font-weight: 900; }.battle-versus b { color: var(--gold); font-size: 15px; }.battle-versus strong { color: #fff; font-size: 11px; text-align: right; }
+.battle-team-mini { width: min(100%,400px); margin: 8px auto 0; display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; }
+.battle-team-mini span { height: 34px; display: flex; align-items: center; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 10px; background: rgba(28,17,45,.92); min-width: 0; }.battle-team-mini img,.battle-team-mini i { width: 25px; height: 26px; flex: none; border-radius: 7px; object-fit: cover; display: grid; place-items: center; background: #30204d; font-size: 9px; font-style: normal; }.battle-team-mini b { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 7px; }
+.battle-log { min-height: 190px; max-height: 32vh; }
+
+@media (max-width: 370px) {
+  .team-slots { gap: 4px; }.team-slot { border-radius: 12px; }.team-slot strong { font-size: 7px; }
+  .material-item { padding: 9px 8px; grid-template-columns: 27px 1fr auto; gap: 5px; }.material-item > i { width: 27px; height: 27px; }
+  .recipe-card { grid-template-columns: 38px 1fr auto; gap: 7px; padding: 10px; }.recipe-icon { width: 38px; }
+  .mission-card.has-image { grid-template-columns: 72px 1fr; }.mission-thumb { min-height: 112px; }
+}

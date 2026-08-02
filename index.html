@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090414">
-  <meta name="description" content="基本オート戦闘とリッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』のWebプロトタイプ。">
+  <meta name="description" content="5人編成・オート戦闘・素材探索・装備生成・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
   <title>境界共鳴 — Social RPG Prototype</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
+  <link rel="preload" href="assets/commander-ren-v1.png" as="image">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,10 +19,7 @@
     <header class="topbar">
       <div class="brand-lockup">
         <span class="brand-mark" aria-hidden="true">界</span>
-        <div>
-          <p class="eyebrow">BORDER RESONANCE</p>
-          <h1 id="screen-title">境界局</h1>
-        </div>
+        <div><p class="eyebrow">BORDER RESONANCE</p><h1 id="screen-title">境界局</h1></div>
       </div>
       <div class="resource-row" aria-label="所持資源">
         <span class="resource stamina"><i>ϟ</i><b id="stamina-value">48/60</b></span>
@@ -35,144 +33,79 @@
     <div class="screen-stack">
       <section id="home-screen" class="screen active" data-title="境界局" aria-labelledby="home-heading">
         <h2 id="home-heading" class="sr-only">ホーム</h2>
-
         <article class="profile-card glass-card">
           <div class="avatar-ring">局</div>
-          <div class="profile-copy">
-            <span>PLAYER LEVEL 07</span>
-            <strong>境界局長</strong>
-            <small>第零遊撃隊　戦力 <b id="home-power">589</b></small>
-          </div>
+          <div class="profile-copy"><span>PLAYER LEVEL 07</span><strong>境界局長</strong><small>第零遊撃隊　5人編成戦力 <b id="home-power">0</b></small></div>
           <button class="icon-button" type="button" data-screen-target="menu" aria-label="設定を開く">⚙</button>
         </article>
 
         <article class="hero-banner vivid-frame">
           <img src="assets/ur-exorcist.png" alt="UR指揮官 コハク">
-          <div class="hero-shade"></div>
-          <div class="chromatic-line" aria-hidden="true"></div>
+          <div class="hero-shade"></div><div class="chromatic-line" aria-hidden="true"></div>
           <div class="hero-content">
             <div class="badge-row"><span class="rarity ur">UR</span><span class="pickup">PICK UP</span></div>
-            <p class="hero-kicker">境界共鳴召喚</p>
-            <h2>界紋を拓く者<br>コハク</h2>
-            <p>初回10連でUR演出を体験</p>
+            <p class="hero-kicker">境界共鳴召喚</p><h2>界紋を拓く者<br>コハク</h2><p>初回10連でUR演出を体験</p>
             <button class="primary-button compact" type="button" data-screen-target="gacha"><span>共鳴召喚へ</span><b>✦</b></button>
           </div>
         </article>
 
-        <div class="section-heading">
-          <div><span>OPERATIONS</span><h2>本日の作戦</h2></div>
-          <button class="text-button" type="button" data-screen-target="missions">すべて見る</button>
+        <div class="section-heading"><div><span>OPERATIONS</span><h2>本日の作戦</h2></div><button class="text-button" type="button" data-screen-target="missions">すべて見る</button></div>
+        <div class="operation-grid">
+          <button class="operation-card glass-card" type="button" data-screen-target="missions"><span class="operation-icon cyan">⌖</span><span class="operation-copy"><small>AUTO MISSION</small><strong>ネオン街の追跡者</strong><em>5人連携 / 消費 6</em></span><span class="chevron">›</span></button>
+          <button class="operation-card glass-card" type="button" data-screen-target="workshop"><span class="operation-icon green">⚒</span><span class="operation-copy"><small>EXPLORE & CRAFT</small><strong>素材探索・境界工房</strong><em>3つの採集地 / 装備生成</em></span><span class="chevron">›</span></button>
+          <button class="operation-card glass-card" type="button" data-screen-target="raid"><span class="operation-icon red">◉</span><span class="operation-copy"><small>CO-OP RAID</small><strong>境界喰らい・ゴライアス</strong><em>残り2日 / 参加 12,480人</em></span><span class="chevron">›</span></button>
         </div>
-
-        <button class="operation-card glass-card" type="button" data-screen-target="missions">
-          <span class="operation-icon cyan">⌖</span>
-          <span class="operation-copy"><small>STORY 1-1</small><strong>ネオン街の追跡者</strong><em>基本オート / 消費 6</em></span>
-          <span class="chevron">›</span>
-        </button>
-
-        <button class="operation-card glass-card" type="button" data-screen-target="raid">
-          <span class="operation-icon red">◉</span>
-          <span class="operation-copy"><small>CO-OP RAID</small><strong>境界喰らい・壱型</strong><em>残り2日 / 参加 12,480人</em></span>
-          <span class="chevron">›</span>
-        </button>
       </section>
 
       <section id="gacha-screen" class="screen" data-title="共鳴召喚" aria-labelledby="gacha-heading">
         <h2 id="gacha-heading" class="sr-only">共鳴召喚</h2>
-
         <article class="gacha-banner vivid-frame">
-          <img src="assets/ur-exorcist.png" alt="ピックアップUR コハク">
-          <div class="hero-shade"></div>
-          <div class="gacha-copy">
-            <span class="rarity ur">UR</span>
-            <p>境界共鳴 PICK UP</p>
-            <h2>界紋を拓く者<br>コハク</h2>
-            <small>出現率UP　あと12日</small>
-          </div>
+          <img src="assets/ur-exorcist.png" alt="ピックアップUR コハク"><div class="hero-shade"></div>
+          <div class="gacha-copy"><span class="rarity ur">UR</span><p>境界共鳴 PICK UP</p><h2>界紋を拓く者<br>コハク</h2><small>出現率UP　あと12日</small></div>
         </article>
-
-        <article class="pity-card glass-card">
-          <div class="pity-head"><span>UR確定まで</span><strong>あと <b id="pity-remaining">8</b> 回</strong></div>
-          <div class="progress-track"><i id="pity-bar" style="width:90%"></i></div>
-          <p>61回目からUR確率が段階上昇。80回目までに必ずUR。</p>
-        </article>
-
+        <article class="pity-card glass-card"><div class="pity-head"><span>UR確定まで</span><strong>あと <b id="pity-remaining">8</b> 回</strong></div><div class="progress-track"><i id="pity-bar"></i></div><p>61回目からUR確率が段階上昇。80回目までにUR確定。</p></article>
+        <button id="sound-preview" class="sound-preview glass-card" type="button"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span><small>GACHA SOUND v2</small><strong>多層SEをプレビュー</strong><em>低音・吸引・静寂・衝撃・和音</em></span><b>▶</b></button>
         <div class="demo-note"><span>DEMO</span> 初回10連で最高レア演出を確認できます</div>
-
         <div class="draw-actions">
-          <button id="draw-ten" class="primary-button draw-button" type="button">
-            <span><small>SR以上1体確定</small><strong>10連召喚</strong></span>
-            <b>◆ 1,500</b>
-          </button>
-          <button id="draw-one" class="secondary-button draw-button" type="button">
-            <span><small>単発召喚</small><strong>1回召喚</strong></span>
-            <b>◆ 150</b>
-          </button>
+          <button id="draw-ten" class="primary-button draw-button" type="button"><span><small>SR以上1体確定</small><strong>10連召喚</strong></span><b>◆ 1,500</b></button>
+          <button id="draw-one" class="secondary-button draw-button" type="button"><span><small>単発召喚</small><strong>1回召喚</strong></span><b>◆ 150</b></button>
         </div>
-
-        <div class="gacha-links">
-          <button type="button" data-dialog="rates">提供割合</button>
-          <button type="button" data-dialog="rules">天井・重複</button>
-          <button type="button" id="reset-demo">デモ初期化</button>
-        </div>
+        <div class="gacha-links"><button type="button" data-dialog="rates">提供割合</button><button type="button" data-dialog="rules">天井・重複</button><button type="button" id="reset-demo">デモ初期化</button></div>
       </section>
 
       <section id="missions-screen" class="screen" data-title="任務" aria-labelledby="missions-heading">
-        <div class="section-heading page-heading">
-          <div><span>AUTO OPERATION</span><h2 id="missions-heading">任務選択</h2></div>
-          <span class="level-chip">CHAPTER 01</span>
-        </div>
-
-        <article class="squad-strip glass-card">
-          <div class="mini-portrait">⚡</div>
-          <div><small>出撃部隊</small><strong>第零遊撃隊</strong><span><b id="squad-commander-name">レン</b> / 射撃兵 <b id="troop-summary">72</b>名</span></div>
-          <em>戦力 <b id="squad-power">589</b></em>
-        </article>
-
-        <div class="mission-list">
-          <article class="mission-card vivid-card">
-            <div class="stage-index"><small>STAGE</small><b>1-1</b></div>
-            <div class="mission-main"><span>CITY / NIGHT</span><h3>ネオン街の追跡者</h3><p>路地裏の自律兵を排除せよ</p><div><i>推奨 420</i><i>ϟ 6</i></div></div>
-            <button type="button" class="sortie-button" data-mission="0">出撃</button>
-          </article>
-          <article class="mission-card vivid-card">
-            <div class="stage-index"><small>STAGE</small><b>1-2</b></div>
-            <div class="mission-main"><span>INDUSTRIAL / RAIN</span><h3>雨上がりの高架線</h3><p>潜伏する狙撃群を突破せよ</p><div><i>推奨 540</i><i>ϟ 8</i></div></div>
-            <button type="button" class="sortie-button" data-mission="1">出撃</button>
-          </article>
-          <article class="mission-card vivid-card locked-stage">
-            <div class="stage-index"><small>STAGE</small><b>1-3</b></div>
-            <div class="mission-main"><span>BORDER GATE</span><h3>境界門、再起動</h3><p>門衛機グラウゼロを停止せよ</p><div><i>推奨 680</i><i>ϟ 10</i></div></div>
-            <button type="button" class="sortie-button" data-mission="2">出撃</button>
-          </article>
-        </div>
-
-        <aside class="system-note"><b>戦闘方式</b><p>編成を決めた後は最後まで基本オート。兵の損耗が次の攻撃・防御へ即時反映されます。</p></aside>
+        <div class="section-heading page-heading"><div><span>AUTO OPERATION</span><h2 id="missions-heading">任務選択</h2></div><span class="level-chip">CHAPTER 01</span></div>
+        <article class="squad-strip glass-card"><div id="mission-team-mini" class="mini-team"></div><div><small>出撃部隊 / 5 UNIT</small><strong>第零遊撃隊</strong><span>兵力 <b id="troop-summary">0</b>名</span></div><em>戦力 <b id="squad-power">0</b></em></article>
+        <div id="mission-list" class="mission-list"></div>
+        <aside class="system-note"><b>完全オート戦闘</b><p>5人の攻撃・防御・戦術と装備補正を合算。各ラウンドでは役割に応じた指揮官が自動で行動します。</p></aside>
       </section>
 
       <section id="raid-screen" class="screen" data-title="共同レイド" aria-labelledby="raid-heading">
         <h2 id="raid-heading" class="sr-only">共同レイド</h2>
-        <article class="raid-hero vivid-frame">
-          <div class="raid-symbol" aria-hidden="true">◉</div>
-          <div class="raid-copy"><span>WORLD BOSS / ACTIVE</span><h2>境界喰らい<br>壱型</h2><p>プレイヤー全員で削る非同期レイド</p></div>
-        </article>
-        <article class="boss-card glass-card">
-          <div class="boss-head"><span>全体HP</span><b>782,400 / 1,000,000</b></div>
-          <div class="progress-track danger"><i style="width:78.24%"></i></div>
-          <div class="raid-meta"><span>◷ 残り2日</span><span>♟ 12,480人</span></div>
-        </article>
-        <div class="section-heading"><div><span>ROADMAP</span><h2>実装予定</h2></div></div>
-        <article class="roadmap glass-card">
-          <div><i>01</i><span><b>個人3回挑戦</b><small>任務の自動戦闘基盤を共用</small></span><em>準備中</em></div>
-          <div><i>02</i><span><b>部位破壊</b><small>全体バフと行動パターン変化</small></span><em>準備中</em></div>
-          <div><i>03</i><span><b>協力報酬</b><small>個人・ギルド・全体の三層</small></span><em>準備中</em></div>
-        </article>
+        <article class="raid-hero vivid-frame"><img src="assets/enemy-goliath-v1.png" alt="レイドボス 境界喰らい・ゴライアス"><div class="raid-shade"></div><div class="raid-copy"><span>WORLD BOSS / ACTIVE</span><h2>境界喰らい<br>ゴライアス</h2><p>全プレイヤーで挑む非同期レイド</p></div></article>
+        <article class="boss-card glass-card"><div class="boss-head"><span>全体HP</span><b>782,400 / 1,000,000</b></div><div class="progress-track danger"><i style="width:78.24%"></i></div><div class="raid-meta"><span>◷ 残り2日</span><span>♟ 12,480人</span></div></article>
+        <button class="primary-button raid-cta" type="button" data-screen-target="missions">まず任務で戦力を確認</button>
+        <div class="section-heading"><div><span>ROADMAP</span><h2>レイド実装設計</h2></div></div>
+        <article class="roadmap glass-card"><div><i>01</i><span><b>5人編成で挑戦</b><small>任務と同じオート戦闘基盤</small></span><em>設計済</em></div><div><i>02</i><span><b>部位破壊</b><small>全体バフと行動パターン変化</small></span><em>次段階</em></div><div><i>03</i><span><b>協力報酬</b><small>個人・ギルド・全体の三層</small></span><em>次段階</em></div></article>
       </section>
 
-      <section id="units-screen" class="screen" data-title="部隊" aria-labelledby="units-heading">
-        <div class="section-heading page-heading"><div><span>COMMANDERS</span><h2 id="units-heading">所持指揮官</h2></div><span id="unit-count" class="level-chip">1 / 10</span></div>
+      <section id="units-screen" class="screen" data-title="5人編成" aria-labelledby="units-heading">
+        <div class="section-heading page-heading"><div><span>FORMATION</span><h2 id="units-heading">第零遊撃隊</h2></div><span id="unit-count" class="level-chip">5 / 10</span></div>
+        <article class="formation-summary glass-card"><div><small>TEAM POWER</small><strong id="formation-power">0</strong></div><span>選択中の枠へ指揮官を配置</span><button type="button" data-screen-target="workshop">装備</button></article>
+        <div id="team-slots" class="team-slots" aria-label="5人編成枠"></div>
+        <div class="section-heading roster-heading"><div><span>ROSTER</span><h2>所持指揮官</h2></div><small>プロローグ召喚5名を含む</small></div>
         <div id="unit-list" class="unit-list"></div>
-        <aside class="system-note"><b>ガチャで仲間を獲得</b><p>重複した指揮官は限界突破用の記憶片へ自動変換されます。</p></aside>
+        <aside class="system-note"><b>基本ユニットは召喚で獲得</b><p>開始時の5名はプロローグ召喚の結果です。以降は共鳴召喚で獲得し、重複は限界突破素材へ変換されます。</p></aside>
+      </section>
+
+      <section id="workshop-screen" class="screen" data-title="素材探索・工房" aria-labelledby="workshop-heading">
+        <div class="section-heading page-heading"><div><span>EXPLORE & CRAFT</span><h2 id="workshop-heading">境界工房</h2></div><span class="level-chip">GEAR Lv.<b id="gear-total-level">0</b></span></div>
+        <div id="material-wallet" class="material-wallet glass-card"></div>
+        <div class="section-heading"><div><span>EXPEDITIONS</span><h2>素材探索</h2></div><small>各探索 ϟ3</small></div>
+        <div id="expedition-list" class="expedition-list"></div>
+        <div class="section-heading"><div><span>CRAFTING</span><h2>武器・防具生成</h2></div><small>部隊全体に装備</small></div>
+        <div id="recipe-list" class="recipe-list"></div>
+        <aside class="system-note"><b>現代向けの短時間ループ</b><p>探索は即時に結果を確認でき、素材は任務からも入手。装備効果は5人チーム全体へ自動反映されます。</p></aside>
       </section>
 
       <section id="menu-screen" class="screen" data-title="メニュー" aria-labelledby="menu-heading">
@@ -180,13 +113,11 @@
         <article class="settings-card glass-card">
           <label><span><b>サウンド</b><small>ガチャSE・UI音</small></span><input id="sound-toggle" type="checkbox" checked><i></i></label>
           <label><span><b>触覚フィードバック</b><small>対応端末のみ</small></span><input id="haptic-toggle" type="checkbox" checked><i></i></label>
-          <label><span><b>強い点滅を抑える</b><small>白フラッシュを無効化</small></span><input id="flash-toggle" type="checkbox"><i></i></label>
+          <label><span><b>強い光を抑える</b><small>白フラッシュを無効化</small></span><input id="flash-toggle" type="checkbox"><i></i></label>
           <label><span><b>召喚結果をすぐ表示</b><small>導入演出を省略</small></span><input id="instant-toggle" type="checkbox"><i></i></label>
         </article>
-        <article class="about-card glass-card">
-          <span>PROTOTYPE v0.1</span><h3>境界共鳴</h3><p>任務・ガチャを実装済み。レイド・PvPは順次追加予定です。</p>
-          <div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>基本オート</b></div><div><i>抽選</i><b>R — UR / 天井あり</b></div>
-        </article>
+        <button class="menu-shortcut glass-card" type="button" data-screen-target="workshop"><span>⚒</span><div><small>CRAFT & INVENTORY</small><strong>素材探索・境界工房</strong></div><b>›</b></button>
+        <article class="about-card glass-card"><span>PROTOTYPE v0.2</span><h3>境界共鳴</h3><p>5人編成、素材探索、装備生成、任務、ガチャを実装。レイドとPvPは同じ戦闘基盤で拡張予定です。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>抽選</i><b>R – UR / 天井あり</b></div></article>
       </section>
     </div>
 
@@ -194,50 +125,30 @@
       <button class="active" type="button" data-screen="home"><i>⌂</i><span>ホーム</span></button>
       <button type="button" data-screen="missions"><i>⌖</i><span>任務</span></button>
       <button type="button" data-screen="raid"><i>◉</i><span>レイド</span></button>
-      <button type="button" data-screen="units"><i>♟</i><span>部隊</span></button>
-      <button type="button" data-screen="menu"><i>☰</i><span>メニュー</span></button>
+      <button type="button" data-screen="units"><i>♟</i><span>編成</span></button>
+      <button type="button" data-screen="menu"><i>⚙</i><span>メニュー</span></button>
     </nav>
   </main>
 
   <section id="summon-overlay" class="full-overlay" aria-hidden="true" aria-label="召喚演出">
-    <canvas id="particle-canvas" aria-hidden="true"></canvas>
-    <div class="summon-aurora" aria-hidden="true"></div>
+    <canvas id="particle-canvas" aria-hidden="true"></canvas><div class="summon-aurora" aria-hidden="true"></div>
     <button id="summon-skip" class="skip-button" type="button">スキップ</button>
-    <div id="summon-charge" class="summon-stage">
-      <div class="summon-sigil" aria-hidden="true"><i></i><i></i><i></i><b>界</b></div>
-      <p>境界座標、同期</p><span>指揮官の共鳴を検出中…</span>
-    </div>
+    <div id="summon-charge" class="summon-stage"><div class="summon-sigil" aria-hidden="true"><i></i><i></i><i></i><b>界</b></div><p>境界座標、同期</p><span>共鳴核を収束中…</span></div>
     <div id="summon-break" class="summon-stage hidden"><div class="burst-mark">✦</div><h2>特異共鳴</h2></div>
-    <button id="summon-hero" class="summon-stage hero-reveal hidden" type="button">
-      <img id="hero-result-image" src="assets/ur-exorcist.png" alt="">
-      <div class="hero-shade"></div>
-      <div class="reveal-copy"><span id="hero-rarity" class="rarity ur">UR</span><em id="hero-new">NEW</em><h2 id="hero-name">界紋を拓く者 コハク</h2><p id="hero-tactic">万象展開</p><small>タップで結果へ</small></div>
-    </button>
-    <div id="summon-results" class="summon-stage results-stage hidden">
-      <header><div><span>RESONANCE COMPLETE</span><h2>召喚結果</h2></div><b id="result-pity">天井 72 → 0</b></header>
-      <div id="result-grid" class="result-grid"></div>
-      <button id="summon-close" class="primary-button" type="button">閉じる</button>
-    </div>
+    <button id="summon-hero" class="summon-stage hero-reveal hidden" type="button"><img id="hero-result-image" src="assets/ur-exorcist.png" alt=""><div class="hero-shade"></div><div class="reveal-copy"><span id="hero-rarity" class="rarity ur">UR</span><em id="hero-new">NEW</em><h2 id="hero-name">界紋を拓く者 コハク</h2><p id="hero-tactic">万象展開</p><small>タップで結果へ</small></div></button>
+    <div id="summon-results" class="summon-stage results-stage hidden"><header><div><span>RESONANCE COMPLETE</span><h2>召喚結果</h2></div><b id="result-pity">天井 72 → 0</b></header><div id="result-grid" class="result-grid"></div><button id="summon-close" class="primary-button" type="button">閉じる</button></div>
   </section>
 
   <section id="battle-overlay" class="full-overlay battle-overlay" aria-hidden="true" aria-label="オート戦闘">
-    <header class="battle-top"><div><span>AUTO ANALYSIS</span><h2 id="battle-title">ネオン街の追跡者</h2></div><button id="battle-skip" type="button">ログ全表示</button></header>
-    <div class="versus-card">
-      <div><i class="ally-dot"></i><span>味方</span><b id="battle-ally-name">レン</b></div><strong>VS</strong><div><i class="enemy-dot"></i><span>敵部隊</span><b id="enemy-name">路地裏の自律兵</b></div>
-    </div>
-    <div class="battle-bars">
-      <label><span>味方兵力 <b id="ally-troop-text">72 / 72</b></span><i><em id="ally-troop-bar" style="width:100%"></em></i></label>
-      <label><span>敵兵力 <b id="enemy-troop-text">42 / 42</b></span><i><em id="enemy-troop-bar" class="enemy" style="width:100%"></em></i></label>
-    </div>
+    <header class="battle-top"><div><span>5 UNIT / AUTO ANALYSIS</span><h2 id="battle-title">ネオン街の追跡者</h2></div><button id="battle-skip" type="button">ログ全表示</button></header>
+    <div class="battle-visual"><img id="battle-enemy-image" src="assets/enemy-rift-hound-v1.png" alt=""><div class="battle-visual-shade"></div><div class="battle-versus"><span>第零遊撃隊</span><b>VS</b><strong id="enemy-name">裂界猟犬</strong></div></div>
+    <div id="battle-team-mini" class="battle-team-mini"></div>
+    <div class="battle-bars"><label><span>味方兵力 <b id="ally-troop-text">0 / 0</b></span><i><em id="ally-troop-bar"></em></i></label><label><span>敵兵力 <b id="enemy-troop-text">0 / 0</b></span><i><em id="enemy-troop-bar" class="enemy"></em></i></label></div>
     <div id="battle-log" class="battle-log" aria-live="polite"></div>
-    <div id="battle-result" class="battle-result hidden"><span id="battle-result-icon">✓</span><h2 id="battle-result-title">任務完了</h2><p id="battle-result-meta">損耗 0名・獲得 800コイン</p><button id="replenish-button" class="secondary-button" type="button">兵を補充</button><button id="battle-close" class="primary-button" type="button">閉じる</button></div>
+    <div id="battle-result" class="battle-result hidden"><span id="battle-result-icon">✓</span><h2 id="battle-result-title">任務完了</h2><p id="battle-result-meta"></p><button id="replenish-button" class="secondary-button" type="button">兵を補充</button><button id="battle-close" class="primary-button" type="button">閉じる</button></div>
   </section>
 
-  <dialog id="info-dialog">
-    <button class="dialog-close" type="button" aria-label="閉じる">×</button>
-    <div id="dialog-content"></div>
-  </dialog>
-
+  <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
   <script src="app.js"></script>
 </body>
 </html>
