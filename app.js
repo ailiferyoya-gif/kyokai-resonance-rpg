@@ -2,16 +2,16 @@ const STORAGE_KEY = "kyokai-resonance-demo-v1";
 const rarityRank = { R: 1, SR: 2, SSR: 3, UR: 4 };
 
 const commanders = [
-  { id: "touma", name: "トウマ", title: "街路の斥候", rarity: "R", role: "偵察", tactic: "先読み", symbol: "➤", attack: 96, defense: 78, command: 18, colors: ["#1fc9ff", "#2948d5"] },
-  { id: "mina", name: "ミナ", title: "境界の衛士", rarity: "R", role: "防御", tactic: "防壁展開", symbol: "◆", attack: 82, defense: 108, command: 20, colors: ["#31c5f4", "#3945ad"] },
-  { id: "isami", name: "イサミ", title: "火花の整備士", rarity: "R", role: "補給", tactic: "現地修復", symbol: "⚙", attack: 90, defense: 88, command: 19, colors: ["#ff644d", "#7825ba"] },
-  { id: "ren", name: "レン", title: "蒼雷の遊撃手", rarity: "SR", role: "攻撃", tactic: "連鎖射撃", symbol: "ϟ", attack: 128, defense: 88, command: 22, colors: ["#5536e8", "#e02ed3"], art: "assets/commander-ren-v1.png" },
-  { id: "sana", name: "サナ", title: "翠環の調律師", rarity: "SR", role: "支援", tactic: "共振増幅", symbol: "⌁", attack: 106, defense: 104, command: 21, colors: ["#00d6a1", "#ff7a2d", "#6734cf"], art: "assets/commander-sana-v1.png" },
-  { id: "ten", name: "テン", title: "黒鋼の盾役", rarity: "SR", role: "防御", tactic: "反射障壁", symbol: "⬢", attack: 102, defense: 142, command: 22, colors: ["#562c8a", "#181526"] },
-  { id: "kanade", name: "カナデ", title: "星砕きの奏者", rarity: "SSR", role: "攻撃", tactic: "星霜連爆", symbol: "✦", attack: 168, defense: 118, command: 25, colors: ["#ffba24", "#f3299b"] },
-  { id: "riku", name: "リク", title: "玻璃の疾風", rarity: "SSR", role: "遊撃", tactic: "残響突破", symbol: "≋", attack: 154, defense: 124, command: 26, colors: ["#21e8ef", "#7c36e8"] },
-  { id: "setsuna", name: "セツナ", title: "常夜の守護者", rarity: "SSR", role: "防御", tactic: "不壊結界", symbol: "☾", attack: 132, defense: 176, command: 27, colors: ["#334dd8", "#d625b5"] },
-  { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", tactic: "万象展開", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/ur-exorcist.png" }
+  { id: "touma", name: "トウマ", title: "街路の斥候", rarity: "R", role: "偵察", symbol: "➤", attack: 96, defense: 78, command: 18, colors: ["#1fc9ff", "#2948d5"], skill: { name: "先読み射線", detail: "弱点を捉える精密射撃" }, passive: { name: "雨路適応", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "mina", name: "ミナ", title: "境界の衛士", rarity: "R", role: "防御", symbol: "◆", attack: 82, defense: 108, command: 20, colors: ["#31c5f4", "#3945ad"], skill: { name: "境界防壁", detail: "防壁越しの反撃を展開" }, passive: { name: "護衛陣形", stat: "defense", detail: "自身の防御を常時強化" } },
+  { id: "isami", name: "イサミ", title: "火花の整備士", rarity: "R", role: "補給", symbol: "⚙", attack: 90, defense: 88, command: 19, colors: ["#ff644d", "#7825ba"], skill: { name: "応急再装填", detail: "即席弾薬で一斉支援" }, passive: { name: "現地整備", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "ren", name: "レン", title: "蒼雷の遊撃手", rarity: "SR", role: "攻撃", symbol: "ϟ", attack: 128, defense: 88, command: 22, colors: ["#ff304f", "#7d27e8", "#19cfff"], art: "assets/commander-ren-v2.png", skill: { name: "蒼雷連鎖", detail: "雷撃を隣接目標へ連鎖" }, passive: { name: "雷導加速", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "sana", name: "サナ", title: "翠環の調律師", rarity: "SR", role: "支援", symbol: "⌁", attack: 106, defense: 104, command: 21, colors: ["#ff5870", "#8e2de2", "#ffd91a", "#13cfff"], art: "assets/commander-sana-v2.png", skill: { name: "翠環共振", detail: "共鳴波で部隊を援護" }, passive: { name: "循環触媒", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "ten", name: "テン", title: "黒鋼の盾役", rarity: "SR", role: "防御", symbol: "⬢", attack: 102, defense: 142, command: 22, colors: ["#562c8a", "#181526"], skill: { name: "黒鋼反射", detail: "障壁で衝撃を反射" }, passive: { name: "不動心", stat: "defense", detail: "自身の防御を常時強化" } },
+  { id: "kanade", name: "カナデ", title: "星砕きの奏者", rarity: "SSR", role: "攻撃", symbol: "✦", attack: 168, defense: 118, command: 25, colors: ["#ffba24", "#f3299b"], skill: { name: "星霜連爆", detail: "音律弾を連続起爆" }, passive: { name: "高揚旋律", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "riku", name: "リク", title: "玻璃の疾風", rarity: "SSR", role: "遊撃", symbol: "≋", attack: 154, defense: 124, command: 26, colors: ["#21e8ef", "#7c36e8"], skill: { name: "残響突破", detail: "残像と共に防衛線を突破" }, passive: { name: "疾風装填", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "setsuna", name: "セツナ", title: "常夜の守護者", rarity: "SSR", role: "防御", symbol: "☾", attack: 132, defense: 176, command: 27, colors: ["#334dd8", "#d625b5"], skill: { name: "常夜結界", detail: "夜色の結界で敵を封鎖" }, passive: { name: "守護誓約", stat: "defense", detail: "自身の防御を常時強化" } },
+  { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/ur-exorcist.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } }
 ];
 
 const missions = [
@@ -34,16 +34,18 @@ const expeditions = [
 ];
 
 const recipes = [
-  { id: "arcRifle", name: "雷紋式アークライフル", type: "武器", icon: "⌁", effect: "部隊攻撃 +42 / Lv", max: 5, costs: { ore: 6, core: 3 }, coins: 800 },
-  { id: "borderCoat", name: "境界織りの外套", type: "防具", icon: "♢", effect: "部隊防御 +46 / Lv", max: 5, costs: { fiber: 5, hide: 4 }, coins: 700 },
-  { id: "resonanceSigil", name: "五連共鳴紋章", type: "装飾", icon: "✦", effect: "攻防 +25 / Lv", max: 5, costs: { core: 5, fiber: 3 }, coins: 1000 }
+  { id: "arcRifle", slot: "weapon", name: "雷紋式アークライフル", type: "武器", icon: "⌁", effect: "対象キャラの攻撃 +42 / Lv", max: 5, costs: { ore: 6, core: 3 }, coins: 800 },
+  { id: "borderCoat", slot: "armor", name: "境界織りの外套", type: "防具", icon: "♢", effect: "対象キャラの防御 +46 / Lv", max: 5, costs: { fiber: 5, hide: 4 }, coins: 700 },
+  { id: "resonanceSigil", slot: "accessory", name: "五連共鳴紋章", type: "装飾", icon: "✦", effect: "対象キャラの攻防 +25 / Lv", max: 5, costs: { core: 5, fiber: 3 }, coins: 1000 }
 ];
 
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
+const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
+const newEquipment = () => ({ weapon: 0, armor: 0, accessory: 0 });
 
 const defaultState = () => ({
-  schema: 2,
+  schema: 3,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -52,7 +54,8 @@ const defaultState = () => ({
   owned: Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }])),
   team: [...starterTeam],
   materials: { ore: 4, fiber: 3, core: 2, hide: 2 },
-  gear: { arcRifle: 0, borderCoat: 0, resonanceSigil: 0 },
+  progression: Object.fromEntries(starterTeam.map(id => [id, newProgress()])),
+  equipment: Object.fromEntries(starterTeam.map(id => [id, newEquipment()])),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -60,6 +63,7 @@ const defaultState = () => ({
 
 let state = loadState();
 let activeSlot = 0;
+let workshopUnitId = state.team[0];
 let toastTimer;
 let summonTimers = [];
 let activeSummonResults = [];
@@ -77,14 +81,28 @@ function loadState() {
     const owned = { ...starterOwned, ...(parsed.owned || {}) };
     const proposedTeam = Array.isArray(parsed.team) ? parsed.team.filter(id => owned[id] && getCommander(id)) : [];
     const team = [...new Set([...proposedTeam, ...starterTeam])].slice(0, 5);
+    const progression = { ...(parsed.progression || {}) };
+    const equipment = { ...(parsed.equipment || {}) };
+    Object.keys(owned).forEach(id => {
+      progression[id] = { ...newProgress(), ...(progression[id] || {}) };
+      equipment[id] = { ...newEquipment(), ...(equipment[id] || {}) };
+    });
+    if (!parsed.equipment && parsed.gear && team[0]) {
+      equipment[team[0]] = {
+        weapon: Number(parsed.gear.arcRifle) || 0,
+        armor: Number(parsed.gear.borderCoat) || 0,
+        accessory: Number(parsed.gear.resonanceSigil) || 0
+      };
+    }
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 2,
+      schema: 3,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
-      gear: { ...defaults.gear, ...(parsed.gear || {}) },
+      progression,
+      equipment,
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -102,10 +120,36 @@ function randomFrom(list) { return list[Math.floor(Math.random() * list.length)]
 function randomInt(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
 function formatNumber(value) { return new Intl.NumberFormat("ja-JP").format(value); }
 
+function getUnitProgress(id, currentState = state) {
+  return { ...newProgress(), ...(currentState.progression[id] || {}) };
+}
+
+function getUnitEquipment(id, currentState = state) {
+  return { ...newEquipment(), ...(currentState.equipment[id] || {}) };
+}
+
+function getUnitStats(id, currentState = state) {
+  const commander = getCommander(id);
+  const progress = getUnitProgress(id, currentState);
+  const equipment = getUnitEquipment(id, currentState);
+  const levelRate = 1 + (progress.level - 1) * .035;
+  let attack = Math.round(commander.attack * levelRate);
+  let defense = Math.round(commander.defense * levelRate);
+  const passiveRate = .02 + (progress.passiveLevel - 1) * .012;
+  if (commander.passive.stat === "attack" || commander.passive.stat === "both") attack += Math.round(commander.attack * passiveRate);
+  if (commander.passive.stat === "defense" || commander.passive.stat === "both") defense += Math.round(commander.defense * passiveRate);
+  const gear = {
+    attack: equipment.weapon * 42 + equipment.accessory * 25,
+    defense: equipment.armor * 46 + equipment.accessory * 25
+  };
+  return { ...commander, ...progress, equipment, gear, attack: attack + gear.attack, defense: defense + gear.defense };
+}
+
 function getGearBonus(currentState = state) {
+  const members = currentState.team.map(id => getUnitStats(id, currentState)).filter(Boolean);
   return {
-    attack: currentState.gear.arcRifle * 42 + currentState.gear.resonanceSigil * 25,
-    defense: currentState.gear.borderCoat * 46 + currentState.gear.resonanceSigil * 25
+    attack: members.reduce((sum, member) => sum + member.gear.attack, 0),
+    defense: members.reduce((sum, member) => sum + member.gear.defense, 0)
   };
 }
 
@@ -115,11 +159,12 @@ function getTeamCapacity(currentState = state) {
 
 function getSquadStats(currentState = state) {
   const team = getTeam(currentState);
+  const members = currentState.team.map(id => getUnitStats(id, currentState)).filter(Boolean);
   const gear = getGearBonus(currentState);
-  const attack = team.reduce((sum, unit) => sum + unit.attack, 0) + gear.attack;
-  const defense = team.reduce((sum, unit) => sum + unit.defense, 0) + gear.defense;
+  const attack = members.reduce((sum, unit) => sum + unit.attack, 0);
+  const defense = members.reduce((sum, unit) => sum + unit.defense, 0);
   const power = attack + defense + Math.round(currentState.troops * 2.2);
-  return { team, attack, defense, power, capacity: getTeamCapacity(currentState), gear };
+  return { team, members, attack, defense, power, capacity: getTeamCapacity(currentState), gear };
 }
 
 function showToast(message) {
@@ -196,8 +241,9 @@ function renderFormation() {
   const owned = Object.keys(state.owned).map(getCommander).filter(Boolean).sort((a, b) => rarityRank[b.rarity] - rarityRank[a.rarity] || b.attack - a.attack);
   document.querySelector("#unit-list").innerHTML = owned.map(commander => {
     const inTeam = state.team.includes(commander.id);
+    const unit = getUnitStats(commander.id);
     const art = commander.art ? `<img src="${commander.art}" alt="">` : `<span>${commander.symbol}</span>`;
-    return `<button class="unit-card glass-card${inTeam ? " in-team" : ""}" type="button" data-unit="${commander.id}"><div class="unit-art" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${art}</div><div class="unit-copy"><span><i class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</i>${inTeam ? `<em class="formation-tag">編成中 ${state.team.indexOf(commander.id) + 1}</em>` : ""}</span><strong>${commander.title} ${commander.name}</strong><small>${commander.role} / ${commander.tactic} / 記憶片 ${state.owned[commander.id]?.shards || 0}</small></div><div class="unit-stats"><small>攻撃</small><b>${commander.attack}</b><small>防御</small><b>${commander.defense}</b></div></button>`;
+    return `<button class="unit-card glass-card${inTeam ? " in-team" : ""}" type="button" data-unit="${commander.id}"><div class="unit-art" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${art}<b>Lv.${unit.level}</b></div><div class="unit-copy"><span><i class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</i>${inTeam ? `<em class="formation-tag">編成中 ${state.team.indexOf(commander.id) + 1}</em>` : ""}</span><strong>${commander.title} ${commander.name}</strong><small>${commander.role} / 記憶片 ${state.owned[commander.id]?.shards || 0}</small><div class="unit-abilities"><i>S${unit.skillLevel} ${commander.skill.name}</i><i>P${unit.passiveLevel} ${commander.passive.name}</i><i>装 ${unit.equipment.weapon}/${unit.equipment.armor}/${unit.equipment.accessory}</i></div></div><div class="unit-stats"><small>攻撃</small><b>${unit.attack}</b><small>防御</small><b>${unit.defense}</b></div></button>`;
   }).join("");
 }
 
@@ -222,12 +268,37 @@ function assignCommander(id) {
   showToast(`${getCommander(id).name}を編成しました`);
 }
 
+function getUpgradeCost(kind, progress) {
+  if (kind === "level") return { materials: { ore: 2 + Math.floor(progress.level / 5), fiber: 1 + Math.floor(progress.level / 8) }, coins: 200 + progress.level * 70, max: 50 };
+  if (kind === "skill") return { materials: { core: 1 + Math.floor(progress.skillLevel / 3), ore: 2 + Math.floor(progress.skillLevel / 4) }, coins: 350 + progress.skillLevel * 150, max: 10 };
+  return { materials: { core: 1 + Math.floor(progress.passiveLevel / 3), hide: 2 + Math.floor(progress.passiveLevel / 4) }, coins: 400 + progress.passiveLevel * 160, max: 10 };
+}
+
+function canPay(cost) {
+  return state.coins >= cost.coins && Object.entries(cost.materials).every(([key, amount]) => state.materials[key] >= amount);
+}
+
+function costMarkup(cost) {
+  return `${Object.entries(cost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materials[key].icon} ${state.materials[key]}/${amount}</i>`).join("")}<i class="${state.coins >= cost.coins ? "ready" : ""}">● ${formatNumber(cost.coins)}</i>`;
+}
+
+function renderGrowthRow(kind, eyebrow, title, detail, current, cost) {
+  const maxed = current >= cost.max;
+  return `<article class="growth-row"><div class="growth-level"><small>${eyebrow}</small><b>Lv.${current}</b><i>/ ${cost.max}</i></div><div class="growth-copy"><h3>${title}</h3><p>${detail}</p><div class="recipe-cost">${costMarkup(cost)}</div></div><button type="button" data-upgrade="${kind}" ${!maxed && canPay(cost) ? "" : "disabled"}>${maxed ? "MAX" : "強化"}</button></article>`;
+}
+
 function renderWorkshop() {
-  document.querySelector("#gear-total-level").textContent = Object.values(state.gear).reduce((sum, value) => sum + value, 0);
+  if (!state.owned[workshopUnitId]) workshopUnitId = state.team[0] || Object.keys(state.owned)[0];
+  const commander = getCommander(workshopUnitId);
+  const progress = getUnitProgress(workshopUnitId);
+  const equipment = getUnitEquipment(workshopUnitId);
+  document.querySelector("#workshop-unit-label").textContent = commander.name;
   document.querySelector("#material-wallet").innerHTML = Object.entries(materials).map(([key, material]) => `<div class="material-item" style="--material:${material.color}"><i>${material.icon}</i><span><small>${material.name}</small></span><b>${state.materials[key]}</b></div>`).join("");
+  document.querySelector("#workshop-unit-tabs").innerHTML = Object.keys(state.owned).map(getCommander).filter(Boolean).sort((a, b) => rarityRank[b.rarity] - rarityRank[a.rarity]).map(unit => `<button type="button" class="workshop-unit-chip${unit.id === workshopUnitId ? " active" : ""}" data-workshop-unit="${unit.id}">${unit.art ? `<img src="${unit.art}" alt="">` : `<i style="background:linear-gradient(145deg,${unit.colors.join(",")})">${unit.symbol}</i>`}<span><b>${unit.name}</b><small>Lv.${getUnitProgress(unit.id).level}</small></span></button>`).join("");
+  document.querySelector("#training-panel").innerHTML = `<div class="training-hero"><div class="training-portrait" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.art ? `<img src="${commander.art}" alt="${commander.name}">` : `<i>${commander.symbol}</i>`}</div><div><span class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</span><h3>${commander.title}<br>${commander.name}</h3><p>${commander.role} / 個別育成</p></div><b>戦力 ${formatNumber(getUnitStats(commander.id).attack + getUnitStats(commander.id).defense)}</b></div>${renderGrowthRow("level", "CHARACTER", "キャラクターLv", "基礎攻撃・防御を上昇", progress.level, getUpgradeCost("level", progress))}${renderGrowthRow("skill", "ACTIVE SKILL", commander.skill.name, commander.skill.detail, progress.skillLevel, getUpgradeCost("skill", progress))}${renderGrowthRow("passive", "PASSIVE SKILL", commander.passive.name, commander.passive.detail, progress.passiveLevel, getUpgradeCost("passive", progress))}`;
   document.querySelector("#expedition-list").innerHTML = expeditions.map((expedition, index) => `<article class="expedition-card" style="--expedition-bg:${expedition.background}"><small>${expedition.code}</small><h3>${expedition.name}</h3><p>${expedition.detail}</p><div class="drop-chips">${Object.keys(expedition.drops).map(key => `<i>${materials[key].icon} ${materials[key].name}</i>`).join("")}</div><button type="button" data-expedition="${index}" ${state.stamina < 3 ? "disabled" : ""}>探索 ϟ3</button></article>`).join("");
   document.querySelector("#recipe-list").innerHTML = recipes.map(recipe => {
-    const level = state.gear[recipe.id];
+    const level = equipment[recipe.slot];
     const maxed = level >= recipe.max;
     const materialReady = Object.entries(recipe.costs).every(([key, amount]) => state.materials[key] >= amount);
     const ready = !maxed && materialReady && state.coins >= recipe.coins;
@@ -258,17 +329,44 @@ function runExpedition(index) {
 
 function craftGear(id) {
   const recipe = recipes.find(item => item.id === id);
-  if (!recipe || state.gear[id] >= recipe.max) return;
+  const equipment = getUnitEquipment(workshopUnitId);
+  if (!recipe || equipment[recipe.slot] >= recipe.max) return;
   const canCraft = Object.entries(recipe.costs).every(([key, amount]) => state.materials[key] >= amount) && state.coins >= recipe.coins;
   if (!canCraft) return showToast("生成素材が不足しています");
   Object.entries(recipe.costs).forEach(([key, amount]) => state.materials[key] -= amount);
   state.coins -= recipe.coins;
-  state.gear[id] += 1;
+  state.equipment[workshopUnitId] ||= newEquipment();
+  state.equipment[workshopUnitId][recipe.slot] += 1;
   saveState();
   updateUI();
   playCraftSound();
   vibrate([25, 30, 65]);
-  showToast(`${recipe.name} Lv.${state.gear[id]}を生成・装備しました`);
+  showToast(`${getCommander(workshopUnitId).name}：${recipe.name} Lv.${state.equipment[workshopUnitId][recipe.slot]}`);
+}
+
+function selectWorkshopUnit(id) {
+  if (!state.owned[id]) return;
+  workshopUnitId = id;
+  renderWorkshop();
+  playUISound();
+}
+
+function upgradeUnit(kind) {
+  const progress = getUnitProgress(workshopUnitId);
+  const cost = getUpgradeCost(kind, progress);
+  const key = kind === "level" ? "level" : `${kind}Level`;
+  if (progress[key] >= cost.max) return;
+  if (!canPay(cost)) return showToast("強化素材が不足しています");
+  Object.entries(cost.materials).forEach(([material, amount]) => state.materials[material] -= amount);
+  state.coins -= cost.coins;
+  state.progression[workshopUnitId] ||= newProgress();
+  state.progression[workshopUnitId][key] += 1;
+  saveState();
+  updateUI();
+  playCraftSound();
+  vibrate([20, 25, 45]);
+  const label = kind === "level" ? "キャラクターLv" : kind === "skill" ? getCommander(workshopUnitId).skill.name : getCommander(workshopUnitId).passive.name;
+  showToast(`${getCommander(workshopUnitId).name}：${label} Lv.${state.progression[workshopUnitId][key]}`);
 }
 
 function poolFor(rarity) { return commanders.filter(item => item.rarity === rarity); }
@@ -301,6 +399,8 @@ function makeDraw(count) {
     result.shards = 0;
     if (result.isNew) {
       state.owned[id] = { shards: 0 };
+      state.progression[id] = newProgress();
+      state.equipment[id] = newEquipment();
       alreadySeen.add(id);
     } else {
       result.shards = { R: 5, SR: 10, SSR: 30, UR: 80 }[result.commander.rarity];
@@ -367,7 +467,7 @@ function showHeroResult(results) {
   rarity.textContent = commander.rarity;
   document.querySelector("#hero-new").classList.toggle("hidden", !result.isNew);
   document.querySelector("#hero-name").textContent = `${commander.title} ${commander.name}`;
-  document.querySelector("#hero-tactic").textContent = commander.tactic;
+  document.querySelector("#hero-tactic").textContent = commander.skill.name;
 }
 
 function showSummonResults(pityBefore = activeSummonPityBefore) {
@@ -417,7 +517,7 @@ function startBattle(missionIndex) {
   document.querySelector("#enemy-name").textContent = mission.enemy;
   document.querySelector("#battle-enemy-image").src = mission.art;
   document.querySelector("#battle-enemy-image").alt = mission.enemy;
-  document.querySelector("#battle-team-mini").innerHTML = getTeam().map(commander => `<span>${commander.art ? `<img src="${commander.art}" alt="">` : `<i style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.symbol}</i>`}<b>${commander.name}</b></span>`).join("");
+  document.querySelector("#battle-team-mini").innerHTML = getSquadStats().members.map(member => `<span>${member.art ? `<img src="${member.art}" alt="">` : `<i style="background:linear-gradient(145deg,${member.colors.join(",")})">${member.symbol}</i>`}<b>${member.name}<small> S${member.skillLevel}</small></b></span>`).join("");
   document.querySelector("#battle-log").innerHTML = "";
   document.querySelector("#battle-result").classList.add("hidden");
   document.querySelector("#battle-skip").classList.remove("hidden");
@@ -432,18 +532,19 @@ function simulateBattle(mission) {
   let enemy = mission.enemyTroops;
   const allyStart = ally;
   const enemyStart = enemy;
-  const logs = [];
+  const logs = [{ round: 0, actor: "PASSIVE", text: stats.members.map(member => `${member.name}「${member.passive.name}」Lv.${member.passiveLevel}`).join(" / "), critical: false, ally, enemy }];
   let round = 0;
   while (round < 12 && ally > 0 && enemy > 0) {
     round += 1;
-    const commander = stats.team[(round - 1) % stats.team.length];
+    const commander = stats.members[(round - 1) % stats.members.length];
     const roleBonus = commander.role === "攻撃" || commander.role === "遊撃" ? 1.14 : 1;
+    const skillBonus = 1 + (commander.skillLevel - 1) * .06;
     const critical = Math.random() < (.12 + rarityRank[commander.rarity] * .025);
-    const raw = Math.max(30, (stats.attack + ally * 2.4 - mission.enemyDefense * .48) * .18 * roleBonus);
+    const raw = Math.max(30, (stats.attack + ally * 2.4 - mission.enemyDefense * .48) * .18 * roleBonus * skillBonus);
     const damage = Math.floor(raw * (.92 + Math.random() * .16) * (critical ? 1.55 : 1));
     const enemyLoss = Math.min(enemy, Math.max(2, Math.floor(damage / 10)));
     enemy -= enemyLoss;
-    logs.push({ round, actor: commander.name, text: `${commander.tactic}。${mission.enemy}へ${damage}ダメージ、敵兵力-${enemyLoss}。${critical ? "会心共鳴！" : ""}`, critical, ally, enemy });
+    logs.push({ round, actor: commander.name, text: `${commander.skill.name} Lv.${commander.skillLevel}。${mission.enemy}へ${damage}ダメージ、敵兵力-${enemyLoss}。${critical ? "会心共鳴！" : ""}`, critical, ally, enemy });
     if (enemy <= 0) break;
     const mitigation = stats.defense * .28;
     const counter = Math.max(18, Math.floor((mission.enemyAttack + enemy * 1.7 - mitigation) * (.9 + Math.random() * .18) * .14));
@@ -468,7 +569,7 @@ function appendNextBattleLog() {
 function appendLogElement(log) {
   const element = document.createElement("div");
   element.className = `log-entry${log.critical ? " critical" : ""}`;
-  element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : `R${log.round}`}</b><span><strong>${log.actor}</strong><small>${log.text}</small></span>`;
+  element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : log.actor === "PASSIVE" ? "PASS" : `R${log.round}`}</b><span><strong>${log.actor === "PASSIVE" ? "パッシブ共鳴" : log.actor}</strong><small>${log.text}</small></span>`;
   const container = document.querySelector("#battle-log");
   container.append(element);
   container.scrollTop = container.scrollHeight;
@@ -545,6 +646,7 @@ function showInfoDialog(type) {
 function resetDemo() {
   state = defaultState();
   activeSlot = 0;
+  workshopUnitId = state.team[0];
   saveState();
   updateUI();
   showToast("デモ状態を初期化しました");
@@ -719,6 +821,10 @@ document.addEventListener("click", event => {
   if (slot) return selectTeamSlot(Number(slot.dataset.slot));
   const unit = event.target.closest("[data-unit]");
   if (unit) return assignCommander(unit.dataset.unit);
+  const workshopUnit = event.target.closest("[data-workshop-unit]");
+  if (workshopUnit) return selectWorkshopUnit(workshopUnit.dataset.workshopUnit);
+  const upgrade = event.target.closest("[data-upgrade]");
+  if (upgrade) return upgradeUnit(upgrade.dataset.upgrade);
   const expedition = event.target.closest("[data-expedition]");
   if (expedition) return runExpedition(Number(expedition.dataset.expedition));
   const recipe = event.target.closest("[data-recipe]");

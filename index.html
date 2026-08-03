@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090414">
-  <meta name="description" content="5人編成・オート戦闘・素材探索・装備生成・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
+  <meta name="description" content="5人編成・個別育成・オート戦闘・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
   <title>境界共鳴 — Social RPG Prototype</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
-  <link rel="preload" href="assets/commander-ren-v1.png" as="image">
+  <link rel="preload" href="assets/commander-ren-v2.png" as="image">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -52,7 +52,7 @@
         <div class="section-heading"><div><span>OPERATIONS</span><h2>本日の作戦</h2></div><button class="text-button" type="button" data-screen-target="missions">すべて見る</button></div>
         <div class="operation-grid">
           <button class="operation-card glass-card" type="button" data-screen-target="missions"><span class="operation-icon cyan">⌖</span><span class="operation-copy"><small>AUTO MISSION</small><strong>ネオン街の追跡者</strong><em>5人連携 / 消費 6</em></span><span class="chevron">›</span></button>
-          <button class="operation-card glass-card" type="button" data-screen-target="workshop"><span class="operation-icon green">⚒</span><span class="operation-copy"><small>EXPLORE & CRAFT</small><strong>素材探索・境界工房</strong><em>3つの採集地 / 装備生成</em></span><span class="chevron">›</span></button>
+          <button class="operation-card glass-card" type="button" data-screen-target="workshop"><span class="operation-icon green">⚒</span><span class="operation-copy"><small>TRAIN & CRAFT</small><strong>個別育成・境界工房</strong><em>スキル強化 / キャラ別装備</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="raid"><span class="operation-icon red">◉</span><span class="operation-copy"><small>CO-OP RAID</small><strong>境界喰らい・ゴライアス</strong><em>残り2日 / 参加 12,480人</em></span><span class="chevron">›</span></button>
         </div>
       </section>
@@ -77,7 +77,7 @@
         <div class="section-heading page-heading"><div><span>AUTO OPERATION</span><h2 id="missions-heading">任務選択</h2></div><span class="level-chip">CHAPTER 01</span></div>
         <article class="squad-strip glass-card"><div id="mission-team-mini" class="mini-team"></div><div><small>出撃部隊 / 5 UNIT</small><strong>第零遊撃隊</strong><span>兵力 <b id="troop-summary">0</b>名</span></div><em>戦力 <b id="squad-power">0</b></em></article>
         <div id="mission-list" class="mission-list"></div>
-        <aside class="system-note"><b>完全オート戦闘</b><p>5人の攻撃・防御・戦術と装備補正を合算。各ラウンドでは役割に応じた指揮官が自動で行動します。</p></aside>
+        <aside class="system-note"><b>完全オート戦闘</b><p>5人のキャラLv、スキルLv、パッシブ、個別装備を反映。各ラウンドでは指揮官が育成済みスキルを自動発動します。</p></aside>
       </section>
 
       <section id="raid-screen" class="screen" data-title="共同レイド" aria-labelledby="raid-heading">
@@ -91,7 +91,7 @@
 
       <section id="units-screen" class="screen" data-title="5人編成" aria-labelledby="units-heading">
         <div class="section-heading page-heading"><div><span>FORMATION</span><h2 id="units-heading">第零遊撃隊</h2></div><span id="unit-count" class="level-chip">5 / 10</span></div>
-        <article class="formation-summary glass-card"><div><small>TEAM POWER</small><strong id="formation-power">0</strong></div><span>選択中の枠へ指揮官を配置</span><button type="button" data-screen-target="workshop">装備</button></article>
+        <article class="formation-summary glass-card"><div><small>TEAM POWER</small><strong id="formation-power">0</strong></div><span>選択中の枠へ指揮官を配置</span><button type="button" data-screen-target="workshop">育成</button></article>
         <div id="team-slots" class="team-slots" aria-label="5人編成枠"></div>
         <div class="section-heading roster-heading"><div><span>ROSTER</span><h2>所持指揮官</h2></div><small>プロローグ召喚5名を含む</small></div>
         <div id="unit-list" class="unit-list"></div>
@@ -99,13 +99,16 @@
       </section>
 
       <section id="workshop-screen" class="screen" data-title="素材探索・工房" aria-labelledby="workshop-heading">
-        <div class="section-heading page-heading"><div><span>EXPLORE & CRAFT</span><h2 id="workshop-heading">境界工房</h2></div><span class="level-chip">GEAR Lv.<b id="gear-total-level">0</b></span></div>
+        <div class="section-heading page-heading"><div><span>TRAIN & CRAFT</span><h2 id="workshop-heading">育成・境界工房</h2></div><span class="level-chip">SELECT <b id="workshop-unit-label">レン</b></span></div>
         <div id="material-wallet" class="material-wallet glass-card"></div>
+        <div class="section-heading"><div><span>CHARACTER LAB</span><h2>キャラ個別育成</h2></div><small>キャラ・スキル・パッシブ</small></div>
+        <div id="workshop-unit-tabs" class="workshop-unit-tabs" aria-label="育成キャラ選択"></div>
+        <div id="training-panel" class="training-panel glass-card"></div>
         <div class="section-heading"><div><span>EXPEDITIONS</span><h2>素材探索</h2></div><small>各探索 ϟ3</small></div>
         <div id="expedition-list" class="expedition-list"></div>
-        <div class="section-heading"><div><span>CRAFTING</span><h2>武器・防具生成</h2></div><small>部隊全体に装備</small></div>
+        <div class="section-heading"><div><span>PERSONAL GEAR</span><h2>個別装備生成</h2></div><small>選択中のキャラへ装備</small></div>
         <div id="recipe-list" class="recipe-list"></div>
-        <aside class="system-note"><b>現代向けの短時間ループ</b><p>探索は即時に結果を確認でき、素材は任務からも入手。装備効果は5人チーム全体へ自動反映されます。</p></aside>
+        <aside class="system-note"><b>短時間で選べる個別育成</b><p>探索と任務で素材を集め、キャラLv・2種類のスキル・3部位装備を強化。編成した5人の育成値がオート戦闘へ反映されます。</p></aside>
       </section>
 
       <section id="menu-screen" class="screen" data-title="メニュー" aria-labelledby="menu-heading">
@@ -117,7 +120,7 @@
           <label><span><b>召喚結果をすぐ表示</b><small>導入演出を省略</small></span><input id="instant-toggle" type="checkbox"><i></i></label>
         </article>
         <button class="menu-shortcut glass-card" type="button" data-screen-target="workshop"><span>⚒</span><div><small>CRAFT & INVENTORY</small><strong>素材探索・境界工房</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PROTOTYPE v0.2</span><h3>境界共鳴</h3><p>5人編成、素材探索、装備生成、任務、ガチャを実装。レイドとPvPは同じ戦闘基盤で拡張予定です。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>抽選</i><b>R – UR / 天井あり</b></div></article>
+        <article class="about-card glass-card"><span>PROTOTYPE v0.3</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、素材探索、任務、ガチャを実装。レイドとPvPは同じ戦闘基盤で拡張予定です。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>育成</i><b>Lv / Skill / Passive</b></div></article>
       </section>
     </div>
 

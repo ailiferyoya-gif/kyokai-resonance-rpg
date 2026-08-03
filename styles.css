@@ -134,6 +134,39 @@ dialog { width: min(calc(100% - 30px),400px); max-height: 74vh; padding: 19px; b
   .hero-banner { height: 355px; }
 }
 
+/* v0.3 — personal growth, skills, passives and per-character equipment */
+.unit-art { position: relative; }
+.unit-art > b { position: absolute; left: 5px; bottom: 5px; padding: 2px 5px; border-radius: 6px; background: rgba(5,2,12,.78); color: var(--gold); font-size: 7px; box-shadow: 0 2px 8px #000; }
+.unit-abilities { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 2px; }
+.unit-abilities i { max-width: 105px; padding: 3px 5px; overflow: hidden; border: 1px solid rgba(255,255,255,.07); border-radius: 6px; background: rgba(255,255,255,.045); color: #d9d0e8; font-size: 6.5px; font-style: normal; white-space: nowrap; text-overflow: ellipsis; }
+.unit-abilities i:first-child { color: var(--cyan); }.unit-abilities i:nth-child(2) { color: var(--pink); }.unit-abilities i:last-child { color: var(--gold); }
+
+.workshop-unit-tabs { display: flex; gap: 7px; margin: 0 -16px 10px; padding: 2px 16px 7px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.workshop-unit-tabs::-webkit-scrollbar { display: none; }
+.workshop-unit-chip { min-width: 91px; padding: 5px; display: grid; grid-template-columns: 35px 1fr; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 13px; background: #171027; color: var(--ink); text-align: left; cursor: pointer; scroll-snap-align: start; }
+.workshop-unit-chip.active { border-color: var(--cyan); background: linear-gradient(120deg,rgba(25,230,255,.12),rgba(241,38,207,.1)); box-shadow: 0 0 18px rgba(25,230,255,.12); }
+.workshop-unit-chip img,.workshop-unit-chip > i { width: 35px; height: 43px; border-radius: 9px; object-fit: cover; display: grid; place-items: center; font-size: 13px; font-style: normal; }
+.workshop-unit-chip span { min-width: 0; display: flex; flex-direction: column; }.workshop-unit-chip b { font-size: 9px; white-space: nowrap; }.workshop-unit-chip small { color: var(--muted); font-size: 7px; }
+
+.training-panel { padding: 10px; overflow: hidden; }
+.training-hero { min-height: 92px; margin: -10px -10px 9px; padding: 9px 11px; display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 10px; position: relative; overflow: hidden; background: radial-gradient(circle at 85% 15%,rgba(255,213,61,.14),transparent 28%),linear-gradient(110deg,rgba(25,230,255,.08),rgba(241,38,207,.1)); }
+.training-hero::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg,transparent 62%,rgba(25,230,255,.08) 62.5%,transparent 63%); }
+.training-portrait { width: 70px; height: 86px; overflow: hidden; border: 1px solid rgba(255,255,255,.15); border-radius: 15px; display: grid; place-items: center; font-size: 25px; }
+.training-portrait img { width: 100%; height: 100%; object-fit: cover; }
+.training-portrait i { font-style: normal; }.training-hero > div:nth-child(2) { min-width: 0; z-index: 1; }.training-hero h3 { margin: 5px 0 2px; font-size: 14px; line-height: 1.25; }.training-hero p { margin: 0; color: var(--muted); font-size: 7px; }.training-hero > b { z-index: 1; align-self: end; padding-bottom: 5px; color: var(--gold); font-size: 8px; white-space: nowrap; }
+.growth-row { min-height: 88px; display: grid; grid-template-columns: 50px 1fr auto; align-items: center; gap: 8px; padding: 9px 2px; border-top: 1px solid var(--line); }
+.growth-level { display: flex; flex-direction: column; align-items: center; }.growth-level small { color: var(--cyan); font-size: 6px; font-weight: 900; letter-spacing: .06em; text-align: center; }.growth-level b { margin-top: 3px; color: white; font-size: 15px; }.growth-level i { color: var(--muted); font-size: 6px; font-style: normal; }
+.growth-copy { min-width: 0; }.growth-copy h3 { margin: 0 0 2px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }.growth-copy p { margin: 0; color: var(--muted); font-size: 7px; }.growth-row .recipe-cost { margin-top: 5px; }
+.growth-row > button { padding: 9px 8px; border: 0; border-radius: 9px; background: linear-gradient(110deg,var(--cyan),var(--pink)); color: #090414; font-size: 8px; font-weight: 950; cursor: pointer; }.growth-row > button:disabled { opacity: .35; filter: grayscale(1); }
+.battle-team-mini b small { color: var(--gold); font-size: 6px; }
+.log-entry:first-child > b { color: var(--pink); }
+
+@media (max-width: 370px) {
+  .unit-card { grid-template-columns: 58px 1fr auto; gap: 7px; }.unit-art { width: 58px; height: 72px; }.unit-abilities i { max-width: 84px; }
+  .training-hero { grid-template-columns: 62px 1fr; }.training-portrait { width: 62px; height: 80px; }.training-hero > b { display: none; }
+  .growth-row { grid-template-columns: 44px 1fr auto; gap: 6px; }.growth-copy h3 { max-width: 145px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }
 }
