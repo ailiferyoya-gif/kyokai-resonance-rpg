@@ -152,6 +152,32 @@ const eventExchangeItems = [
   { id: "event-core", name: "共鳴核×3", icon: "◆", cost: 90, stock: 1, reward: { materials: { core: 3 } } }
 ];
 
+const eventRaidBoss = {
+  name: "祭禍機ヨルカグラ",
+  maxHp: 650000,
+  initialHp: 518400,
+  attack: 735,
+  defense: 575,
+  art: eventBossArt,
+  parts: {
+    tails: { name: "九尾封輪", icon: "九", maxHp: 1450, effect: "破壊後：ボス攻撃 -18%", reward: { tokens: 35, points: 80, materials: { fiber: 2 } } },
+    mask: { name: "白磁神楽面", icon: "面", maxHp: 1650, effect: "破壊後：味方与ダメージ +20%", reward: { tokens: 40, points: 100, materials: { ore: 2 } } },
+    core: { name: "祈願共鳴核", icon: "核", maxHp: 1950, effect: "破壊後：祭札ボーナス +25", reward: { tokens: 50, points: 130, materials: { core: 2 } } }
+  }
+};
+
+const eventRaidRewardTiers = [
+  { id: "event-r1", damage: 1200, name: "共闘参加報酬", reward: { crystals: 60, coins: 800 } },
+  { id: "event-r2", damage: 3600, name: "祭禍迎撃報酬", reward: { crystals: 110, materials: { ore: 2, fiber: 2 } } },
+  { id: "event-r3", damage: 6800, name: "夜神楽鎮圧報酬", reward: { crystals: 180, materials: { core: 3 } } }
+];
+
+const eventRaidMembers = [
+  { name: "白鷺ユラ", role: "団長", commander: "kohaku", damage: 9840 },
+  { name: "黒鉄ジン", role: "副団長", commander: "sana", damage: 7420 },
+  { name: "霞坂ユノ", role: "精鋭", commander: "ren", damage: 5280 }
+];
+
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
@@ -169,10 +195,12 @@ const localWeekKey = (date = new Date()) => {
 };
 const newGuildActions = () => ({ mission: 0, expedition: 0, raid: 0, arena: 0, craft: 0, upgrade: 0 });
 const newGuildState = () => ({ weekKey: localWeekKey(), contribution: 0, totalContribution: 0, actions: newGuildActions(), claimedMissions: [], claimedRewards: [], cheerDay: "", supplyDay: "", rescueDay: "", rescueDamage: 0, chat: [], lastActivity: "" });
-const newEventState = () => ({ seasonId: eventSeasonId, points: 0, tokens: 0, clears: {}, claimedRewards: [], exchange: {}, storyRead: [] });
+const newEventRaidParts = () => Object.fromEntries(Object.entries(eventRaidBoss.parts).map(([id, part]) => [id, { hp: part.maxHp, broken: false }]));
+const newEventRaidState = () => ({ attempts: 3, resetDay: localDayKey(), bossHp: eventRaidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "tails", parts: newEventRaidParts(), claimedRewards: [], supportDay: "", supportDamage: 0 });
+const newEventState = () => ({ seasonId: eventSeasonId, points: 0, tokens: 0, clears: {}, claimedRewards: [], exchange: {}, storyRead: [], raid: newEventRaidState() });
 
 const defaultState = () => ({
-  schema: 9,
+  schema: 10,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -289,13 +317,30 @@ function loadState() {
     guild.contribution = Math.max(0, Number(guild.contribution) || 0);
     guild.totalContribution = Math.max(0, Number(guild.totalContribution) || 0);
     const parsedEvent = parsed.event || {};
+    const parsedEventRaid = parsedEvent.raid || {};
+    const eventRaid = {
+      ...defaults.event.raid,
+      ...parsedEventRaid,
+      parts: Object.fromEntries(Object.keys(eventRaidBoss.parts).map(id => [id, { ...defaults.event.raid.parts[id], ...(parsedEventRaid.parts?.[id] || {}) }])),
+      claimedRewards: Array.isArray(parsedEventRaid.claimedRewards) ? parsedEventRaid.claimedRewards : []
+    };
+    if (eventRaid.resetDay !== localDayKey()) {
+      eventRaid.attempts = 3;
+      eventRaid.resetDay = localDayKey();
+    }
+    eventRaid.attempts = Math.max(0, Math.min(3, Number(eventRaid.attempts) || 0));
+    const restoredEventBossHp = Number(eventRaid.bossHp);
+    eventRaid.bossHp = Number.isFinite(restoredEventBossHp) ? Math.max(0, Math.min(eventRaidBoss.maxHp, restoredEventBossHp)) : eventRaidBoss.initialHp;
+    eventRaid.personalDamage = Math.max(0, Number(eventRaid.personalDamage) || 0);
+    eventRaid.lastDamage = Math.max(0, Number(eventRaid.lastDamage) || 0);
     let event = {
       ...defaults.event,
       ...parsedEvent,
       clears: { ...defaults.event.clears, ...(parsedEvent.clears || {}) },
       exchange: { ...defaults.event.exchange, ...(parsedEvent.exchange || {}) },
       claimedRewards: Array.isArray(parsedEvent.claimedRewards) ? parsedEvent.claimedRewards : [],
-      storyRead: Array.isArray(parsedEvent.storyRead) ? parsedEvent.storyRead : []
+      storyRead: Array.isArray(parsedEvent.storyRead) ? parsedEvent.storyRead : [],
+      raid: eventRaid
     };
     if (event.seasonId !== eventSeasonId) event = newEventState();
     event.points = Math.max(0, Number(event.points) || 0);
@@ -303,7 +348,7 @@ function loadState() {
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 9,
+      schema: 10,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -352,6 +397,13 @@ function ensureGuildReset() {
   state.guild.claimedMissions = [];
   state.guild.claimedRewards = [];
   state.guild.lastActivity = "";
+  return true;
+}
+
+function ensureEventRaidReset() {
+  if (state.event.raid.resetDay === localDayKey()) return false;
+  state.event.raid.resetDay = localDayKey();
+  state.event.raid.attempts = 3;
   return true;
 }
 
@@ -655,7 +707,8 @@ function navigateTo(screenName) {
 function updateUI() {
   const dailyReset = ensureDailyReset();
   const guildReset = ensureGuildReset();
-  if (dailyReset || guildReset) saveState();
+  const eventRaidReset = ensureEventRaidReset();
+  if (dailyReset || guildReset || eventRaidReset) saveState();
   const stats = getSquadStats();
   state.troops = Math.min(state.troops, stats.capacity);
   document.querySelector("#stamina-value").textContent = `${state.stamina}/60`;
@@ -818,6 +871,19 @@ function renderGuild() {
   document.querySelector("#guild-quick-messages").innerHTML = guildQuickMessages.map(item => `<button type="button" data-guild-quick="${escapeHtml(item.text)}"><i>${item.icon}</i><span>${escapeHtml(item.text)}</span></button>`).join("");
 }
 
+function getEventRaidPhase(hp = state.event.raid.bossHp) {
+  const rate = hp / eventRaidBoss.maxHp;
+  if (rate > .66) return { code: "PHASE 1", name: "祭礼起動", attackRate: 1 };
+  if (rate > .33) return { code: "PHASE 2", name: "九尾展開", attackRate: 1.1 };
+  return { code: "FINAL PHASE", name: "祈願核暴走", attackRate: 1.22 };
+}
+
+function eventRaidPartRewardText(reward) {
+  const parts = [`祭札${reward.tokens}`, `+${reward.points} PT`];
+  Object.entries(reward.materials || {}).forEach(([key, amount]) => parts.push(`${materials[key].icon}${amount}`));
+  return parts.join("　");
+}
+
 function renderEvent() {
   const root = document.querySelector("#event-screen");
   if (!root) return;
@@ -842,6 +908,40 @@ function renderEvent() {
     const ready = remaining > 0 && state.event.tokens >= item.cost;
     return `<article class="event-exchange-item"><i>${item.icon}</i><div><small>残り ${remaining} / ${item.stock}</small><b>${item.name}</b><span>祭札 ${item.cost}</span></div><button type="button" data-event-exchange="${item.id}" ${ready ? "" : "disabled"}>${remaining ? "交換" : "完売"}</button></article>`;
   }).join("");
+  const raid = state.event.raid;
+  const phase = getEventRaidPhase();
+  document.querySelector("#event-raid-boss-hp").textContent = `${formatNumber(raid.bossHp)} / ${formatNumber(eventRaidBoss.maxHp)}`;
+  document.querySelector("#event-raid-boss-bar").style.width = `${Math.max(0, raid.bossHp / eventRaidBoss.maxHp * 100)}%`;
+  document.querySelector("#event-raid-phase").textContent = `${phase.code} / ${phase.name}`;
+  document.querySelector("#event-raid-attempts").textContent = `${raid.attempts} / 3`;
+  document.querySelector("#event-raid-participants").textContent = formatNumber(8742 + raid.runs * 13);
+  document.querySelector("#event-raid-damage").textContent = formatNumber(raid.personalDamage);
+  document.querySelector("#event-raid-last").textContent = raid.lastDamage ? `前回 +${formatNumber(raid.lastDamage)}` : "未参加";
+  document.querySelector("#event-raid-runs").textContent = `${raid.runs} 回`;
+  document.querySelector("#event-raid-party").innerHTML = miniTeamMarkup();
+  document.querySelector("#event-raid-part-list").innerHTML = Object.entries(eventRaidBoss.parts).map(([id, part]) => {
+    const status = raid.parts[id];
+    const active = raid.target === id && !status.broken;
+    const rate = Math.max(0, status.hp / part.maxHp * 100);
+    return `<button type="button" class="event-raid-part${active ? " active" : ""}${status.broken ? " broken" : ""}" data-event-raid-target="${id}" ${status.broken ? "disabled" : ""}><i>${part.icon}</i><span><small>${status.broken ? "BREAK" : active ? "AUTO TARGET" : "TARGET"}</small><b>${part.name}</b><em>${part.effect}</em><u><s style="width:${rate}%"></s></u></span><strong>${status.broken ? "破壊済" : `${formatNumber(status.hp)} / ${formatNumber(part.maxHp)}`}</strong></button>`;
+  }).join("");
+  document.querySelector("#event-raid-reward-list").innerHTML = eventRaidRewardTiers.map(tier => {
+    const current = Math.min(tier.damage, raid.personalDamage);
+    const claimed = raid.claimedRewards.includes(tier.id);
+    const ready = current >= tier.damage && !claimed;
+    return `<article class="event-raid-reward${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><div><small>TOTAL ${formatNumber(tier.damage)} DMG</small><b>${tier.name}</b><span>${rewardText(tier.reward)}</span><u><i style="width:${current / tier.damage * 100}%"></i></u></div><button type="button" data-event-raid-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : `${formatNumber(current)}/${formatNumber(tier.damage)}`}</button></article>`;
+  }).join("");
+  const raidPlayer = { name: "境界局長", role: "YOU", commander: state.team[0], damage: raid.personalDamage, isPlayer: true };
+  const ranking = [...eventRaidMembers, raidPlayer].sort((a, b) => b.damage - a.damage);
+  document.querySelector("#event-raid-ranking").innerHTML = ranking.map((member, index) => `<article class="event-raid-rank${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b></span><div><small>DAMAGE</small><b>${formatNumber(member.damage)}</b></div></article>`).join("");
+  const start = document.querySelector("#event-raid-start");
+  start.disabled = raid.attempts <= 0 || raid.bossHp <= 0 || state.troops <= 0;
+  start.innerHTML = raid.bossHp <= 0 ? `<span>祭禍鎮圧完了</span><b>✓</b>` : raid.attempts <= 0 ? `<span>本日の共鳴終了</span><b>0 / 3</b>` : `<span>5人オートで共鳴</span><b>挑戦 ${raid.attempts}</b>`;
+  const supported = raid.supportDay === localDayKey();
+  const support = document.querySelector("#event-raid-support");
+  support.disabled = supported || raid.bossHp <= 0;
+  support.innerHTML = raid.bossHp <= 0 ? `<span>支援不要・鎮圧済み</span><b>✓</b>` : supported ? `<span>団員支援 到着済み</span><b>-${formatNumber(raid.supportDamage)} HP</b>` : `<span>団員3名へ支援要請</span><b>1日1回</b>`;
+  document.querySelector("#event-raid-support-note").textContent = supported ? "白鷺ユラ・黒鉄ジン・霞坂ユノが共鳴" : "支援で全体HPを減少 / 個人ダメージには非加算";
 }
 
 function showEventStory(id) {
@@ -886,6 +986,46 @@ function exchangeEventItem(id) {
   playCraftSound();
   vibrate([20, 25, 45]);
   showToast(`${item.name}を交換しました`);
+}
+
+function selectEventRaidTarget(id) {
+  if (!eventRaidBoss.parts[id] || state.event.raid.parts[id].broken) return;
+  state.event.raid.target = id;
+  saveState();
+  renderEvent();
+  playUISound();
+  showToast(`${eventRaidBoss.parts[id].name}を優先攻撃します`);
+}
+
+function claimEventRaidReward(id) {
+  const tier = eventRaidRewardTiers.find(item => item.id === id);
+  if (!tier || state.event.raid.personalDamage < tier.damage || state.event.raid.claimedRewards.includes(id)) return;
+  state.event.raid.claimedRewards.push(id);
+  applyReward(tier.reward);
+  saveState();
+  updateUI();
+  playRevealSound("SSR");
+  vibrate([20, 35, 65]);
+  showToast(`${tier.name}：${rewardText(tier.reward)}`);
+}
+
+function requestEventRaidSupport() {
+  const raid = state.event.raid;
+  if (raid.supportDay === localDayKey()) return showToast("本日の団員支援は到着済みです");
+  if (raid.bossHp <= 0) return showToast("ヨルカグラは鎮圧済みです");
+  const damage = Math.min(raid.bossHp, 8600);
+  raid.bossHp -= damage;
+  raid.supportDay = localDayKey();
+  raid.supportDamage = damage;
+  state.event.points += 50;
+  state.event.tokens += 20;
+  recordGuildActivity("raid", damage);
+  grantPlayerXp(10);
+  saveState();
+  updateUI();
+  playRevealSound("SR");
+  vibrate([20, 30, 50]);
+  showToast(`団員支援 -${formatNumber(damage)} HP / 祭札+20 / +50 PT`);
 }
 
 function renderMissions() {
@@ -1239,6 +1379,7 @@ function symbolArtData(commander) {
 
 function openBattleReport(report, title, enemyName, art) {
   const overlay = document.querySelector("#battle-overlay");
+  const raidMode = report.mode === "raid" || report.mode === "event-raid";
   overlay.classList.add("active");
   overlay.setAttribute("aria-hidden", "false");
   document.querySelector("#battle-title").textContent = title;
@@ -1246,8 +1387,8 @@ function openBattleReport(report, title, enemyName, art) {
   document.querySelector("#battle-enemy-image").src = art;
   document.querySelector("#battle-enemy-image").alt = enemyName;
   document.querySelector("#battle-team-mini").innerHTML = getSquadStats().members.map(member => `<span>${member.art ? `<img src="${member.art}" alt="">` : `<i style="background:linear-gradient(145deg,${member.colors.join(",")})">${member.symbol}</i>`}<b>${member.name}<small> S${member.skillLevel}</small></b></span>`).join("");
-  document.querySelector("#ally-bar-label").textContent = report.mode === "arena" ? "自軍耐久" : report.mode === "raid" ? "部隊兵力" : "味方兵力";
-  document.querySelector("#enemy-bar-label").textContent = report.mode === "arena" ? "相手耐久" : report.mode === "raid" ? "BOSS HP" : "敵兵力";
+  document.querySelector("#ally-bar-label").textContent = report.mode === "arena" ? "自軍耐久" : raidMode ? "部隊兵力" : "味方兵力";
+  document.querySelector("#enemy-bar-label").textContent = report.mode === "arena" ? "相手耐久" : raidMode ? "BOSS HP" : "敵兵力";
   document.querySelector("#battle-log").innerHTML = "";
   document.querySelector("#battle-result").classList.add("hidden");
   document.querySelector("#replenish-button").classList.toggle("hidden", report.mode === "arena");
@@ -1298,6 +1439,100 @@ function startEventBattle(stageIndex) {
   saveState();
   updateUI();
   openBattleReport(report, `限定任務 ${stage.title}`, stage.enemy, stage.art);
+}
+
+function simulateEventRaid() {
+  const stats = getSquadStats();
+  const raid = state.event.raid;
+  let ally = state.troops;
+  let enemy = raid.bossHp;
+  const allyStart = ally;
+  const enemyStart = enemy;
+  const parts = Object.fromEntries(Object.entries(raid.parts).map(([id, value]) => [id, { ...value }]));
+  let targetId = parts[raid.target] && !parts[raid.target].broken ? raid.target : Object.keys(parts).find(id => !parts[id].broken);
+  const newBreaks = [];
+  let currentPhase = getEventRaidPhase(enemy);
+  const logs = [{ round: 0, actor: "PASSIVE", text: `${stats.members.map(member => `${member.name}「${member.passive.name}」Lv.${member.passiveLevel}`).join(" / ")}。優先部位：${targetId ? eventRaidBoss.parts[targetId].name : "本体"} / ${currentPhase.name}`, critical: false, ally, enemy }];
+  const supportRate = Math.min(.3, stats.members.filter(member => member.role === "支援" || member.role === "防御").reduce((sum, member) => sum + .026 + member.passiveLevel * .006, 0));
+  let totalDamage = 0;
+  let round = 0;
+  while (round < 10 && ally > 0 && enemy > 0) {
+    round += 1;
+    const commander = stats.members[(round - 1) % stats.members.length];
+    const roleBonus = commander.role === "攻撃" || commander.role === "遊撃" ? 1.18 : commander.role === "万能" ? 1.1 : 1;
+    const skillBonus = 1 + (commander.skillLevel - 1) * .065;
+    const maskBonus = parts.mask.broken ? 1.2 : 1;
+    const critical = Math.random() < (.15 + rarityRank[commander.rarity] * .025);
+    const raw = Math.max(110, (stats.attack * 1.38 + ally * 3.2 - eventRaidBoss.defense * .23) * .25 * roleBonus * skillBonus * maskBonus);
+    const damage = Math.min(enemy, Math.floor(raw * (.93 + Math.random() * .17) * (critical ? 1.58 : 1)));
+    enemy -= damage;
+    totalDamage += damage;
+    const targetName = targetId ? eventRaidBoss.parts[targetId].name : "本体";
+    logs.push({ round, actor: commander.name, text: `${commander.skill.name} Lv.${commander.skillLevel}。${targetName}へ${formatNumber(damage)}ダメージ。${critical ? "祭礼共鳴！" : ""}`, critical, ally, enemy });
+    if (targetId && !parts[targetId].broken) {
+      const partDamage = Math.min(parts[targetId].hp, Math.max(1, Math.floor(damage * .74)));
+      parts[targetId].hp -= partDamage;
+      if (parts[targetId].hp <= 0) {
+        parts[targetId].hp = 0;
+        parts[targetId].broken = true;
+        newBreaks.push(targetId);
+        logs.push({ round, actor: "BREAK", text: `${eventRaidBoss.parts[targetId].name}を破壊。${eventRaidBoss.parts[targetId].effect}`, critical: true, ally, enemy });
+        targetId = Object.keys(parts).find(id => !parts[id].broken);
+      }
+    }
+    const nextPhase = getEventRaidPhase(enemy);
+    if (nextPhase.code !== currentPhase.code) {
+      currentPhase = nextPhase;
+      logs.push({ round, actor: "PHASE", text: `${currentPhase.code}「${currentPhase.name}」へ移行。祭禍出力が上昇。`, critical: true, ally, enemy });
+    }
+    if (enemy <= 0) break;
+    const tailsRate = parts.tails.broken ? .82 : 1;
+    const counter = Math.max(26, Math.floor((eventRaidBoss.attack * tailsRate * currentPhase.attackRate - stats.defense * .35) * (.9 + Math.random() * .2) * .15 * (1 - supportRate)));
+    const allyLoss = Math.min(ally, Math.max(1, Math.floor(counter / 11)));
+    ally -= allyLoss;
+    logs.push({ round, actor: eventRaidBoss.name, text: `夜神楽衝${formatNumber(counter)}ダメージ。味方兵力-${allyLoss}。`, critical: false, ally, enemy });
+  }
+  const won = enemy <= 0;
+  logs.push({ round, actor: "SYSTEM", text: won ? "祈願共鳴核の停止を確認。ヨルカグラ鎮圧完了。" : `共鳴限界へ到達。累積${formatNumber(totalDamage)}ダメージを同期。`, critical: false, ally, enemy });
+  const reward = 520 + Math.floor(totalDamage * .42);
+  const eventTokens = 24 + Math.floor(totalDamage / 550) + (parts.core.broken ? 25 : 0);
+  const eventPoints = 120 + Math.floor(totalDamage / 18);
+  return { mode: "event-raid", logs, won, rounds: round, allyStart, enemyStart, allyRemaining: Math.max(0, ally), enemyRemaining: Math.max(0, enemy), casualties: allyStart - Math.max(0, ally), damage: totalDamage, reward, eventTokens, eventPoints, parts, newBreaks };
+}
+
+function startEventRaidBattle() {
+  const raid = state.event.raid;
+  if (raid.attempts <= 0) return showToast("本日のイベントレイド挑戦回数を使い切りました");
+  if (raid.bossHp <= 0) return showToast("ヨルカグラは鎮圧済みです");
+  if (state.troops <= 0) return showToast("兵を補充してから共鳴してください");
+  const report = simulateEventRaid();
+  raid.attempts -= 1;
+  raid.bossHp = report.enemyRemaining;
+  raid.personalDamage += report.damage;
+  raid.lastDamage = report.damage;
+  raid.runs += 1;
+  raid.parts = report.parts;
+  raid.target = Object.keys(report.parts).find(id => !report.parts[id].broken) || raid.target;
+  state.troops = report.allyRemaining;
+  state.coins += report.reward;
+  state.event.tokens += report.eventTokens;
+  state.event.points += report.eventPoints;
+  report.newBreaks.forEach(id => {
+    const reward = eventRaidBoss.parts[id].reward;
+    state.event.tokens += reward.tokens;
+    state.event.points += reward.points;
+    report.eventTokens += reward.tokens;
+    report.eventPoints += reward.points;
+    applyReward({ materials: reward.materials });
+  });
+  report.levelsGained = recordDailyActivity("raid", 40);
+  recordGuildActivity("raid", report.damage);
+  report.playerLevel = state.player.level;
+  saveState();
+  updateUI();
+  openBattleReport(report, "夜神楽共鳴戦", eventRaidBoss.name, eventRaidBoss.art);
+  playRevealSound("UR");
+  vibrate([30, 35, 70]);
 }
 
 function simulateBattle(mission) {
@@ -1489,8 +1724,8 @@ function appendNextBattleLog() {
 
 function appendLogElement(log) {
   const element = document.createElement("div");
-  element.className = `log-entry${log.critical ? " critical" : ""}${log.actor === "BREAK" ? " break" : ""}`;
-  element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : log.actor === "PASSIVE" ? "PASS" : log.actor === "BREAK" ? "BRK" : `R${log.round}`}</b><span><strong>${log.actor === "PASSIVE" ? "パッシブ共鳴" : log.actor === "BREAK" ? "部位破壊" : log.actor}</strong><small>${log.text}</small></span>`;
+  element.className = `log-entry${log.critical ? " critical" : ""}${log.actor === "BREAK" ? " break" : ""}${log.actor === "PHASE" ? " phase" : ""}`;
+  element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : log.actor === "PASSIVE" ? "PASS" : log.actor === "BREAK" ? "BRK" : log.actor === "PHASE" ? "PHS" : `R${log.round}`}</b><span><strong>${log.actor === "PASSIVE" ? "パッシブ共鳴" : log.actor === "BREAK" ? "部位破壊" : log.actor === "PHASE" ? "段階移行" : log.actor}</strong><small>${log.text}</small></span>`;
   const container = document.querySelector("#battle-log");
   container.append(element);
   container.scrollTop = container.scrollHeight;
@@ -1531,6 +1766,11 @@ function finishBattleDisplay() {
     document.querySelector("#battle-result-title").textContent = report.won ? "レイド鎮圧" : "共鳴同期完了";
     const breaks = report.newBreaks.length ? ` / 部位破壊 ${report.newBreaks.map(id => raidBoss.parts[id].name).join("・")}` : "";
     document.querySelector("#battle-result-meta").textContent = `与ダメージ ${formatNumber(report.damage)} / 損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${breaks}${growth}`;
+  } else if (report.mode === "event-raid") {
+    document.querySelector("#battle-result-icon").textContent = "祭";
+    document.querySelector("#battle-result-title").textContent = report.won ? "ヨルカグラ鎮圧" : "共鳴ダメージ同期";
+    const breaks = report.newBreaks.length ? ` / 部位破壊 ${report.newBreaks.map(id => eventRaidBoss.parts[id].name).join("・")}` : "";
+    document.querySelector("#battle-result-meta").textContent = `与ダメージ ${formatNumber(report.damage)} / 損耗 ${report.casualties}名 / 祭札 +${report.eventTokens} / +${report.eventPoints} PT${breaks}${growth}`;
   } else if (report.mode === "event") {
     document.querySelector("#battle-result-icon").textContent = report.won ? "祭" : "!";
     document.querySelector("#battle-result-title").textContent = report.won ? "イベント任務完了" : "部隊撤退";
@@ -1548,7 +1788,7 @@ function finishBattleDisplay() {
     button.textContent = missing > 0 ? `兵を補充（${formatNumber(missing * 12)}コイン）` : "兵力は最大です";
     button.disabled = missing === 0;
   }
-  playBattleResultSound(report.mode === "raid" || report.won);
+  playBattleResultSound(report.mode === "raid" || report.mode === "event-raid" || report.won);
 }
 
 function replenishTroops() {
@@ -1783,6 +2023,10 @@ document.addEventListener("click", event => {
   if (guildReward) return claimGuildReward(guildReward.dataset.guildReward);
   const guildQuick = event.target.closest("[data-guild-quick]");
   if (guildQuick) return sendGuildMessage(guildQuick.dataset.guildQuick);
+  const eventRaidTarget = event.target.closest("[data-event-raid-target]");
+  if (eventRaidTarget) return selectEventRaidTarget(eventRaidTarget.dataset.eventRaidTarget);
+  const eventRaidReward = event.target.closest("[data-event-raid-reward]");
+  if (eventRaidReward) return claimEventRaidReward(eventRaidReward.dataset.eventRaidReward);
   const eventStage = event.target.closest("[data-event-stage]");
   if (eventStage) return startEventBattle(Number(eventStage.dataset.eventStage));
   const eventStory = event.target.closest("[data-event-story]");
@@ -1805,6 +2049,8 @@ document.querySelector("#battle-skip").addEventListener("click", showAllBattleLo
 document.querySelector("#battle-close").addEventListener("click", closeBattle);
 document.querySelector("#raid-start").addEventListener("click", startRaidBattle);
 document.querySelector("#raid-rescue").addEventListener("click", requestRaidRescue);
+document.querySelector("#event-raid-start").addEventListener("click", startEventRaidBattle);
+document.querySelector("#event-raid-support").addEventListener("click", requestEventRaidSupport);
 document.querySelector("#daily-login-claim").addEventListener("click", claimLoginReward);
 document.querySelector("#daily-all-claim").addEventListener("click", claimDailyAll);
 document.querySelector("#guild-cheer").addEventListener("click", cheerGuild);
