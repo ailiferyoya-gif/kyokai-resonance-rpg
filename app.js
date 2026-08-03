@@ -39,13 +39,34 @@ const recipes = [
   { id: "resonanceSigil", slot: "accessory", name: "五連共鳴紋章", type: "装飾", icon: "✦", effect: "対象キャラの攻防 +25 / Lv", max: 5, costs: { core: 5, fiber: 3 }, coins: 1000 }
 ];
 
+const raidBoss = {
+  name: "境界喰らい・ゴライアス",
+  maxHp: 1000000,
+  initialHp: 782400,
+  attack: 690,
+  defense: 540,
+  art: "assets/enemy-goliath-v1.png",
+  parts: {
+    mask: { name: "白磁面", icon: "◉", maxHp: 1250, effect: "破壊後：ボス攻撃 -15%", reward: { fiber: 3, hide: 2 } },
+    core: { name: "境界核", icon: "◆", maxHp: 1550, effect: "破壊後：味方与ダメージ +18%", reward: { core: 3, ore: 2 } }
+  }
+};
+
+const raidRewardTiers = [
+  { id: "r1", damage: 1200, name: "参加報酬", crystals: 100, coins: 1200, materials: { ore: 2 } },
+  { id: "r2", damage: 3200, name: "貢献報酬", crystals: 150, coins: 2200, materials: { core: 2, fiber: 2 } },
+  { id: "r3", damage: 6500, name: "上位貢献報酬", crystals: 250, coins: 4000, materials: { core: 3, hide: 3 } }
+];
+
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
 const newEquipment = () => ({ weapon: 0, armor: 0, accessory: 0 });
+const newRaidParts = () => Object.fromEntries(Object.entries(raidBoss.parts).map(([id, part]) => [id, { hp: part.maxHp, broken: false }]));
+const newRaidState = () => ({ attempts: 3, bossHp: raidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "core", parts: newRaidParts(), claimedRewards: [] });
 
 const defaultState = () => ({
-  schema: 3,
+  schema: 4,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -56,6 +77,7 @@ const defaultState = () => ({
   materials: { ore: 4, fiber: 3, core: 2, hide: 2 },
   progression: Object.fromEntries(starterTeam.map(id => [id, newProgress()])),
   equipment: Object.fromEntries(starterTeam.map(id => [id, newEquipment()])),
+  raid: newRaidState(),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -94,15 +116,25 @@ function loadState() {
         accessory: Number(parsed.gear.resonanceSigil) || 0
       };
     }
+    const parsedRaid = parsed.raid || {};
+    const raid = {
+      ...defaults.raid,
+      ...parsedRaid,
+      parts: Object.fromEntries(Object.keys(raidBoss.parts).map(id => [id, { ...defaults.raid.parts[id], ...(parsedRaid.parts?.[id] || {}) }])),
+      claimedRewards: Array.isArray(parsedRaid.claimedRewards) ? parsedRaid.claimedRewards : []
+    };
+    raid.attempts = Math.max(0, Math.min(3, Number(raid.attempts) || 0));
+    raid.bossHp = Math.max(0, Math.min(raidBoss.maxHp, Number(raid.bossHp) || raidBoss.initialHp));
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 3,
+      schema: 4,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
       progression,
       equipment,
+      raid,
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -183,6 +215,7 @@ function navigateTo(screenName) {
   if (screen) screen.scrollTop = 0;
   if (screenName === "units") renderFormation();
   if (screenName === "workshop") renderWorkshop();
+  if (screenName === "raid") renderRaid();
   playUISound();
 }
 
@@ -204,6 +237,7 @@ function updateUI() {
   document.body.classList.toggle("reduced-flash", state.settings.reduceFlash);
   document.querySelector("#mission-team-mini").innerHTML = miniTeamMarkup();
   renderMissions();
+  renderRaid();
   renderFormation();
   renderWorkshop();
 }
@@ -228,6 +262,62 @@ function renderMissions() {
       <div class="mission-body"><div class="mission-main"><span>${mission.zone}</span><h3>${mission.title}</h3><p>${mission.description}</p><div class="mission-drops"><i>推奨 ${mission.recommended}</i><i>ϟ ${mission.stamina}</i><i>${dropNames}</i></div></div><button type="button" class="sortie-button" data-mission="${index}">出撃</button></div>
     </article>`;
   }).join("");
+}
+
+function raidRewardSummary(tier) {
+  const materialText = Object.entries(tier.materials).map(([key, amount]) => `${materials[key].icon}${amount}`).join(" ");
+  return `◆${tier.crystals}　●${formatNumber(tier.coins)}　${materialText}`;
+}
+
+function renderRaid() {
+  const raid = state.raid;
+  const hpRate = Math.max(0, raid.bossHp / raidBoss.maxHp * 100);
+  document.querySelector("#raid-boss-hp").textContent = `${formatNumber(raid.bossHp)} / ${formatNumber(raidBoss.maxHp)}`;
+  document.querySelector("#raid-boss-bar").style.width = `${hpRate}%`;
+  document.querySelector("#raid-attempts").textContent = `${raid.attempts} / 3`;
+  document.querySelector("#raid-participants").textContent = formatNumber(12480 + raid.runs * 17);
+  document.querySelector("#raid-personal-damage").textContent = formatNumber(raid.personalDamage);
+  document.querySelector("#raid-last-damage").textContent = raid.lastDamage ? `前回 +${formatNumber(raid.lastDamage)}` : "未参加";
+  document.querySelector("#raid-run-count").textContent = `${raid.runs} 回`;
+  document.querySelector("#raid-party-mini").innerHTML = miniTeamMarkup();
+  document.querySelector("#raid-part-list").innerHTML = Object.entries(raidBoss.parts).map(([id, part]) => {
+    const status = raid.parts[id];
+    const active = raid.target === id && !status.broken;
+    const rate = Math.max(0, status.hp / part.maxHp * 100);
+    return `<button type="button" class="raid-part${active ? " active" : ""}${status.broken ? " broken" : ""}" data-raid-target="${id}" ${status.broken ? "disabled" : ""}><i>${part.icon}</i><span><small>${status.broken ? "BREAK" : active ? "AUTO TARGET" : "TARGET"}</small><b>${part.name}</b><em>${part.effect}</em><u><s style="width:${rate}%"></s></u></span><strong>${status.broken ? "破壊済" : `${formatNumber(status.hp)} / ${formatNumber(part.maxHp)}`}</strong></button>`;
+  }).join("");
+  document.querySelector("#raid-reward-list").innerHTML = raidRewardTiers.map(tier => {
+    const claimed = raid.claimedRewards.includes(tier.id);
+    const ready = raid.personalDamage >= tier.damage && !claimed;
+    return `<article class="raid-reward${ready ? " ready" : ""}"><div><small>TOTAL ${formatNumber(tier.damage)}</small><b>${tier.name}</b><span>${raidRewardSummary(tier)}</span></div><button type="button" data-raid-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : "未達成"}</button></article>`;
+  }).join("");
+  const start = document.querySelector("#raid-start");
+  const disabled = raid.attempts <= 0 || raid.bossHp <= 0 || state.troops <= 0;
+  start.disabled = disabled;
+  start.innerHTML = raid.bossHp <= 0 ? `<span>鎮圧完了</span><b>✓</b>` : raid.attempts <= 0 ? `<span>本日の挑戦終了</span><b>0 / 3</b>` : `<span>5人オートで出撃</span><b>参加証 ${raid.attempts}</b>`;
+}
+
+function selectRaidTarget(id) {
+  if (!raidBoss.parts[id] || state.raid.parts[id].broken) return;
+  state.raid.target = id;
+  saveState();
+  renderRaid();
+  playUISound();
+  showToast(`${raidBoss.parts[id].name}を優先攻撃します`);
+}
+
+function claimRaidReward(id) {
+  const tier = raidRewardTiers.find(item => item.id === id);
+  if (!tier || state.raid.personalDamage < tier.damage || state.raid.claimedRewards.includes(id)) return;
+  state.raid.claimedRewards.push(id);
+  state.crystals += tier.crystals;
+  state.coins += tier.coins;
+  Object.entries(tier.materials).forEach(([key, amount]) => state.materials[key] += amount);
+  saveState();
+  updateUI();
+  playCraftSound();
+  vibrate([20, 35, 65]);
+  showToast(`${tier.name}を受け取りました`);
 }
 
 function renderFormation() {
@@ -499,6 +589,25 @@ function symbolArtData(commander) {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+function openBattleReport(report, title, enemyName, art) {
+  const overlay = document.querySelector("#battle-overlay");
+  overlay.classList.add("active");
+  overlay.setAttribute("aria-hidden", "false");
+  document.querySelector("#battle-title").textContent = title;
+  document.querySelector("#enemy-name").textContent = enemyName;
+  document.querySelector("#battle-enemy-image").src = art;
+  document.querySelector("#battle-enemy-image").alt = enemyName;
+  document.querySelector("#battle-team-mini").innerHTML = getSquadStats().members.map(member => `<span>${member.art ? `<img src="${member.art}" alt="">` : `<i style="background:linear-gradient(145deg,${member.colors.join(",")})">${member.symbol}</i>`}<b>${member.name}<small> S${member.skillLevel}</small></b></span>`).join("");
+  document.querySelector("#ally-bar-label").textContent = report.mode === "raid" ? "部隊兵力" : "味方兵力";
+  document.querySelector("#enemy-bar-label").textContent = report.mode === "raid" ? "BOSS HP" : "敵兵力";
+  document.querySelector("#battle-log").innerHTML = "";
+  document.querySelector("#battle-result").classList.add("hidden");
+  document.querySelector("#battle-skip").classList.remove("hidden");
+  updateBattleBars(report.allyStart, report.allyStart, report.enemyStart, report.enemyStart, report.mode);
+  battleRun = { report, index: 0, timer: null };
+  appendNextBattleLog();
+}
+
 function startBattle(missionIndex) {
   const mission = missions[missionIndex];
   if (state.stamina < mission.stamina) return showToast("スタミナが不足しています");
@@ -510,20 +619,7 @@ function startBattle(missionIndex) {
   if (report.won) Object.entries(mission.drops).forEach(([key, amount]) => state.materials[key] += amount);
   saveState();
   updateUI();
-  const overlay = document.querySelector("#battle-overlay");
-  overlay.classList.add("active");
-  overlay.setAttribute("aria-hidden", "false");
-  document.querySelector("#battle-title").textContent = mission.title;
-  document.querySelector("#enemy-name").textContent = mission.enemy;
-  document.querySelector("#battle-enemy-image").src = mission.art;
-  document.querySelector("#battle-enemy-image").alt = mission.enemy;
-  document.querySelector("#battle-team-mini").innerHTML = getSquadStats().members.map(member => `<span>${member.art ? `<img src="${member.art}" alt="">` : `<i style="background:linear-gradient(145deg,${member.colors.join(",")})">${member.symbol}</i>`}<b>${member.name}<small> S${member.skillLevel}</small></b></span>`).join("");
-  document.querySelector("#battle-log").innerHTML = "";
-  document.querySelector("#battle-result").classList.add("hidden");
-  document.querySelector("#battle-skip").classList.remove("hidden");
-  updateBattleBars(report.allyStart, report.allyStart, report.enemyStart, report.enemyStart);
-  battleRun = { report, index: 0, timer: null };
-  appendNextBattleLog();
+  openBattleReport(report, mission.title, mission.enemy, mission.art);
 }
 
 function simulateBattle(mission) {
@@ -554,7 +650,79 @@ function simulateBattle(mission) {
   }
   const won = enemy <= 0 || (ally / allyStart > enemy / enemyStart);
   logs.push({ round, actor: "SYSTEM", text: won ? "敵信号の停止を確認。任務完了。" : "味方部隊が撤退。再編成が必要です。", critical: false, ally, enemy });
-  return { mission, logs, won, rounds: round, allyStart, enemyStart, allyRemaining: Math.max(0, ally), enemyRemaining: Math.max(0, enemy), casualties: allyStart - Math.max(0, ally), reward: won ? mission.reward : 120 };
+  return { mode: "mission", mission, logs, won, rounds: round, allyStart, enemyStart, allyRemaining: Math.max(0, ally), enemyRemaining: Math.max(0, enemy), casualties: allyStart - Math.max(0, ally), reward: won ? mission.reward : 120 };
+}
+
+function simulateRaid() {
+  const stats = getSquadStats();
+  let ally = state.troops;
+  let enemy = state.raid.bossHp;
+  const allyStart = ally;
+  const enemyStart = enemy;
+  const parts = Object.fromEntries(Object.entries(state.raid.parts).map(([id, value]) => [id, { ...value }]));
+  let targetId = parts[state.raid.target] && !parts[state.raid.target].broken ? state.raid.target : Object.keys(parts).find(id => !parts[id].broken);
+  const newBreaks = [];
+  const logs = [{ round: 0, actor: "PASSIVE", text: `${stats.members.map(member => `${member.name}「${member.passive.name}」Lv.${member.passiveLevel}`).join(" / ")}。優先部位：${targetId ? raidBoss.parts[targetId].name : "本体"}`, critical: false, ally, enemy }];
+  const supportRate = Math.min(.28, stats.members.filter(member => member.role === "支援" || member.role === "防御").reduce((sum, member) => sum + .025 + member.passiveLevel * .006, 0));
+  let totalDamage = 0;
+  let round = 0;
+  while (round < 10 && ally > 0 && enemy > 0) {
+    round += 1;
+    const commander = stats.members[(round - 1) % stats.members.length];
+    const roleBonus = commander.role === "攻撃" || commander.role === "遊撃" ? 1.16 : commander.role === "万能" ? 1.1 : 1;
+    const skillBonus = 1 + (commander.skillLevel - 1) * .06;
+    const coreBonus = parts.core.broken ? 1.18 : 1;
+    const critical = Math.random() < (.14 + rarityRank[commander.rarity] * .025);
+    const raw = Math.max(95, (stats.attack * 1.32 + ally * 3.1 - raidBoss.defense * .24) * .24 * roleBonus * skillBonus * coreBonus);
+    const damage = Math.min(enemy, Math.floor(raw * (.92 + Math.random() * .18) * (critical ? 1.55 : 1)));
+    enemy -= damage;
+    totalDamage += damage;
+    const targetName = targetId ? raidBoss.parts[targetId].name : "本体";
+    logs.push({ round, actor: commander.name, text: `${commander.skill.name} Lv.${commander.skillLevel}。${targetName}へ${formatNumber(damage)}ダメージ。${critical ? "会心共鳴！" : ""}`, critical, ally, enemy });
+    if (targetId && !parts[targetId].broken) {
+      const partDamage = Math.min(parts[targetId].hp, Math.max(1, Math.floor(damage * .72)));
+      parts[targetId].hp -= partDamage;
+      if (parts[targetId].hp <= 0) {
+        parts[targetId].hp = 0;
+        parts[targetId].broken = true;
+        newBreaks.push(targetId);
+        logs.push({ round, actor: "BREAK", text: `${raidBoss.parts[targetId].name}を破壊。${raidBoss.parts[targetId].effect}`, critical: true, ally, enemy });
+        targetId = Object.keys(parts).find(id => !parts[id].broken);
+      }
+    }
+    if (enemy <= 0) break;
+    const maskRate = parts.mask.broken ? .85 : 1;
+    const counter = Math.max(24, Math.floor((raidBoss.attack * maskRate - stats.defense * .34) * (.9 + Math.random() * .2) * .15 * (1 - supportRate)));
+    const allyLoss = Math.min(ally, Math.max(1, Math.floor(counter / 11)));
+    ally -= allyLoss;
+    logs.push({ round, actor: raidBoss.name, text: `重力衝${formatNumber(counter)}ダメージ。味方兵力-${allyLoss}。`, critical: false, ally, enemy });
+  }
+  const won = enemy <= 0;
+  logs.push({ round, actor: "SYSTEM", text: won ? "全体HPの消失を確認。ゴライアス鎮圧完了。" : `共鳴限界へ到達。累積${formatNumber(totalDamage)}ダメージを同期。`, critical: false, ally, enemy });
+  const reward = 400 + Math.floor(totalDamage * .38);
+  return { mode: "raid", logs, won, rounds: round, allyStart, enemyStart, allyRemaining: Math.max(0, ally), enemyRemaining: Math.max(0, enemy), casualties: allyStart - Math.max(0, ally), damage: totalDamage, reward, parts, newBreaks };
+}
+
+function startRaidBattle() {
+  if (state.raid.attempts <= 0) return showToast("本日の挑戦回数を使い切りました");
+  if (state.raid.bossHp <= 0) return showToast("ゴライアスは鎮圧済みです");
+  if (state.troops <= 0) return showToast("兵を補充してから出撃してください");
+  const report = simulateRaid();
+  state.raid.attempts -= 1;
+  state.raid.bossHp = report.enemyRemaining;
+  state.raid.personalDamage += report.damage;
+  state.raid.lastDamage = report.damage;
+  state.raid.runs += 1;
+  state.raid.parts = report.parts;
+  state.raid.target = Object.keys(report.parts).find(id => !report.parts[id].broken) || state.raid.target;
+  state.troops = report.allyRemaining;
+  state.coins += report.reward;
+  report.newBreaks.forEach(id => Object.entries(raidBoss.parts[id].reward).forEach(([key, amount]) => state.materials[key] += amount));
+  saveState();
+  updateUI();
+  openBattleReport(report, "共鳴限界戦", raidBoss.name, raidBoss.art);
+  playRevealSound("SSR");
+  vibrate([30, 35, 60]);
 }
 
 function appendNextBattleLog() {
@@ -568,8 +736,8 @@ function appendNextBattleLog() {
 
 function appendLogElement(log) {
   const element = document.createElement("div");
-  element.className = `log-entry${log.critical ? " critical" : ""}`;
-  element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : log.actor === "PASSIVE" ? "PASS" : `R${log.round}`}</b><span><strong>${log.actor === "PASSIVE" ? "パッシブ共鳴" : log.actor}</strong><small>${log.text}</small></span>`;
+  element.className = `log-entry${log.critical ? " critical" : ""}${log.actor === "BREAK" ? " break" : ""}`;
+  element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : log.actor === "PASSIVE" ? "PASS" : log.actor === "BREAK" ? "BRK" : `R${log.round}`}</b><span><strong>${log.actor === "PASSIVE" ? "パッシブ共鳴" : log.actor === "BREAK" ? "部位破壊" : log.actor}</strong><small>${log.text}</small></span>`;
   const container = document.querySelector("#battle-log");
   container.append(element);
   container.scrollTop = container.scrollHeight;
@@ -587,9 +755,9 @@ function showAllBattleLogs() {
   finishBattleDisplay();
 }
 
-function updateBattleBars(ally, allyStart, enemy, enemyStart) {
-  document.querySelector("#ally-troop-text").textContent = `${ally} / ${allyStart}`;
-  document.querySelector("#enemy-troop-text").textContent = `${enemy} / ${enemyStart}`;
+function updateBattleBars(ally, allyStart, enemy, enemyStart, mode = battleRun?.report?.mode) {
+  document.querySelector("#ally-troop-text").textContent = `${formatNumber(ally)} / ${formatNumber(allyStart)}`;
+  document.querySelector("#enemy-troop-text").textContent = `${formatNumber(enemy)} / ${formatNumber(enemyStart)}`;
   document.querySelector("#ally-troop-bar").style.width = `${Math.max(0, ally / allyStart * 100)}%`;
   document.querySelector("#enemy-troop-bar").style.width = `${Math.max(0, enemy / enemyStart * 100)}%`;
 }
@@ -600,15 +768,22 @@ function finishBattleDisplay() {
   const report = battleRun.report;
   document.querySelector("#battle-skip").classList.add("hidden");
   document.querySelector("#battle-result").classList.remove("hidden");
-  document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "!";
-  document.querySelector("#battle-result-title").textContent = report.won ? "任務完了" : "部隊撤退";
-  const drops = report.won ? ` / ${Object.entries(report.mission.drops).map(([key, amount]) => `${materials[key].name}×${amount}`).join("・")}` : "";
-  document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${drops}`;
+  if (report.mode === "raid") {
+    document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "界";
+    document.querySelector("#battle-result-title").textContent = report.won ? "レイド鎮圧" : "共鳴同期完了";
+    const breaks = report.newBreaks.length ? ` / 部位破壊 ${report.newBreaks.map(id => raidBoss.parts[id].name).join("・")}` : "";
+    document.querySelector("#battle-result-meta").textContent = `与ダメージ ${formatNumber(report.damage)} / 損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${breaks}`;
+  } else {
+    document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "!";
+    document.querySelector("#battle-result-title").textContent = report.won ? "任務完了" : "部隊撤退";
+    const drops = report.won ? ` / ${Object.entries(report.mission.drops).map(([key, amount]) => `${materials[key].name}×${amount}`).join("・")}` : "";
+    document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${drops}`;
+  }
   const missing = Math.max(0, getTeamCapacity() - state.troops);
   const button = document.querySelector("#replenish-button");
   button.textContent = missing > 0 ? `兵を補充（${formatNumber(missing * 12)}コイン）` : "兵力は最大です";
   button.disabled = missing === 0;
-  playBattleResultSound(report.won);
+  playBattleResultSound(report.mode === "raid" || report.won);
 }
 
 function replenishTroops() {
@@ -829,6 +1004,10 @@ document.addEventListener("click", event => {
   if (expedition) return runExpedition(Number(expedition.dataset.expedition));
   const recipe = event.target.closest("[data-recipe]");
   if (recipe) return craftGear(recipe.dataset.recipe);
+  const raidTarget = event.target.closest("[data-raid-target]");
+  if (raidTarget) return selectRaidTarget(raidTarget.dataset.raidTarget);
+  const raidReward = event.target.closest("[data-raid-reward]");
+  if (raidReward) return claimRaidReward(raidReward.dataset.raidReward);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
 });
@@ -841,6 +1020,7 @@ document.querySelector("#summon-hero").addEventListener("click", () => showSummo
 document.querySelector("#summon-close").addEventListener("click", closeSummon);
 document.querySelector("#battle-skip").addEventListener("click", showAllBattleLogs);
 document.querySelector("#battle-close").addEventListener("click", closeBattle);
+document.querySelector("#raid-start").addEventListener("click", startRaidBattle);
 document.querySelector("#replenish-button").addEventListener("click", replenishTroops);
 document.querySelector(".dialog-close").addEventListener("click", () => document.querySelector("#info-dialog").close());
 document.querySelector("#reset-demo").addEventListener("click", resetDemo);

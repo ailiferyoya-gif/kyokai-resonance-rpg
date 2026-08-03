@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090414">
-  <meta name="description" content="5人編成・個別育成・オート戦闘・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
+  <meta name="description" content="5人編成・個別育成・オート戦闘・部位破壊レイド・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
   <title>境界共鳴 — Social RPG Prototype</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
@@ -83,10 +83,14 @@
       <section id="raid-screen" class="screen" data-title="共同レイド" aria-labelledby="raid-heading">
         <h2 id="raid-heading" class="sr-only">共同レイド</h2>
         <article class="raid-hero vivid-frame"><img src="assets/enemy-goliath-v1.png" alt="レイドボス 境界喰らい・ゴライアス"><div class="raid-shade"></div><div class="raid-copy"><span>WORLD BOSS / ACTIVE</span><h2>境界喰らい<br>ゴライアス</h2><p>全プレイヤーで挑む非同期レイド</p></div></article>
-        <article class="boss-card glass-card"><div class="boss-head"><span>全体HP</span><b>782,400 / 1,000,000</b></div><div class="progress-track danger"><i style="width:78.24%"></i></div><div class="raid-meta"><span>◷ 残り2日</span><span>♟ 12,480人</span></div></article>
-        <button class="primary-button raid-cta" type="button" data-screen-target="missions">まず任務で戦力を確認</button>
-        <div class="section-heading"><div><span>ROADMAP</span><h2>レイド実装設計</h2></div></div>
-        <article class="roadmap glass-card"><div><i>01</i><span><b>5人編成で挑戦</b><small>任務と同じオート戦闘基盤</small></span><em>設計済</em></div><div><i>02</i><span><b>部位破壊</b><small>全体バフと行動パターン変化</small></span><em>次段階</em></div><div><i>03</i><span><b>協力報酬</b><small>個人・ギルド・全体の三層</small></span><em>次段階</em></div></article>
+        <article class="boss-card glass-card"><div class="boss-head"><span>全体HP</span><b id="raid-boss-hp">782,400 / 1,000,000</b></div><div class="progress-track danger"><i id="raid-boss-bar" style="width:78.24%"></i></div><div class="raid-meta"><span>◷ 残り2日</span><span>♟ <b id="raid-participants">12,480</b>人</span><span>参加証 <b id="raid-attempts">3 / 3</b></span></div></article>
+        <article class="raid-contribution glass-card"><div id="raid-party-mini" class="mini-team"></div><div><small>PERSONAL DAMAGE</small><strong id="raid-personal-damage">0</strong><span id="raid-last-damage">未参加</span></div><em>挑戦 <b id="raid-run-count">0 回</b></em></article>
+        <button id="raid-start" class="primary-button raid-cta" type="button"><span>5人オートで出撃</span><b>参加証 3</b></button>
+        <div class="section-heading"><div><span>BREAK TARGET</span><h2>優先攻撃部位</h2></div><small>戦闘は基本オート</small></div>
+        <div id="raid-part-list" class="raid-part-list"></div>
+        <div class="section-heading"><div><span>DAMAGE REWARD</span><h2>累積貢献報酬</h2></div><small>到達後に受取</small></div>
+        <div id="raid-reward-list" class="raid-reward-list glass-card"></div>
+        <aside class="system-note"><b>非同期レイド・プロトタイプ</b><p>挑戦ごとのダメージを全体HPと個人累積へ反映。部位破壊効果は次の行動から自動適用されます。</p></aside>
       </section>
 
       <section id="units-screen" class="screen" data-title="5人編成" aria-labelledby="units-heading">
@@ -120,7 +124,7 @@
           <label><span><b>召喚結果をすぐ表示</b><small>導入演出を省略</small></span><input id="instant-toggle" type="checkbox"><i></i></label>
         </article>
         <button class="menu-shortcut glass-card" type="button" data-screen-target="workshop"><span>⚒</span><div><small>CRAFT & INVENTORY</small><strong>素材探索・境界工房</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PROTOTYPE v0.3</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、素材探索、任務、ガチャを実装。レイドとPvPは同じ戦闘基盤で拡張予定です。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>育成</i><b>Lv / Skill / Passive</b></div></article>
+        <article class="about-card glass-card"><span>PROTOTYPE v0.4</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、素材探索、任務、ガチャ、部位破壊レイドを実装。PvPは同じ戦闘基盤で拡張予定です。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>レイド</i><b>部位破壊 / 累積報酬</b></div></article>
       </section>
     </div>
 
@@ -146,7 +150,7 @@
     <header class="battle-top"><div><span>5 UNIT / AUTO ANALYSIS</span><h2 id="battle-title">ネオン街の追跡者</h2></div><button id="battle-skip" type="button">ログ全表示</button></header>
     <div class="battle-visual"><img id="battle-enemy-image" src="assets/enemy-rift-hound-v1.png" alt=""><div class="battle-visual-shade"></div><div class="battle-versus"><span>第零遊撃隊</span><b>VS</b><strong id="enemy-name">裂界猟犬</strong></div></div>
     <div id="battle-team-mini" class="battle-team-mini"></div>
-    <div class="battle-bars"><label><span>味方兵力 <b id="ally-troop-text">0 / 0</b></span><i><em id="ally-troop-bar"></em></i></label><label><span>敵兵力 <b id="enemy-troop-text">0 / 0</b></span><i><em id="enemy-troop-bar" class="enemy"></em></i></label></div>
+    <div class="battle-bars"><label><span><i id="ally-bar-label">味方兵力</i> <b id="ally-troop-text">0 / 0</b></span><i><em id="ally-troop-bar"></em></i></label><label><span><i id="enemy-bar-label">敵兵力</i> <b id="enemy-troop-text">0 / 0</b></span><i><em id="enemy-troop-bar" class="enemy"></em></i></label></div>
     <div id="battle-log" class="battle-log" aria-live="polite"></div>
     <div id="battle-result" class="battle-result hidden"><span id="battle-result-icon">✓</span><h2 id="battle-result-title">任務完了</h2><p id="battle-result-meta"></p><button id="replenish-button" class="secondary-button" type="button">兵を補充</button><button id="battle-close" class="primary-button" type="button">閉じる</button></div>
   </section>
