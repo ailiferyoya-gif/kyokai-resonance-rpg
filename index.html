@@ -10,7 +10,7 @@
   <link rel="preload" href="assets/commander-kohaku-v2.png" as="image">
   <link rel="preload" href="assets/commander-ren-v3.png" as="image">
   <link rel="preload" href="assets/event-yorukagura-v1.png" as="image">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -201,14 +201,14 @@
       <section id="workshop-screen" class="screen" data-title="素材探索・工房" aria-labelledby="workshop-heading">
         <div class="section-heading page-heading"><div><span>TRAIN & CRAFT</span><h2 id="workshop-heading">育成・境界工房</h2></div><span class="level-chip">SELECT <b id="workshop-unit-label">レン</b></span></div>
         <div id="material-wallet" class="material-wallet glass-card"></div>
-        <div class="section-heading"><div><span>CHARACTER LAB</span><h2>キャラ個別育成</h2></div><small>キャラ・スキル・パッシブ</small></div>
+        <div class="section-heading"><div><span>CHARACTER LAB</span><h2>キャラ個別育成</h2></div><small>効果をタップで確認</small></div>
         <div id="workshop-unit-tabs" class="workshop-unit-tabs" aria-label="育成キャラ選択"></div>
         <div id="training-panel" class="training-panel glass-card"></div>
         <div class="section-heading"><div><span>EXPEDITIONS</span><h2>素材探索</h2></div><small>各探索 ϟ3</small></div>
         <div id="expedition-list" class="expedition-list"></div>
-        <div class="section-heading"><div><span>PERSONAL GEAR</span><h2>個別装備生成</h2></div><small>選択中のキャラへ装備</small></div>
+        <div class="section-heading"><div><span>PERSONAL GEAR</span><h2>個別装備生成</h2></div><small>タップで素材・確認</small></div>
         <div id="recipe-list" class="recipe-list"></div>
-        <aside class="system-note"><b>短時間で選べる個別育成</b><p>探索と任務で素材を集め、キャラLv・2種類のスキル・3部位装備を強化。編成した5人の育成値がオート戦闘へ反映されます。</p></aside>
+        <aside class="system-note"><b>育成するほど伸び幅が増加</b><p>キャラLvは高くなるほど攻撃・防御の上昇量が加速。スキル効果と必要素材を確認しながら、3部位の個別装備を生成できます。</p></aside>
       </section>
 
       <section id="menu-screen" class="screen" data-title="メニュー" aria-labelledby="menu-heading">
@@ -231,7 +231,7 @@
         <button class="menu-shortcut glass-card" type="button" data-screen-target="daily"><span>✓</span><div><small>DAILY & PLAYER LEVEL</small><strong>デイリー作戦・ログイン補給</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card guild-shortcut" type="button" data-screen-target="guild"><span>結</span><div><small>WEEKLY GUILD CO-OP</small><strong>第零共鳴団・共同任務</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card event-shortcut" type="button" data-screen-target="event"><span>祭</span><div><small>LIMITED EVENT</small><strong>夜神楽、境界に灯る</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PLAYABLE BUILD v1.3</span><h3>境界共鳴</h3><p>新規指揮官2名、敵5体、敵図鑑、第4章を追加。4章12任務、16名の指揮官、個別育成、期間共闘、ガチャ、レイド、非同期PvPを端末内保存でプレイ可能。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>保存</i><b>自動保存 / セーブコード</b></div><div><i>人数</i><b>ソロ / 少人数テスト</b></div></article>
+        <article class="about-card glass-card"><span>PLAYABLE BUILD v1.4</span><h3>境界共鳴</h3><p>タップ式スキル詳細、Lv加速成長、装備素材・生成確認を追加。4章12任務、16名の指揮官、個別育成、期間共闘、ガチャ、レイド、非同期PvPを端末内保存でプレイ可能。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>保存</i><b>自動保存 / セーブコード</b></div><div><i>人数</i><b>ソロ / 少人数テスト</b></div></article>
       </section>
     </div>
 
@@ -263,6 +263,6 @@
   </section>
 
   <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
-  <script src="app.js?v=13"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>

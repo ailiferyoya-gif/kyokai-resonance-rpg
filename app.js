@@ -220,7 +220,7 @@ const newCampaignState = () => ({ unlocked: 1, clears: {}, firstRewards: [] });
 const newLifetimeState = () => ({ battles: 0, missionWins: 0, raidRuns: 0, arenaWins: 0, draws: 0 });
 
 const defaultState = () => ({
-  schema: 13,
+  schema: 14,
   crystals: 4500,
   coins: 12800,
   stamina: 60,
@@ -387,7 +387,7 @@ function loadState() {
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 13,
+      schema: 14,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -685,13 +685,24 @@ function getUnitEquipment(id, currentState = state) {
   return { ...newEquipment(), ...(currentState.equipment[id] || {}) };
 }
 
+function scaleStatsForLevel(baseAttack, baseDefense, level) {
+  const step = Math.max(0, Math.min(49, Number(level) - 1));
+  const baseTotal = baseAttack + baseDefense;
+  const baseGain = Math.max(1, Math.round(baseTotal * .025));
+  const accelerationGain = Math.max(1, Math.round(baseTotal * .004));
+  const completedBands = Math.floor(step / 4);
+  const remainder = step % 4;
+  const accelerationSteps = 4 * completedBands * (completedBands - 1) / 2 + completedBands * remainder;
+  const grownTotal = baseTotal + step * baseGain + accelerationSteps * accelerationGain;
+  const attack = Math.round(grownTotal * baseAttack / baseTotal);
+  return { attack, defense: grownTotal - attack };
+}
+
 function getUnitStats(id, currentState = state) {
   const commander = getCommander(id);
   const progress = getUnitProgress(id, currentState);
   const equipment = getUnitEquipment(id, currentState);
-  const levelRate = 1 + (progress.level - 1) * .035;
-  let attack = Math.round(commander.attack * levelRate);
-  let defense = Math.round(commander.defense * levelRate);
+  let { attack, defense } = scaleStatsForLevel(commander.attack, commander.defense, progress.level);
   const passiveRate = .02 + (progress.passiveLevel - 1) * .012;
   if (commander.passive.stat === "attack" || commander.passive.stat === "both") attack += Math.round(commander.attack * passiveRate);
   if (commander.passive.stat === "defense" || commander.passive.stat === "both") defense += Math.round(commander.defense * passiveRate);
@@ -731,9 +742,7 @@ function getArenaPlayerStats() {
 
 function getArenaOpponentStats(opponent) {
   const members = opponent.team.map(id => getCommander(id)).filter(Boolean).map(commander => {
-    const levelRate = 1 + (opponent.level - 1) * .035;
-    let attack = Math.round(commander.attack * levelRate);
-    let defense = Math.round(commander.defense * levelRate);
+    let { attack, defense } = scaleStatsForLevel(commander.attack, commander.defense, opponent.level);
     const passiveRate = .02 + (opponent.passiveLevel - 1) * .012;
     if (commander.passive.stat === "attack" || commander.passive.stat === "both") attack += Math.round(commander.attack * passiveRate);
     if (commander.passive.stat === "defense" || commander.passive.stat === "both") defense += Math.round(commander.defense * passiveRate);
@@ -1258,7 +1267,7 @@ function renderFormation() {
     const inTeam = state.team.includes(commander.id);
     const unit = getUnitStats(commander.id);
     const art = commander.art ? `<img src="${commander.art}" alt="">` : `<span>${commander.symbol}</span>`;
-    return `<button class="unit-card glass-card${inTeam ? " in-team" : ""}" type="button" data-unit="${commander.id}"><div class="unit-art" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${art}<b>Lv.${unit.level}</b></div><div class="unit-copy"><span><i class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</i>${inTeam ? `<em class="formation-tag">編成中 ${state.team.indexOf(commander.id) + 1}</em>` : ""}</span><strong>${commander.title} ${commander.name}</strong><small>${commander.role} / 記憶片 ${state.owned[commander.id]?.shards || 0}</small><div class="unit-abilities"><i>S${unit.skillLevel} ${commander.skill.name}</i><i>P${unit.passiveLevel} ${commander.passive.name}</i><i>装 ${unit.equipment.weapon}/${unit.equipment.armor}/${unit.equipment.accessory}</i></div></div><div class="unit-stats"><small>攻撃</small><b>${unit.attack}</b><small>防御</small><b>${unit.defense}</b></div></button>`;
+    return `<article class="unit-card glass-card${inTeam ? " in-team" : ""}" data-unit="${commander.id}"><div class="unit-art" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${art}<button type="button" data-open-training="${commander.id}" aria-label="${commander.name}を育成">Lv.${unit.level} 育成›</button></div><div class="unit-copy"><span><i class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</i>${inTeam ? `<em class="formation-tag">編成中 ${state.team.indexOf(commander.id) + 1}</em>` : ""}</span><strong>${commander.title} ${commander.name}</strong><small>${commander.role} / 記憶片 ${state.owned[commander.id]?.shards || 0}</small><div class="unit-abilities"><button type="button" data-ability-detail="skill" data-commander="${commander.id}">S${unit.skillLevel} ${commander.skill.name}</button><button type="button" data-ability-detail="passive" data-commander="${commander.id}">P${unit.passiveLevel} ${commander.passive.name}</button><i>装 ${unit.equipment.weapon}/${unit.equipment.armor}/${unit.equipment.accessory}</i></div></div><div class="unit-stats"><small>攻撃</small><b>${unit.attack}</b><small>防御</small><b>${unit.defense}</b></div></article>`;
   }).join("");
 }
 
@@ -1297,9 +1306,30 @@ function costMarkup(cost) {
   return `${Object.entries(cost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materials[key].icon} ${state.materials[key]}/${amount}</i>`).join("")}<i class="${state.coins >= cost.coins ? "ready" : ""}">● ${formatNumber(cost.coins)}</i>`;
 }
 
+function getRecipeUpgradeCost(recipe, currentLevel) {
+  return {
+    materials: Object.fromEntries(Object.entries(recipe.costs).map(([key, amount]) => [key, amount + Math.ceil(amount * currentLevel * .45)])),
+    coins: Math.round(recipe.coins * (1 + currentLevel * .6))
+  };
+}
+
+function projectedLevelGain(id) {
+  const progress = getUnitProgress(id);
+  const current = getUnitStats(id);
+  if (progress.level >= 50) return { current: current.attack + current.defense, next: current.attack + current.defense, gain: 0 };
+  const previewState = { ...state, progression: { ...state.progression, [id]: { ...progress, level: progress.level + 1 } } };
+  const next = getUnitStats(id, previewState);
+  return { current: current.attack + current.defense, next: next.attack + next.defense, gain: next.attack + next.defense - current.attack - current.defense };
+}
+
 function renderGrowthRow(kind, eyebrow, title, detail, current, cost) {
   const maxed = current >= cost.max;
-  return `<article class="growth-row"><div class="growth-level"><small>${eyebrow}</small><b>Lv.${current}</b><i>/ ${cost.max}</i></div><div class="growth-copy"><h3>${title}</h3><p>${detail}</p><div class="recipe-cost">${costMarkup(cost)}</div></div><button type="button" data-upgrade="${kind}" ${!maxed && canPay(cost) ? "" : "disabled"}>${maxed ? "MAX" : "強化"}</button></article>`;
+  const payable = canPay(cost);
+  const gain = kind === "level" ? projectedLevelGain(workshopUnitId) : null;
+  const detailControl = kind === "level"
+    ? `<span class="growth-gain">${maxed ? "最大Lv到達" : `次回 戦力 +${formatNumber(gain.gain)} / ${formatNumber(gain.next)}`}</span>`
+    : `<button type="button" class="growth-info" data-ability-detail="${kind}" data-commander="${workshopUnitId}">効果を確認</button>`;
+  return `<article class="growth-row${payable ? " payable" : " needs-material"}"><div class="growth-level"><small>${eyebrow}</small><b>Lv.${current}</b><i>/ ${cost.max}</i></div><div class="growth-copy"><div class="growth-title"><h3>${title}</h3>${detailControl}</div><p>${detail}</p><div class="recipe-cost">${costMarkup(cost)}</div></div><button type="button" class="upgrade-button" data-upgrade="${kind}" ${maxed ? "disabled" : ""}>${maxed ? "MAX" : kind === "level" ? "Lv.UP" : "強化"}</button></article>`;
 }
 
 function renderWorkshop() {
@@ -1310,16 +1340,63 @@ function renderWorkshop() {
   document.querySelector("#workshop-unit-label").textContent = commander.name;
   document.querySelector("#material-wallet").innerHTML = Object.entries(materials).map(([key, material]) => `<div class="material-item" style="--material:${material.color}"><i>${material.icon}</i><span><small>${material.name}</small></span><b>${state.materials[key]}</b></div>`).join("");
   document.querySelector("#workshop-unit-tabs").innerHTML = Object.keys(state.owned).map(getCommander).filter(Boolean).sort((a, b) => rarityRank[b.rarity] - rarityRank[a.rarity]).map(unit => `<button type="button" class="workshop-unit-chip${unit.id === workshopUnitId ? " active" : ""}" data-workshop-unit="${unit.id}">${unit.art ? `<img src="${unit.art}" alt="">` : `<i style="background:linear-gradient(145deg,${unit.colors.join(",")})">${unit.symbol}</i>`}<span><b>${unit.name}</b><small>Lv.${getUnitProgress(unit.id).level}</small></span></button>`).join("");
-  document.querySelector("#training-panel").innerHTML = `<div class="training-hero"><div class="training-portrait" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.art ? `<img src="${commander.art}" alt="${commander.name}">` : `<i>${commander.symbol}</i>`}</div><div><span class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</span><h3>${commander.title}<br>${commander.name}</h3><p>${commander.role} / 個別育成</p></div><b>戦力 ${formatNumber(getUnitStats(commander.id).attack + getUnitStats(commander.id).defense)}</b></div>${renderGrowthRow("level", "CHARACTER", "キャラクターLv", "基礎攻撃・防御を上昇", progress.level, getUpgradeCost("level", progress))}${renderGrowthRow("skill", "ACTIVE SKILL", commander.skill.name, commander.skill.detail, progress.skillLevel, getUpgradeCost("skill", progress))}${renderGrowthRow("passive", "PASSIVE SKILL", commander.passive.name, commander.passive.detail, progress.passiveLevel, getUpgradeCost("passive", progress))}`;
+  document.querySelector("#training-panel").innerHTML = `<div class="training-hero"><div class="training-portrait" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.art ? `<img src="${commander.art}" alt="${commander.name}">` : `<i>${commander.symbol}</i>`}</div><div><span class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</span><h3>${commander.title}<br>${commander.name}</h3><p>${commander.role} / Lvが高いほど成長量アップ</p></div><b>戦力 ${formatNumber(getUnitStats(commander.id).attack + getUnitStats(commander.id).defense)}</b></div>${renderGrowthRow("level", "CHARACTER", "キャラクターLv", "攻撃・防御の伸び幅がLvごとに加速", progress.level, getUpgradeCost("level", progress))}${renderGrowthRow("skill", "ACTIVE SKILL", commander.skill.name, commander.skill.detail, progress.skillLevel, getUpgradeCost("skill", progress))}${renderGrowthRow("passive", "PASSIVE SKILL", commander.passive.name, commander.passive.detail, progress.passiveLevel, getUpgradeCost("passive", progress))}`;
   document.querySelector("#expedition-list").innerHTML = expeditions.map((expedition, index) => `<article class="expedition-card" style="--expedition-bg:${expedition.background}"><small>${expedition.code}</small><h3>${expedition.name}</h3><p>${expedition.detail}</p><div class="drop-chips">${Object.keys(expedition.drops).map(key => `<i>${materials[key].icon} ${materials[key].name}</i>`).join("")}</div><button type="button" data-expedition="${index}" ${state.stamina < 3 ? "disabled" : ""}>探索 ϟ3</button></article>`).join("");
   document.querySelector("#recipe-list").innerHTML = recipes.map(recipe => {
     const level = equipment[recipe.slot];
     const maxed = level >= recipe.max;
-    const materialReady = Object.entries(recipe.costs).every(([key, amount]) => state.materials[key] >= amount);
-    const ready = !maxed && materialReady && state.coins >= recipe.coins;
-    const costs = Object.entries(recipe.costs).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materials[key].icon} ${state.materials[key]}/${amount}</i>`).join("");
-    return `<article class="recipe-card"><div class="recipe-icon">${recipe.icon}</div><div class="recipe-copy"><small>${recipe.type.toUpperCase()}</small><h3>${recipe.name} <b>Lv.${level}</b></h3><p>${recipe.effect}</p><div class="recipe-cost">${costs}<i class="${state.coins >= recipe.coins ? "ready" : ""}">● ${formatNumber(recipe.coins)}</i></div></div><button type="button" data-recipe="${recipe.id}" ${ready ? "" : "disabled"}>${maxed ? "MAX" : "生成"}</button></article>`;
+    const upgradeCost = getRecipeUpgradeCost(recipe, level);
+    const materialReady = Object.entries(upgradeCost.materials).every(([key, amount]) => state.materials[key] >= amount);
+    const ready = !maxed && materialReady && state.coins >= upgradeCost.coins;
+    const costs = Object.entries(upgradeCost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materials[key].icon} ${state.materials[key]}/${amount}</i>`).join("");
+    return `<article class="recipe-card${ready ? " ready" : ""}${maxed ? " maxed" : ""}" data-recipe-preview="${recipe.id}"><div class="recipe-icon">${recipe.icon}</div><div class="recipe-copy"><small>${recipe.type.toUpperCase()}</small><h3>${recipe.name} <b>Lv.${level}</b></h3><p>${recipe.effect}</p><div class="recipe-cost">${costs}<i class="${state.coins >= upgradeCost.coins ? "ready" : ""}">● ${formatNumber(upgradeCost.coins)}</i></div></div><button type="button" data-recipe-preview="${recipe.id}">${maxed ? "MAX" : "確認"}</button></article>`;
   }).join("");
+}
+
+function openTraining(id) {
+  if (!state.owned[id]) return;
+  const dialog = document.querySelector("#info-dialog");
+  if (dialog.open) dialog.close();
+  workshopUnitId = id;
+  navigateTo("workshop");
+  renderWorkshop();
+}
+
+function showAbilityDetail(commanderId, kind) {
+  const commander = getCommander(commanderId);
+  if (!commander || !state.owned[commanderId]) return;
+  const unit = getUnitStats(commanderId);
+  const active = kind === "skill";
+  const ability = active ? commander.skill : commander.passive;
+  const level = active ? unit.skillLevel : unit.passiveLevel;
+  const cost = getUpgradeCost(active ? "skill" : "passive", getUnitProgress(commanderId));
+  const statLabel = commander.passive.stat === "both" ? "攻撃・防御" : commander.passive.stat === "attack" ? "攻撃" : "防御";
+  const currentEffect = active ? `スキル威力 +${(level - 1) * 6}%` : `${statLabel} +${(2 + (level - 1) * 1.2).toFixed(1)}%`;
+  const nextEffect = level >= cost.max ? "最大Lv到達" : active ? `次Lv：スキル威力 +${level * 6}%` : `次Lv：${statLabel} +${(2 + level * 1.2).toFixed(1)}%`;
+  const dialog = document.querySelector("#info-dialog");
+  if (dialog.open) dialog.close();
+  document.querySelector("#dialog-content").innerHTML = `<div class="ability-dialog"><div class="ability-dialog-head">${commander.art ? `<img src="${commander.art}" alt="${commander.name}">` : `<i style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.symbol}</i>`}<span><small>${active ? "ACTIVE SKILL" : "PASSIVE SKILL"}</small><h2>${ability.name}</h2><em>${commander.name} / Lv.${level}</em></span></div><p>${ability.detail}</p><div class="ability-effect"><span><small>現在の効果</small><strong>${currentEffect}</strong></span><b>→</b><span><small>強化後</small><strong>${nextEffect}</strong></span></div><div class="ability-cost"><small>次回強化素材</small><div class="recipe-cost">${level >= cost.max ? "<i class=\"ready\">MAX</i>" : costMarkup(cost)}</div></div><button type="button" class="primary-button" data-open-training="${commanderId}">このキャラを育成</button></div>`;
+  dialog.showModal();
+}
+
+function showRecipeConfirmation(id) {
+  const recipe = recipes.find(item => item.id === id);
+  const commander = getCommander(workshopUnitId);
+  const equipment = getUnitEquipment(workshopUnitId);
+  if (!recipe || !commander) return;
+  const level = equipment[recipe.slot];
+  const maxed = level >= recipe.max;
+  const upgradeCost = getRecipeUpgradeCost(recipe, level);
+  const materialRows = Object.entries(upgradeCost.materials).map(([key, amount]) => {
+    const enough = state.materials[key] >= amount;
+    return `<div class="craft-material-row ${enough ? "ready" : "missing"}"><i style="--material:${materials[key].color}">${materials[key].icon}</i><span><small>${materials[key].name}</small><b>所持 ${state.materials[key]} / 必要 ${amount}</b></span><strong>${enough ? "OK" : `不足 ${amount - state.materials[key]}`}</strong></div>`;
+  }).join("");
+  const coinReady = state.coins >= upgradeCost.coins;
+  const canCraft = !maxed && coinReady && Object.entries(upgradeCost.materials).every(([key, amount]) => state.materials[key] >= amount);
+  const dialog = document.querySelector("#info-dialog");
+  if (dialog.open) dialog.close();
+  document.querySelector("#dialog-content").innerHTML = `<div class="craft-confirm-dialog"><small>PERSONAL GEAR / ${recipe.type}</small><h2>${recipe.icon} ${recipe.name}</h2><p>${commander.name}専用装備　Lv.${level} → ${Math.min(recipe.max, level + 1)}</p><em>${recipe.effect}</em><div class="craft-material-list"><b>必要な資材</b>${materialRows}<div class="craft-material-row ${coinReady ? "ready" : "missing"}"><i>●</i><span><small>生成費用</small><b>所持 ${formatNumber(state.coins)} / 必要 ${formatNumber(upgradeCost.coins)}</b></span><strong>${coinReady ? "OK" : `不足 ${formatNumber(upgradeCost.coins - state.coins)}`}</strong></div></div><div class="craft-confirm-actions"><button type="button" class="secondary-button" data-dialog-close>戻る</button><button type="button" class="primary-button" data-confirm-recipe="${recipe.id}" ${canCraft ? "" : "disabled"}>${maxed ? "最大強化済み" : canCraft ? "この内容で生成" : "素材不足"}</button></div></div>`;
+  dialog.showModal();
 }
 
 function runExpedition(index) {
@@ -1347,11 +1424,12 @@ function runExpedition(index) {
 function craftGear(id) {
   const recipe = recipes.find(item => item.id === id);
   const equipment = getUnitEquipment(workshopUnitId);
-  if (!recipe || equipment[recipe.slot] >= recipe.max) return;
-  const canCraft = Object.entries(recipe.costs).every(([key, amount]) => state.materials[key] >= amount) && state.coins >= recipe.coins;
-  if (!canCraft) return showToast("生成素材が不足しています");
-  Object.entries(recipe.costs).forEach(([key, amount]) => state.materials[key] -= amount);
-  state.coins -= recipe.coins;
+  if (!recipe || equipment[recipe.slot] >= recipe.max) return false;
+  const upgradeCost = getRecipeUpgradeCost(recipe, equipment[recipe.slot]);
+  const canCraft = Object.entries(upgradeCost.materials).every(([key, amount]) => state.materials[key] >= amount) && state.coins >= upgradeCost.coins;
+  if (!canCraft) { showToast("生成素材が不足しています"); return false; }
+  Object.entries(upgradeCost.materials).forEach(([key, amount]) => state.materials[key] -= amount);
+  state.coins -= upgradeCost.coins;
   state.equipment[workshopUnitId] ||= newEquipment();
   state.equipment[workshopUnitId][recipe.slot] += 1;
   const levels = grantPlayerXp(10);
@@ -1361,6 +1439,9 @@ function craftGear(id) {
   playCraftSound();
   vibrate([25, 30, 65]);
   showToast(`${getCommander(workshopUnitId).name}：${recipe.name} Lv.${state.equipment[workshopUnitId][recipe.slot]}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
+  const dialog = document.querySelector("#info-dialog");
+  if (dialog.open) dialog.close();
+  return true;
 }
 
 function selectWorkshopUnit(id) {
@@ -1375,7 +1456,11 @@ function upgradeUnit(kind) {
   const cost = getUpgradeCost(kind, progress);
   const key = kind === "level" ? "level" : `${kind}Level`;
   if (progress[key] >= cost.max) return;
-  if (!canPay(cost)) return showToast("強化素材が不足しています");
+  if (!canPay(cost)) {
+    const missing = Object.entries(cost.materials).filter(([material, amount]) => state.materials[material] < amount).map(([material, amount]) => `${materials[material].name}×${amount - state.materials[material]}`);
+    if (state.coins < cost.coins) missing.push(`コイン×${formatNumber(cost.coins - state.coins)}`);
+    return showToast(`不足：${missing.join(" / ")}`);
+  }
   Object.entries(cost.materials).forEach(([material, amount]) => state.materials[material] -= amount);
   state.coins -= cost.coins;
   state.progression[workshopUnitId] ||= newProgress();
@@ -2332,6 +2417,10 @@ document.addEventListener("click", event => {
   if (enemyPreview) return showEnemyPreview(Number(enemyPreview.dataset.enemyPreview));
   const slot = event.target.closest("[data-slot]");
   if (slot) return selectTeamSlot(Number(slot.dataset.slot));
+  const abilityDetail = event.target.closest("[data-ability-detail]");
+  if (abilityDetail) return showAbilityDetail(abilityDetail.dataset.commander, abilityDetail.dataset.abilityDetail);
+  const trainingLink = event.target.closest("[data-open-training]");
+  if (trainingLink) return openTraining(trainingLink.dataset.openTraining);
   const unit = event.target.closest("[data-unit]");
   if (unit) return assignCommander(unit.dataset.unit);
   const workshopUnit = event.target.closest("[data-workshop-unit]");
@@ -2340,6 +2429,12 @@ document.addEventListener("click", event => {
   if (upgrade) return upgradeUnit(upgrade.dataset.upgrade);
   const expedition = event.target.closest("[data-expedition]");
   if (expedition) return runExpedition(Number(expedition.dataset.expedition));
+  const recipePreview = event.target.closest("[data-recipe-preview]");
+  if (recipePreview) return showRecipeConfirmation(recipePreview.dataset.recipePreview);
+  const recipeConfirm = event.target.closest("[data-confirm-recipe]");
+  if (recipeConfirm) return craftGear(recipeConfirm.dataset.confirmRecipe);
+  const dialogClose = event.target.closest("[data-dialog-close]");
+  if (dialogClose) return document.querySelector("#info-dialog").close();
   const recipe = event.target.closest("[data-recipe]");
   if (recipe) return craftGear(recipe.dataset.recipe);
   const raidTarget = event.target.closest("[data-raid-target]");
@@ -2370,6 +2465,14 @@ document.addEventListener("click", event => {
   if (eventExchange) return exchangeEventItem(eventExchange.dataset.eventExchange);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const unit = event.target.matches?.(".unit-card[data-unit]") ? event.target : null;
+  const recipe = event.target.matches?.(".recipe-card[data-recipe-preview]") ? event.target : null;
+  if (unit) { event.preventDefault(); assignCommander(unit.dataset.unit); }
+  if (recipe) { event.preventDefault(); showRecipeConfirmation(recipe.dataset.recipePreview); }
 });
 
 document.querySelector("#draw-ten").addEventListener("click", () => performDraw(10));
