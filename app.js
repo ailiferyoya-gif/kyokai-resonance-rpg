@@ -81,6 +81,29 @@ const loginRewards = [
   { label: "◆200", reward: { crystals: 200, materials: { core: 2 } } }
 ];
 
+const guildMembers = [
+  { name: "白鷺ユラ", role: "団長", power: 4230, contribution: 430, commander: "kohaku" },
+  { name: "黒鉄ジン", role: "副団長", power: 3660, contribution: 345, commander: "sana" },
+  { name: "霞坂ユノ", role: "精鋭", power: 3180, contribution: 290, commander: "ren" },
+  { name: "星詠ミオ", role: "参謀", power: 2950, contribution: 238, commander: "kanade" },
+  { name: "雨森カイ", role: "団員", power: 2410, contribution: 174, commander: "touma" },
+  { name: "灯里ナギ", role: "団員", power: 2260, contribution: 126, commander: "mina" }
+];
+
+const guildMissions = [
+  { id: "guild-mission", activity: "mission", code: "G-01 / CITY", name: "共同制圧任務", detail: "団員全員で通常任務を40回完了", goal: 40, base: 39, unit: "回", reward: { crystals: 120 } },
+  { id: "guild-raid", activity: "raid", code: "G-02 / RAID", name: "巨大境界反応", detail: "団員全員でレイドへ50万ダメージ", goal: 500000, base: 498000, unit: "DMG", reward: { coins: 2000, materials: { core: 3 } } },
+  { id: "guild-arena", activity: "arena", code: "G-03 / ARENA", name: "境界防衛演習", detail: "団員全員でアリーナを50戦", goal: 50, base: 49, unit: "戦", reward: { crystals: 150 } }
+];
+
+const guildRewardTiers = [
+  { id: "guild-c1", points: 50, name: "協力報酬 I", reward: { coins: 1200, materials: { ore: 2 } } },
+  { id: "guild-c2", points: 150, name: "協力報酬 II", reward: { crystals: 120, materials: { fiber: 3 } } },
+  { id: "guild-c3", points: 300, name: "協力報酬 III", reward: { crystals: 220, materials: { core: 3 } } }
+];
+
+const guildContributionPoints = { mission: 25, expedition: 15, raid: 60, arena: 35, craft: 15, upgrade: 10 };
+
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
@@ -91,9 +114,16 @@ const newRaidState = () => ({ attempts: 3, resetDay: localDayKey(), bossHp: raid
 const newArenaState = () => ({ tickets: 5, resetDay: localDayKey(), rating: 1000, wins: 0, losses: 0, streak: 0, bestStreak: 0, history: [] });
 const newDailyCounters = () => Object.fromEntries(dailyTasks.map(task => [task.activity, 0]));
 const newDailyState = () => ({ resetDay: localDayKey(), counters: newDailyCounters(), claimed: [], allClaimed: false, loginLastDay: "", loginStreak: 0 });
+const localWeekKey = (date = new Date()) => {
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  return localDayKey(monday);
+};
+const newGuildActions = () => ({ mission: 0, expedition: 0, raid: 0, arena: 0, craft: 0, upgrade: 0 });
+const newGuildState = () => ({ weekKey: localWeekKey(), contribution: 0, totalContribution: 0, actions: newGuildActions(), claimedMissions: [], claimedRewards: [], cheerDay: "", lastActivity: "" });
 
 const defaultState = () => ({
-  schema: 6,
+  schema: 7,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -108,6 +138,7 @@ const defaultState = () => ({
   arena: newArenaState(),
   player: { level: 7, xp: 85 },
   daily: newDailyState(),
+  guild: newGuildState(),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -188,10 +219,28 @@ function loadState() {
     const player = { ...defaults.player, ...(parsed.player || {}) };
     player.level = Math.max(1, Number(player.level) || defaults.player.level);
     player.xp = Math.max(0, Number(player.xp) || 0);
+    const parsedGuild = parsed.guild || {};
+    const guild = {
+      ...defaults.guild,
+      ...parsedGuild,
+      actions: { ...defaults.guild.actions, ...(parsedGuild.actions || {}) },
+      claimedMissions: Array.isArray(parsedGuild.claimedMissions) ? parsedGuild.claimedMissions : [],
+      claimedRewards: Array.isArray(parsedGuild.claimedRewards) ? parsedGuild.claimedRewards : []
+    };
+    if (guild.weekKey !== localWeekKey()) {
+      guild.weekKey = localWeekKey();
+      guild.contribution = 0;
+      guild.actions = newGuildActions();
+      guild.claimedMissions = [];
+      guild.claimedRewards = [];
+      guild.lastActivity = "";
+    }
+    guild.contribution = Math.max(0, Number(guild.contribution) || 0);
+    guild.totalContribution = Math.max(0, Number(guild.totalContribution) || 0);
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 6,
+      schema: 7,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -201,6 +250,7 @@ function loadState() {
       arena,
       player,
       daily,
+      guild,
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -229,6 +279,17 @@ function ensureDailyReset() {
   return true;
 }
 
+function ensureGuildReset() {
+  if (state.guild.weekKey === localWeekKey()) return false;
+  state.guild.weekKey = localWeekKey();
+  state.guild.contribution = 0;
+  state.guild.actions = newGuildActions();
+  state.guild.claimedMissions = [];
+  state.guild.claimedRewards = [];
+  state.guild.lastActivity = "";
+  return true;
+}
+
 function grantPlayerXp(amount) {
   state.player.xp += amount;
   let levels = 0;
@@ -246,6 +307,18 @@ function recordDailyActivity(activity, xp) {
   const task = dailyTasks.find(item => item.activity === activity);
   if (task) state.daily.counters[activity] = Math.min(task.goal, (Number(state.daily.counters[activity]) || 0) + 1);
   return grantPlayerXp(xp);
+}
+
+function recordGuildActivity(activity, value = 1) {
+  ensureGuildReset();
+  if (!(activity in guildContributionPoints)) return 0;
+  state.guild.actions[activity] = (Number(state.guild.actions[activity]) || 0) + value;
+  const points = guildContributionPoints[activity];
+  state.guild.contribution += points;
+  state.guild.totalContribution += points;
+  const labels = { mission: "通常任務を完了", expedition: "素材探索を完了", raid: "レイドダメージを同期", arena: "アリーナへ参加", craft: "個別装備を生成", upgrade: "キャラ育成を実行" };
+  state.guild.lastActivity = `${labels[activity]} / +${points}貢献`;
+  return points;
 }
 
 function applyReward(reward) {
@@ -313,6 +386,48 @@ function claimDailyAll() {
   playRevealSound("SSR");
   vibrate([25, 35, 80]);
   showToast(`全作戦達成：${rewardText(reward)}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
+}
+
+function guildMissionProgress(mission) {
+  return Math.min(mission.goal, mission.base + (Number(state.guild.actions[mission.activity]) || 0));
+}
+
+function claimGuildMission(id) {
+  const mission = guildMissions.find(item => item.id === id);
+  if (!mission || state.guild.claimedMissions.includes(id) || guildMissionProgress(mission) < mission.goal) return;
+  state.guild.claimedMissions.push(id);
+  applyReward(mission.reward);
+  saveState();
+  updateUI();
+  playRevealSound("SSR");
+  vibrate([25, 30, 70]);
+  showToast(`${mission.name}：${rewardText(mission.reward)}`);
+}
+
+function claimGuildReward(id) {
+  const tier = guildRewardTiers.find(item => item.id === id);
+  if (!tier || state.guild.claimedRewards.includes(id) || state.guild.contribution < tier.points) return;
+  state.guild.claimedRewards.push(id);
+  applyReward(tier.reward);
+  saveState();
+  updateUI();
+  playEquipSound();
+  vibrate(30);
+  showToast(`${tier.name}：${rewardText(tier.reward)}`);
+}
+
+function cheerGuild() {
+  if (state.guild.cheerDay === localDayKey()) return showToast("本日の応援は送信済みです");
+  state.guild.cheerDay = localDayKey();
+  state.guild.contribution += 20;
+  state.guild.totalContribution += 20;
+  state.guild.lastActivity = "団員へ共鳴応援を送信 / +20貢献";
+  const levels = grantPlayerXp(5);
+  saveState();
+  updateUI();
+  playGatherSound();
+  vibrate([15, 25, 45]);
+  showToast(`応援を送りました：+20貢献${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
 }
 
 function getUnitProgress(id, currentState = state) {
@@ -417,11 +532,14 @@ function navigateTo(screenName) {
   if (screenName === "raid") renderRaid();
   if (screenName === "arena") renderArena();
   if (screenName === "daily") renderDaily();
+  if (screenName === "guild") renderGuild();
   playUISound();
 }
 
 function updateUI() {
-  if (ensureDailyReset()) saveState();
+  const dailyReset = ensureDailyReset();
+  const guildReset = ensureGuildReset();
+  if (dailyReset || guildReset) saveState();
   const stats = getSquadStats();
   state.troops = Math.min(state.troops, stats.capacity);
   document.querySelector("#stamina-value").textContent = `${state.stamina}/60`;
@@ -438,6 +556,7 @@ function updateUI() {
   const dailyComplete = dailyTasks.filter(task => (state.daily.counters[task.activity] || 0) >= task.goal).length;
   document.querySelector("#home-daily-progress").textContent = `${dailyComplete} / ${dailyTasks.length}`;
   document.querySelector("#home-login-state").textContent = state.daily.loginLastDay === localDayKey() ? "補給受取済" : "補給受取可";
+  document.querySelector("#home-guild-contribution").textContent = `${formatNumber(state.guild.contribution)} 貢献`;
   document.querySelector("#sound-toggle").checked = state.settings.sound;
   document.querySelector("#haptic-toggle").checked = state.settings.haptic;
   document.querySelector("#flash-toggle").checked = state.settings.reduceFlash;
@@ -448,6 +567,7 @@ function updateUI() {
   renderRaid();
   renderArena();
   renderDaily();
+  renderGuild();
   renderFormation();
   renderWorkshop();
 }
@@ -527,6 +647,49 @@ function renderDaily() {
   const allButton = document.querySelector("#daily-all-claim");
   allButton.disabled = completeCount < dailyTasks.length || state.daily.allClaimed;
   allButton.innerHTML = state.daily.allClaimed ? `<span>全達成報酬 受取済み</span><b>✓</b>` : `<span>全達成報酬</span><b>◆150　◆核2</b>`;
+}
+
+function guildWeekLabel() {
+  const [year, month, day] = state.guild.weekKey.split("-").map(Number);
+  const end = new Date(year, month - 1, day + 6);
+  return `${month}/${day} - ${end.getMonth() + 1}/${end.getDate()}`;
+}
+
+function guildAvatarMarkup(id) {
+  const commander = getCommander(id) || getCommander("touma");
+  return commander.art ? `<img src="${commander.art}" alt="${commander.name}">` : `<i style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.symbol}</i>`;
+}
+
+function renderGuild() {
+  const root = document.querySelector("#guild-screen");
+  if (!root) return;
+  const maxPoints = guildRewardTiers.at(-1).points;
+  document.querySelector("#guild-week-label").textContent = guildWeekLabel();
+  document.querySelector("#guild-contribution").textContent = formatNumber(state.guild.contribution);
+  document.querySelector("#guild-total-contribution").textContent = formatNumber(state.guild.totalContribution);
+  document.querySelector("#guild-contribution-bar").style.width = `${Math.min(100, state.guild.contribution / maxPoints * 100)}%`;
+  document.querySelector("#guild-party-mini").innerHTML = miniTeamMarkup();
+  const cheer = document.querySelector("#guild-cheer");
+  const cheered = state.guild.cheerDay === localDayKey();
+  cheer.disabled = cheered;
+  cheer.innerHTML = cheered ? `<span>本日の応援済み</span><b>✓</b>` : `<span>団員へ応援を送る</span><b>+20</b>`;
+  document.querySelector("#guild-reward-list").innerHTML = guildRewardTiers.map(tier => {
+    const current = Math.min(tier.points, state.guild.contribution);
+    const claimed = state.guild.claimedRewards.includes(tier.id);
+    const ready = current >= tier.points && !claimed;
+    return `<article class="guild-reward${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><div><small>${formatNumber(tier.points)} PT</small><b>${tier.name}</b><span>${rewardText(tier.reward)}</span><u><i style="width:${current / tier.points * 100}%"></i></u></div><button type="button" data-guild-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : `${formatNumber(current)}/${formatNumber(tier.points)}`}</button></article>`;
+  }).join("");
+  document.querySelector("#guild-mission-list").innerHTML = guildMissions.map(mission => {
+    const current = guildMissionProgress(mission);
+    const claimed = state.guild.claimedMissions.includes(mission.id);
+    const ready = current >= mission.goal && !claimed;
+    return `<article class="guild-mission glass-card${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><div class="guild-mission-code"><small>${mission.code}</small><b>${mission.activity === "raid" ? "◉" : mission.activity === "arena" ? "冠" : "⌖"}</b></div><div><h3>${mission.name}</h3><p>${mission.detail}</p><u><i style="width:${current / mission.goal * 100}%"></i></u><em>${formatNumber(current)} / ${formatNumber(mission.goal)} ${mission.unit}</em><span>${rewardText(mission.reward)}</span></div><button type="button" data-guild-mission="${mission.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : "進行中"}</button></article>`;
+  }).join("");
+  const player = { name: "境界局長", role: "YOU", power: getArenaPlayerStats().power, contribution: state.guild.contribution, commander: state.team[0], isPlayer: true };
+  const ranking = [...guildMembers, player].sort((a, b) => b.contribution - a.contribution);
+  document.querySelector("#guild-ranking").innerHTML = ranking.map((member, index) => `<article class="guild-member${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b><em>戦力 ${formatNumber(member.power)}</em></span><div><small>WEEKLY</small><b>${formatNumber(member.contribution)}</b></div></article>`).join("");
+  const personalFeed = state.guild.lastActivity || "共同任務へ参加すると、ここに活動が表示されます";
+  document.querySelector("#guild-feed").innerHTML = `<div class="guild-feed-row player"><i>NOW</i><span><b>境界局長</b><small>${personalFeed}</small></span></div><div class="guild-feed-row"><i>12分</i><span><b>白鷺ユラ</b><small>ゴライアスの境界核を破壊 / +60貢献</small></span></div><div class="guild-feed-row"><i>28分</i><span><b>雨森カイ</b><small>共同制圧任務へ参加 / +25貢献</small></span></div>`;
 }
 
 function renderMissions() {
@@ -686,6 +849,7 @@ function runExpedition(index) {
   });
   state.expeditions += 1;
   const levels = recordDailyActivity("expedition", 12);
+  recordGuildActivity("expedition");
   saveState();
   updateUI();
   playGatherSound();
@@ -704,6 +868,7 @@ function craftGear(id) {
   state.equipment[workshopUnitId] ||= newEquipment();
   state.equipment[workshopUnitId][recipe.slot] += 1;
   const levels = grantPlayerXp(10);
+  recordGuildActivity("craft");
   saveState();
   updateUI();
   playCraftSound();
@@ -729,6 +894,7 @@ function upgradeUnit(kind) {
   state.progression[workshopUnitId] ||= newProgress();
   state.progression[workshopUnitId][key] += 1;
   const levels = grantPlayerXp(10);
+  recordGuildActivity("upgrade");
   saveState();
   updateUI();
   playCraftSound();
@@ -897,6 +1063,7 @@ function startBattle(missionIndex) {
   state.coins += report.reward;
   if (report.won) Object.entries(mission.drops).forEach(([key, amount]) => state.materials[key] += amount);
   report.levelsGained = recordDailyActivity(report.won ? "mission" : "", report.won ? 25 : 8);
+  if (report.won) recordGuildActivity("mission");
   report.playerLevel = state.player.level;
   saveState();
   updateUI();
@@ -1000,6 +1167,7 @@ function startRaidBattle() {
   state.coins += report.reward;
   report.newBreaks.forEach(id => Object.entries(raidBoss.parts[id].reward).forEach(([key, amount]) => state.materials[key] += amount));
   report.levelsGained = recordDailyActivity("raid", 35);
+  recordGuildActivity("raid", report.damage);
   report.playerLevel = state.player.level;
   saveState();
   updateUI();
@@ -1070,6 +1238,7 @@ function startArenaBattle(opponentId) {
   state.arena.history = state.arena.history.slice(0, 10);
   state.coins += report.reward;
   report.levelsGained = recordDailyActivity("arena", 25);
+  recordGuildActivity("arena");
   report.playerLevel = state.player.level;
   saveState();
   updateUI();
@@ -1373,6 +1542,10 @@ document.addEventListener("click", event => {
   if (arenaOpponent) return startArenaBattle(arenaOpponent.dataset.arenaOpponent);
   const dailyClaim = event.target.closest("[data-daily-claim]");
   if (dailyClaim) return claimDailyTask(dailyClaim.dataset.dailyClaim);
+  const guildMission = event.target.closest("[data-guild-mission]");
+  if (guildMission) return claimGuildMission(guildMission.dataset.guildMission);
+  const guildReward = event.target.closest("[data-guild-reward]");
+  if (guildReward) return claimGuildReward(guildReward.dataset.guildReward);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
 });
@@ -1388,6 +1561,7 @@ document.querySelector("#battle-close").addEventListener("click", closeBattle);
 document.querySelector("#raid-start").addEventListener("click", startRaidBattle);
 document.querySelector("#daily-login-claim").addEventListener("click", claimLoginReward);
 document.querySelector("#daily-all-claim").addEventListener("click", claimDailyAll);
+document.querySelector("#guild-cheer").addEventListener("click", cheerGuild);
 document.querySelector("#replenish-button").addEventListener("click", replenishTroops);
 document.querySelector(".dialog-close").addEventListener("click", () => document.querySelector("#info-dialog").close());
 document.querySelector("#reset-demo").addEventListener("click", resetDemo);
