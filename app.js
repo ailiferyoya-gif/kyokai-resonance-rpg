@@ -64,6 +64,23 @@ const arenaOpponents = [
   { id: "hoshiyomi", name: "星詠ミオ", guild: "天蓋観測局", rating: 1240, level: 6, skillLevel: 3, passiveLevel: 3, gearLevel: 2, team: ["kohaku", "kanade", "setsuna", "riku", "sana"] }
 ];
 
+const dailyTasks = [
+  { id: "mission", activity: "mission", code: "D-01", name: "任務を1回完了", detail: "いずれかの通常任務に勝利", goal: 1, icon: "⌖", reward: { crystals: 60 } },
+  { id: "expedition", activity: "expedition", code: "D-02", name: "素材探索を1回実行", detail: "任意の探索地から素材を回収", goal: 1, icon: "⚒", reward: { coins: 800, materials: { ore: 2 } } },
+  { id: "raid", activity: "raid", code: "D-03", name: "レイドへ1回参加", detail: "ゴライアスへ累積ダメージを同期", goal: 1, icon: "◉", reward: { crystals: 80 } },
+  { id: "arena", activity: "arena", code: "D-04", name: "アリーナで1回対戦", detail: "勝敗を問わず5対5オート戦へ参加", goal: 1, icon: "冠", reward: { coins: 1200 } }
+];
+
+const loginRewards = [
+  { label: "◆50", reward: { crystals: 50 } },
+  { label: "●800", reward: { coins: 800 } },
+  { label: "⬡3", reward: { materials: { ore: 3 } } },
+  { label: "◆80", reward: { crystals: 80 } },
+  { label: "≋3", reward: { materials: { fiber: 3 } } },
+  { label: "●1,500", reward: { coins: 1500 } },
+  { label: "◆200", reward: { crystals: 200, materials: { core: 2 } } }
+];
+
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
@@ -72,9 +89,11 @@ const newRaidParts = () => Object.fromEntries(Object.entries(raidBoss.parts).map
 const localDayKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const newRaidState = () => ({ attempts: 3, resetDay: localDayKey(), bossHp: raidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "core", parts: newRaidParts(), claimedRewards: [] });
 const newArenaState = () => ({ tickets: 5, resetDay: localDayKey(), rating: 1000, wins: 0, losses: 0, streak: 0, bestStreak: 0, history: [] });
+const newDailyCounters = () => Object.fromEntries(dailyTasks.map(task => [task.activity, 0]));
+const newDailyState = () => ({ resetDay: localDayKey(), counters: newDailyCounters(), claimed: [], allClaimed: false, loginLastDay: "", loginStreak: 0 });
 
 const defaultState = () => ({
-  schema: 5,
+  schema: 6,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -87,6 +106,8 @@ const defaultState = () => ({
   equipment: Object.fromEntries(starterTeam.map(id => [id, newEquipment()])),
   raid: newRaidState(),
   arena: newArenaState(),
+  player: { level: 7, xp: 85 },
+  daily: newDailyState(),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -151,10 +172,26 @@ function loadState() {
     }
     arena.tickets = Math.max(0, Math.min(5, Number(arena.tickets) || 0));
     arena.rating = Math.max(0, Number(arena.rating) || defaults.arena.rating);
+    const parsedDaily = parsed.daily || {};
+    const daily = {
+      ...defaults.daily,
+      ...parsedDaily,
+      counters: { ...defaults.daily.counters, ...(parsedDaily.counters || {}) },
+      claimed: Array.isArray(parsedDaily.claimed) ? parsedDaily.claimed : []
+    };
+    if (daily.resetDay !== localDayKey()) {
+      daily.resetDay = localDayKey();
+      daily.counters = newDailyCounters();
+      daily.claimed = [];
+      daily.allClaimed = false;
+    }
+    const player = { ...defaults.player, ...(parsed.player || {}) };
+    player.level = Math.max(1, Number(player.level) || defaults.player.level);
+    player.xp = Math.max(0, Number(player.xp) || 0);
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 5,
+      schema: 6,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -162,6 +199,8 @@ function loadState() {
       equipment,
       raid,
       arena,
+      player,
+      daily,
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -178,6 +217,103 @@ function getTeam(currentState = state) { return currentState.team.map(getCommand
 function randomFrom(list) { return list[Math.floor(Math.random() * list.length)]; }
 function randomInt(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
 function formatNumber(value) { return new Intl.NumberFormat("ja-JP").format(value); }
+
+function playerXpTarget(level = state.player.level) { return 150 + level * 30; }
+
+function ensureDailyReset() {
+  if (state.daily.resetDay === localDayKey()) return false;
+  state.daily.resetDay = localDayKey();
+  state.daily.counters = newDailyCounters();
+  state.daily.claimed = [];
+  state.daily.allClaimed = false;
+  return true;
+}
+
+function grantPlayerXp(amount) {
+  state.player.xp += amount;
+  let levels = 0;
+  while (state.player.xp >= playerXpTarget()) {
+    state.player.xp -= playerXpTarget();
+    state.player.level += 1;
+    state.crystals += 80;
+    levels += 1;
+  }
+  return levels;
+}
+
+function recordDailyActivity(activity, xp) {
+  ensureDailyReset();
+  const task = dailyTasks.find(item => item.activity === activity);
+  if (task) state.daily.counters[activity] = Math.min(task.goal, (Number(state.daily.counters[activity]) || 0) + 1);
+  return grantPlayerXp(xp);
+}
+
+function applyReward(reward) {
+  state.crystals += reward.crystals || 0;
+  state.coins += reward.coins || 0;
+  Object.entries(reward.materials || {}).forEach(([key, amount]) => state.materials[key] += amount);
+}
+
+function rewardText(reward) {
+  const parts = [];
+  if (reward.crystals) parts.push(`◆${formatNumber(reward.crystals)}`);
+  if (reward.coins) parts.push(`●${formatNumber(reward.coins)}`);
+  Object.entries(reward.materials || {}).forEach(([key, amount]) => parts.push(`${materials[key].icon}${amount}`));
+  return parts.join("　");
+}
+
+function localDayDistance(fromKey, toKey = localDayKey()) {
+  if (!fromKey) return Infinity;
+  const from = new Date(`${fromKey}T00:00:00`);
+  const to = new Date(`${toKey}T00:00:00`);
+  return Math.round((to - from) / 86400000);
+}
+
+function loginRewardIndex() {
+  if (state.daily.loginLastDay === localDayKey()) return Math.max(0, (state.daily.loginStreak - 1) % loginRewards.length);
+  return localDayDistance(state.daily.loginLastDay) === 1 ? state.daily.loginStreak % loginRewards.length : 0;
+}
+
+function claimLoginReward() {
+  if (state.daily.loginLastDay === localDayKey()) return showToast("本日のログイン補給は受取済みです");
+  const consecutive = localDayDistance(state.daily.loginLastDay) === 1;
+  state.daily.loginStreak = consecutive ? state.daily.loginStreak + 1 : 1;
+  state.daily.loginLastDay = localDayKey();
+  const reward = loginRewards[(state.daily.loginStreak - 1) % loginRewards.length];
+  applyReward(reward.reward);
+  const levels = grantPlayerXp(15);
+  saveState();
+  updateUI();
+  playCraftSound();
+  vibrate([20, 30, 60]);
+  showToast(`DAY ${((state.daily.loginStreak - 1) % 7) + 1} 補給：${rewardText(reward.reward)}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
+}
+
+function claimDailyTask(id) {
+  const task = dailyTasks.find(item => item.id === id);
+  if (!task || state.daily.claimed.includes(id) || (state.daily.counters[task.activity] || 0) < task.goal) return;
+  state.daily.claimed.push(id);
+  applyReward(task.reward);
+  saveState();
+  updateUI();
+  playEquipSound();
+  vibrate(25);
+  showToast(`${task.name}：${rewardText(task.reward)}`);
+}
+
+function claimDailyAll() {
+  const complete = dailyTasks.every(task => (state.daily.counters[task.activity] || 0) >= task.goal);
+  if (!complete || state.daily.allClaimed) return;
+  const reward = { crystals: 150, materials: { core: 2 } };
+  state.daily.allClaimed = true;
+  applyReward(reward);
+  const levels = grantPlayerXp(40);
+  saveState();
+  updateUI();
+  playRevealSound("SSR");
+  vibrate([25, 35, 80]);
+  showToast(`全作戦達成：${rewardText(reward)}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
+}
 
 function getUnitProgress(id, currentState = state) {
   return { ...newProgress(), ...(currentState.progression[id] || {}) };
@@ -280,10 +416,12 @@ function navigateTo(screenName) {
   if (screenName === "workshop") renderWorkshop();
   if (screenName === "raid") renderRaid();
   if (screenName === "arena") renderArena();
+  if (screenName === "daily") renderDaily();
   playUISound();
 }
 
 function updateUI() {
+  if (ensureDailyReset()) saveState();
   const stats = getSquadStats();
   state.troops = Math.min(state.troops, stats.capacity);
   document.querySelector("#stamina-value").textContent = `${state.stamina}/60`;
@@ -294,6 +432,12 @@ function updateUI() {
   document.querySelector("#troop-summary").textContent = `${state.troops} / ${stats.capacity}`;
   document.querySelector("#home-power").textContent = formatNumber(stats.power);
   document.querySelector("#squad-power").textContent = formatNumber(stats.power);
+  document.querySelector("#player-level").textContent = String(state.player.level).padStart(2, "0");
+  document.querySelector("#home-xp-bar").style.width = `${Math.min(100, state.player.xp / playerXpTarget() * 100)}%`;
+  document.querySelector("#home-xp-text").textContent = `${formatNumber(state.player.xp)} / ${formatNumber(playerXpTarget())}`;
+  const dailyComplete = dailyTasks.filter(task => (state.daily.counters[task.activity] || 0) >= task.goal).length;
+  document.querySelector("#home-daily-progress").textContent = `${dailyComplete} / ${dailyTasks.length}`;
+  document.querySelector("#home-login-state").textContent = state.daily.loginLastDay === localDayKey() ? "補給受取済" : "補給受取可";
   document.querySelector("#sound-toggle").checked = state.settings.sound;
   document.querySelector("#haptic-toggle").checked = state.settings.haptic;
   document.querySelector("#flash-toggle").checked = state.settings.reduceFlash;
@@ -303,6 +447,7 @@ function updateUI() {
   renderMissions();
   renderRaid();
   renderArena();
+  renderDaily();
   renderFormation();
   renderWorkshop();
 }
@@ -350,6 +495,38 @@ function renderArena() {
   }).join("");
   const history = arena.history.slice(0, 5);
   document.querySelector("#arena-history").innerHTML = history.length ? history.map(item => `<div class="arena-history-row ${item.won ? "win" : "loss"}"><b>${item.won ? "WIN" : "LOSE"}</b><span><strong>${item.opponent}</strong><small>${item.date || "模擬戦"}</small></span><em>${item.delta > 0 ? "+" : ""}${item.delta}</em></div>`).join("") : `<div class="arena-empty"><b>NO MATCHES</b><span>最初の対戦相手を選んでください</span></div>`;
+}
+
+function renderDaily() {
+  const root = document.querySelector("#daily-screen");
+  if (!root) return;
+  const claimedLogin = state.daily.loginLastDay === localDayKey();
+  const rewardIndex = loginRewardIndex();
+  const cycleProgress = claimedLogin ? (state.daily.loginStreak - 1) % 7 : Math.max(0, rewardIndex - 1);
+  document.querySelector("#daily-player-level").textContent = `Lv.${state.player.level}`;
+  document.querySelector("#daily-player-xp").textContent = `${formatNumber(state.player.xp)} / ${formatNumber(playerXpTarget())}`;
+  document.querySelector("#daily-player-xp-bar").style.width = `${Math.min(100, state.player.xp / playerXpTarget() * 100)}%`;
+  document.querySelector("#daily-login-streak").textContent = `${state.daily.loginStreak}日継続`;
+  document.querySelector("#login-calendar").innerHTML = loginRewards.map((item, index) => {
+    const active = index === rewardIndex;
+    const complete = claimedLogin ? index <= cycleProgress : index < rewardIndex;
+    return `<div class="login-day${active ? " active" : ""}${complete ? " complete" : ""}"><small>DAY ${index + 1}</small><b>${item.label}</b><i>${complete ? "✓" : index === 6 ? "BONUS" : ""}</i></div>`;
+  }).join("");
+  const loginButton = document.querySelector("#daily-login-claim");
+  loginButton.disabled = claimedLogin;
+  loginButton.innerHTML = claimedLogin ? `<span>本日の補給は受取済み</span><b>✓</b>` : `<span>ログイン補給を受け取る</span><b>${loginRewards[rewardIndex].label}</b>`;
+  document.querySelector("#daily-task-list").innerHTML = dailyTasks.map(task => {
+    const current = Math.min(task.goal, state.daily.counters[task.activity] || 0);
+    const ready = current >= task.goal;
+    const claimed = state.daily.claimed.includes(task.id);
+    return `<article class="daily-task glass-card${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><i>${task.icon}</i><div><small>${task.code}</small><h3>${task.name}</h3><p>${task.detail}</p><u><s style="width:${current / task.goal * 100}%"></s></u><em>${current} / ${task.goal}</em></div><button type="button" data-daily-claim="${task.id}" ${ready && !claimed ? "" : "disabled"}><span>${claimed ? "受取済" : ready ? "受取" : "進行中"}</span><b>${rewardText(task.reward)}</b></button></article>`;
+  }).join("");
+  const completeCount = dailyTasks.filter(task => (state.daily.counters[task.activity] || 0) >= task.goal).length;
+  document.querySelector("#daily-complete-count").textContent = `${completeCount} / ${dailyTasks.length}`;
+  document.querySelector("#daily-complete-bar").style.width = `${completeCount / dailyTasks.length * 100}%`;
+  const allButton = document.querySelector("#daily-all-claim");
+  allButton.disabled = completeCount < dailyTasks.length || state.daily.allClaimed;
+  allButton.innerHTML = state.daily.allClaimed ? `<span>全達成報酬 受取済み</span><b>✓</b>` : `<span>全達成報酬</span><b>◆150　◆核2</b>`;
 }
 
 function renderMissions() {
@@ -508,11 +685,12 @@ function runExpedition(index) {
     }
   });
   state.expeditions += 1;
+  const levels = recordDailyActivity("expedition", 12);
   saveState();
   updateUI();
   playGatherSound();
   vibrate([15, 25, 25]);
-  showToast(`${expedition.name}: ${rewards.join(" / ")}`);
+  showToast(`${expedition.name}: ${rewards.join(" / ")}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
 }
 
 function craftGear(id) {
@@ -525,11 +703,12 @@ function craftGear(id) {
   state.coins -= recipe.coins;
   state.equipment[workshopUnitId] ||= newEquipment();
   state.equipment[workshopUnitId][recipe.slot] += 1;
+  const levels = grantPlayerXp(10);
   saveState();
   updateUI();
   playCraftSound();
   vibrate([25, 30, 65]);
-  showToast(`${getCommander(workshopUnitId).name}：${recipe.name} Lv.${state.equipment[workshopUnitId][recipe.slot]}`);
+  showToast(`${getCommander(workshopUnitId).name}：${recipe.name} Lv.${state.equipment[workshopUnitId][recipe.slot]}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
 }
 
 function selectWorkshopUnit(id) {
@@ -549,12 +728,13 @@ function upgradeUnit(kind) {
   state.coins -= cost.coins;
   state.progression[workshopUnitId] ||= newProgress();
   state.progression[workshopUnitId][key] += 1;
+  const levels = grantPlayerXp(10);
   saveState();
   updateUI();
   playCraftSound();
   vibrate([20, 25, 45]);
   const label = kind === "level" ? "キャラクターLv" : kind === "skill" ? getCommander(workshopUnitId).skill.name : getCommander(workshopUnitId).passive.name;
-  showToast(`${getCommander(workshopUnitId).name}：${label} Lv.${state.progression[workshopUnitId][key]}`);
+  showToast(`${getCommander(workshopUnitId).name}：${label} Lv.${state.progression[workshopUnitId][key]}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
 }
 
 function poolFor(rarity) { return commanders.filter(item => item.rarity === rarity); }
@@ -716,6 +896,8 @@ function startBattle(missionIndex) {
   state.troops = report.allyRemaining;
   state.coins += report.reward;
   if (report.won) Object.entries(mission.drops).forEach(([key, amount]) => state.materials[key] += amount);
+  report.levelsGained = recordDailyActivity(report.won ? "mission" : "", report.won ? 25 : 8);
+  report.playerLevel = state.player.level;
   saveState();
   updateUI();
   openBattleReport(report, mission.title, mission.enemy, mission.art);
@@ -817,6 +999,8 @@ function startRaidBattle() {
   state.troops = report.allyRemaining;
   state.coins += report.reward;
   report.newBreaks.forEach(id => Object.entries(raidBoss.parts[id].reward).forEach(([key, amount]) => state.materials[key] += amount));
+  report.levelsGained = recordDailyActivity("raid", 35);
+  report.playerLevel = state.player.level;
   saveState();
   updateUI();
   openBattleReport(report, "共鳴限界戦", raidBoss.name, raidBoss.art);
@@ -885,6 +1069,8 @@ function startArenaBattle(opponentId) {
   state.arena.history.unshift({ opponent: opponent.name, won: report.won, delta: report.ratingDelta, date: new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date()) });
   state.arena.history = state.arena.history.slice(0, 10);
   state.coins += report.reward;
+  report.levelsGained = recordDailyActivity("arena", 25);
+  report.playerLevel = state.player.level;
   saveState();
   updateUI();
   const leader = getCommander(opponent.team[0]);
@@ -934,22 +1120,23 @@ function finishBattleDisplay() {
   if (!battleRun) return;
   clearTimeout(battleRun.timer);
   const report = battleRun.report;
+  const growth = report.levelsGained ? ` / PLAYER Lv.${report.playerLevel} UP` : "";
   document.querySelector("#battle-skip").classList.add("hidden");
   document.querySelector("#battle-result").classList.remove("hidden");
   if (report.mode === "arena") {
     document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "×";
     document.querySelector("#battle-result-title").textContent = report.won ? "ARENA WIN" : "ARENA LOSE";
-    document.querySelector("#battle-result-meta").textContent = `RATE ${formatNumber(report.ratingBefore)} → ${formatNumber(report.ratingAfter)}（${report.ratingDelta > 0 ? "+" : ""}${report.ratingDelta}） / ${formatNumber(report.reward)}コイン`;
+    document.querySelector("#battle-result-meta").textContent = `RATE ${formatNumber(report.ratingBefore)} → ${formatNumber(report.ratingAfter)}（${report.ratingDelta > 0 ? "+" : ""}${report.ratingDelta}） / ${formatNumber(report.reward)}コイン${growth}`;
   } else if (report.mode === "raid") {
     document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "界";
     document.querySelector("#battle-result-title").textContent = report.won ? "レイド鎮圧" : "共鳴同期完了";
     const breaks = report.newBreaks.length ? ` / 部位破壊 ${report.newBreaks.map(id => raidBoss.parts[id].name).join("・")}` : "";
-    document.querySelector("#battle-result-meta").textContent = `与ダメージ ${formatNumber(report.damage)} / 損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${breaks}`;
+    document.querySelector("#battle-result-meta").textContent = `与ダメージ ${formatNumber(report.damage)} / 損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${breaks}${growth}`;
   } else {
     document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "!";
     document.querySelector("#battle-result-title").textContent = report.won ? "任務完了" : "部隊撤退";
     const drops = report.won ? ` / ${Object.entries(report.mission.drops).map(([key, amount]) => `${materials[key].name}×${amount}`).join("・")}` : "";
-    document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${drops}`;
+    document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${drops}${growth}`;
   }
   const missing = Math.max(0, getTeamCapacity() - state.troops);
   const button = document.querySelector("#replenish-button");
@@ -1184,6 +1371,8 @@ document.addEventListener("click", event => {
   if (raidReward) return claimRaidReward(raidReward.dataset.raidReward);
   const arenaOpponent = event.target.closest("[data-arena-opponent]");
   if (arenaOpponent) return startArenaBattle(arenaOpponent.dataset.arenaOpponent);
+  const dailyClaim = event.target.closest("[data-daily-claim]");
+  if (dailyClaim) return claimDailyTask(dailyClaim.dataset.dailyClaim);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
 });
@@ -1197,6 +1386,8 @@ document.querySelector("#summon-close").addEventListener("click", closeSummon);
 document.querySelector("#battle-skip").addEventListener("click", showAllBattleLogs);
 document.querySelector("#battle-close").addEventListener("click", closeBattle);
 document.querySelector("#raid-start").addEventListener("click", startRaidBattle);
+document.querySelector("#daily-login-claim").addEventListener("click", claimLoginReward);
+document.querySelector("#daily-all-claim").addEventListener("click", claimDailyAll);
 document.querySelector("#replenish-button").addEventListener("click", replenishTroops);
 document.querySelector(".dialog-close").addEventListener("click", () => document.querySelector("#info-dialog").close());
 document.querySelector("#reset-demo").addEventListener("click", resetDemo);

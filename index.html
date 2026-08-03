@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090414">
-  <meta name="description" content="5人編成・個別育成・オート戦闘・非同期PvPアリーナ・部位破壊レイド・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
+  <meta name="description" content="5人編成・個別育成・オート戦闘・デイリー作戦・プレイヤーLv・非同期PvPアリーナ・部位破壊レイド・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
   <title>境界共鳴 — Social RPG Prototype</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
   <link rel="preload" href="assets/commander-ren-v2.png" as="image">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -35,7 +35,7 @@
         <h2 id="home-heading" class="sr-only">ホーム</h2>
         <article class="profile-card glass-card">
           <div class="avatar-ring">局</div>
-          <div class="profile-copy"><span>PLAYER LEVEL 07</span><strong>境界局長</strong><small>第零遊撃隊　5人編成戦力 <b id="home-power">0</b></small></div>
+          <div class="profile-copy"><span>PLAYER LEVEL <b id="player-level">07</b></span><strong>境界局長</strong><small>第零遊撃隊　5人編成戦力 <b id="home-power">0</b></small><div class="profile-xp"><i id="home-xp-bar"></i><em id="home-xp-text">0 / 0</em></div></div>
           <button class="icon-button" type="button" data-screen-target="menu" aria-label="設定を開く">⚙</button>
         </article>
 
@@ -51,6 +51,7 @@
 
         <div class="section-heading"><div><span>OPERATIONS</span><h2>本日の作戦</h2></div><button class="text-button" type="button" data-screen-target="missions">すべて見る</button></div>
         <div class="operation-grid">
+          <button class="operation-card glass-card" type="button" data-screen-target="daily"><span class="operation-icon pink">✓</span><span class="operation-copy"><small>DAILY OPERATIONS</small><strong>デイリー作戦・ログイン補給</strong><em><b id="home-daily-progress">0 / 4</b> 達成 / <span id="home-login-state">補給受取可</span></em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="missions"><span class="operation-icon cyan">⌖</span><span class="operation-copy"><small>AUTO MISSION</small><strong>ネオン街の追跡者</strong><em>5人連携 / 消費 6</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="workshop"><span class="operation-icon green">⚒</span><span class="operation-copy"><small>TRAIN & CRAFT</small><strong>個別育成・境界工房</strong><em>スキル強化 / キャラ別装備</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="raid"><span class="operation-icon red">◉</span><span class="operation-copy"><small>CO-OP RAID</small><strong>境界喰らい・ゴライアス</strong><em>残り2日 / 参加 12,480人</em></span><span class="chevron">›</span></button>
@@ -109,6 +110,18 @@
         <aside class="system-note"><b>非同期PvP・静的プロトタイプ</b><p>保存された模擬防衛データと5対5で完全オート対戦します。兵力は消費せず、キャラLv・スキル・パッシブ・個別装備が戦力へ反映されます。</p></aside>
       </section>
 
+      <section id="daily-screen" class="screen" data-title="デイリー作戦" aria-labelledby="daily-heading">
+        <div class="section-heading page-heading"><div><span>DAILY OPERATIONS</span><h2 id="daily-heading">本日の作戦</h2></div><span class="level-chip">更新 00:00</span></div>
+        <article class="daily-player vivid-frame"><div class="daily-player-mark">局</div><div><small>PLAYER GROWTH</small><strong id="daily-player-level">Lv.7</strong><span>次のレベルまで <b id="daily-player-xp">0 / 0</b></span><u><i id="daily-player-xp-bar"></i></u></div><em>Lv.UP<br>◆80</em></article>
+        <div class="section-heading"><div><span>LOGIN SUPPLY</span><h2>7日間補給</h2></div><small id="daily-login-streak">0日継続</small></div>
+        <article class="login-supply glass-card"><div id="login-calendar" class="login-calendar"></div><button id="daily-login-claim" class="primary-button daily-claim" type="button"><span>ログイン補給を受け取る</span><b>◆50</b></button></article>
+        <div class="section-heading"><div><span>NO GACHA REQUIRED</span><h2>デイリー任務</h2></div><small><b id="daily-complete-count">0 / 4</b> 達成</small></div>
+        <div class="daily-overall glass-card"><span>ALL CLEAR</span><div class="progress-track"><i id="daily-complete-bar" style="width:0%"></i></div><small>任務・探索・レイド・アリーナを1回ずつ</small></div>
+        <div id="daily-task-list" class="daily-task-list"></div>
+        <button id="daily-all-claim" class="primary-button daily-all-claim" type="button" disabled><span>全達成報酬</span><b>◆150　◆核2</b></button>
+        <aside class="system-note"><b>遊ぶほど育つ現代型デイリー</b><p>ガチャを日課に含めず、主要コンテンツを1回ずつ遊ぶだけで完了。プレイヤー経験値は任務・探索・レイド・アリーナ・育成から獲得できます。</p></aside>
+      </section>
+
       <section id="units-screen" class="screen" data-title="5人編成" aria-labelledby="units-heading">
         <div class="section-heading page-heading"><div><span>FORMATION</span><h2 id="units-heading">第零遊撃隊</h2></div><span id="unit-count" class="level-chip">5 / 10</span></div>
         <article class="formation-summary glass-card"><div><small>TEAM POWER</small><strong id="formation-power">0</strong></div><span>選択中の枠へ指揮官を配置</span><button type="button" data-screen-target="workshop">育成</button></article>
@@ -141,7 +154,8 @@
         </article>
         <button class="menu-shortcut glass-card" type="button" data-screen-target="workshop"><span>⚒</span><div><small>CRAFT & INVENTORY</small><strong>素材探索・境界工房</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card" type="button" data-screen-target="arena"><span>冠</span><div><small>RATED AUTO BATTLE</small><strong>境界アリーナ</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PROTOTYPE v0.5</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、素材探索、任務、ガチャ、部位破壊レイド、非同期PvPアリーナを実装。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>PvP</i><b>レート / 日次5戦</b></div></article>
+        <button class="menu-shortcut glass-card" type="button" data-screen-target="daily"><span>✓</span><div><small>DAILY & PLAYER LEVEL</small><strong>デイリー作戦・ログイン補給</strong></div><b>›</b></button>
+        <article class="about-card glass-card"><span>PROTOTYPE v0.6</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、デイリー、任務、ガチャ、部位破壊レイド、非同期PvPアリーナを実装。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>成長</i><b>プレイヤーLv / 日次報酬</b></div><div><i>PvP</i><b>レート / 日次5戦</b></div></article>
       </section>
     </div>
 
@@ -173,6 +187,6 @@
   </section>
 
   <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>
