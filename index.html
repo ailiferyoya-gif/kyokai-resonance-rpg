@@ -9,7 +9,7 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
   <link rel="preload" href="assets/commander-ren-v2.png" as="image">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -88,12 +88,15 @@
         <article class="raid-hero vivid-frame"><img src="assets/enemy-goliath-v1.png" alt="レイドボス 境界喰らい・ゴライアス"><div class="raid-shade"></div><div class="raid-copy"><span>WORLD BOSS / ACTIVE</span><h2>境界喰らい<br>ゴライアス</h2><p>全プレイヤーで挑む非同期レイド</p></div></article>
         <article class="boss-card glass-card"><div class="boss-head"><span>全体HP</span><b id="raid-boss-hp">782,400 / 1,000,000</b></div><div class="progress-track danger"><i id="raid-boss-bar" style="width:78.24%"></i></div><div class="raid-meta"><span>◷ 残り2日</span><span>♟ <b id="raid-participants">12,480</b>人</span><span>参加証 <b id="raid-attempts">3 / 3</b></span></div></article>
         <article class="raid-contribution glass-card"><div id="raid-party-mini" class="mini-team"></div><div><small>PERSONAL DAMAGE</small><strong id="raid-personal-damage">0</strong><span id="raid-last-damage">未参加</span></div><em>挑戦 <b id="raid-run-count">0 回</b></em></article>
+        <article class="raid-rescue-card glass-card"><div class="raid-rescue-members"><i>白</i><i>黒</i><i>霞</i></div><div><small>GUILD RESCUE</small><strong>第零共鳴団へ救援を要請</strong><span id="raid-rescue-status">団員3名が待機中</span></div><button id="raid-rescue" type="button"><span>ギルドへ救援要請</span><b>1日1回</b></button></article>
         <button id="raid-start" class="primary-button raid-cta" type="button"><span>5人オートで出撃</span><b>参加証 3</b></button>
         <div class="section-heading"><div><span>BREAK TARGET</span><h2>優先攻撃部位</h2></div><small>戦闘は基本オート</small></div>
         <div id="raid-part-list" class="raid-part-list"></div>
         <div class="section-heading"><div><span>DAMAGE REWARD</span><h2>累積貢献報酬</h2></div><small>到達後に受取</small></div>
         <div id="raid-reward-list" class="raid-reward-list glass-card"></div>
-        <aside class="system-note"><b>非同期レイド・プロトタイプ</b><p>挑戦ごとのダメージを全体HPと個人累積へ反映。部位破壊効果は次の行動から自動適用されます。</p></aside>
+        <div class="section-heading"><div><span>GUILD DAMAGE RANK</span><h2>団内レイドランキング</h2></div><small>あなたの累積値を反映</small></div>
+        <div id="raid-guild-ranking" class="raid-guild-ranking glass-card"></div>
+        <aside class="system-note"><b>非同期レイド・プロトタイプ</b><p>挑戦ごとのダメージを全体HPと個人累積へ反映。ギルド救援は全体HPと共同任務だけを進め、個人ダメージ報酬には加算されません。</p></aside>
       </section>
 
       <section id="arena-screen" class="screen" data-title="境界アリーナ" aria-labelledby="arena-heading">
@@ -135,6 +138,7 @@
           <div><small>YOUR WEEKLY CONTRIBUTION</small><strong><b id="guild-contribution">0</b> PT</strong><span>累計 <b id="guild-total-contribution">0</b> / 次週も記録</span><u><i id="guild-contribution-bar"></i></u></div>
           <button id="guild-cheer" type="button"><span>団員へ応援を送る</span><b>+20</b></button>
         </article>
+        <article class="guild-supply-card glass-card"><div><i>補</i><span><small>DAILY SHARED SUPPLY</small><strong>団員の共同補給</strong><em id="guild-supply-note">団員の探索成果が到着しています</em></span></div><button id="guild-supply" type="button"><span>共同補給を受け取る</span><b>●500　⬡1　≋1</b></button></article>
         <div class="section-heading"><div><span>PERSONAL REWARD</span><h2>週間貢献報酬</h2></div><small>月曜 00:00 更新</small></div>
         <div id="guild-reward-list" class="guild-reward-list glass-card"></div>
         <div class="section-heading"><div><span>CO-OP OPERATIONS</span><h2>共同任務</h2></div><small>全団員で進行</small></div>
@@ -143,7 +147,9 @@
         <div id="guild-ranking" class="guild-ranking glass-card"></div>
         <div class="section-heading"><div><span>ACTIVITY FEED</span><h2>共鳴ログ</h2></div><small>最新3件</small></div>
         <div id="guild-feed" class="guild-feed glass-card"></div>
-        <aside class="system-note"><b>静的版のソーシャル機能</b><p>現在は端末内のあなたの行動と模擬団員データで共同進行を再現しています。本番ではサーバー同期、加入申請、チャット、団長権限へ拡張できます。</p></aside>
+        <div class="section-heading"><div><span>GUILD LOUNGE</span><h2>ギルドチャット</h2></div><small>定型スタンプ / 40文字</small></div>
+        <div class="guild-chat glass-card"><div id="guild-chat-list" class="guild-chat-list"></div><div id="guild-quick-messages" class="guild-quick-messages"></div><form id="guild-chat-form" class="guild-chat-form"><input id="guild-chat-input" type="text" maxlength="40" autocomplete="off" aria-label="ギルドメッセージ" placeholder="メッセージを入力…"><button type="submit">送信</button></form></div>
+        <aside class="system-note"><b>静的版のソーシャル機能</b><p>チャットとあなたの操作は端末内へ保存し、模擬団員の投稿・ランキングと組み合わせて共闘を再現しています。本番ではサーバー同期、通報・ミュート、加入申請、団長権限へ拡張できます。</p></aside>
       </section>
 
       <section id="units-screen" class="screen" data-title="5人編成" aria-labelledby="units-heading">
@@ -180,7 +186,7 @@
         <button class="menu-shortcut glass-card" type="button" data-screen-target="arena"><span>冠</span><div><small>RATED AUTO BATTLE</small><strong>境界アリーナ</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card" type="button" data-screen-target="daily"><span>✓</span><div><small>DAILY & PLAYER LEVEL</small><strong>デイリー作戦・ログイン補給</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card guild-shortcut" type="button" data-screen-target="guild"><span>結</span><div><small>WEEKLY GUILD CO-OP</small><strong>第零共鳴団・共同任務</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PROTOTYPE v0.7</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、デイリー、ギルド共闘、任務、ガチャ、部位破壊レイド、非同期PvPアリーナを実装。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>協力</i><b>週間貢献 / 共同任務</b></div><div><i>PvP</i><b>レート / 日次5戦</b></div></article>
+        <article class="about-card glass-card"><span>PROTOTYPE v0.8</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、デイリー、ギルド交流・救援、任務、ガチャ、部位破壊レイド、非同期PvPアリーナを実装。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>交流</i><b>チャット / 救援 / 共同補給</b></div><div><i>PvP</i><b>レート / 日次5戦</b></div></article>
       </section>
     </div>
 
@@ -212,6 +218,6 @@
   </section>
 
   <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

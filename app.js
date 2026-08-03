@@ -90,6 +90,26 @@ const guildMembers = [
   { name: "灯里ナギ", role: "団員", power: 2260, contribution: 126, commander: "mina" }
 ];
 
+const guildChatSeed = [
+  { id: "seed-yura", author: "白鷺ユラ", role: "団長", commander: "kohaku", message: "今夜21時、ゴライアス救援へ。参加できる人は共鳴を！", time: "20:10" },
+  { id: "seed-jin", author: "黒鉄ジン", role: "副団長", commander: "sana", message: "境界核を優先指定済み。素材が足りない人は共同補給をどうぞ。", time: "19:42" },
+  { id: "seed-kai", author: "雨森カイ", role: "団員", commander: "touma", message: "ネオン市場跡を探索中です！", time: "19:18" }
+];
+
+const guildQuickMessages = [
+  { icon: "◉", text: "レイド行きます！" },
+  { icon: "⚒", text: "素材集め中です" },
+  { icon: "♟", text: "編成を更新しました" },
+  { icon: "✓", text: "お疲れさま！" }
+];
+
+const guildRaidMembers = [
+  { name: "白鷺ユラ", role: "団長", commander: "kohaku", damage: 18240 },
+  { name: "黒鉄ジン", role: "副団長", commander: "sana", damage: 14680 },
+  { name: "霞坂ユノ", role: "精鋭", commander: "ren", damage: 11320 },
+  { name: "星詠ミオ", role: "参謀", commander: "kanade", damage: 8940 }
+];
+
 const guildMissions = [
   { id: "guild-mission", activity: "mission", code: "G-01 / CITY", name: "共同制圧任務", detail: "団員全員で通常任務を40回完了", goal: 40, base: 39, unit: "回", reward: { crystals: 120 } },
   { id: "guild-raid", activity: "raid", code: "G-02 / RAID", name: "巨大境界反応", detail: "団員全員でレイドへ50万ダメージ", goal: 500000, base: 498000, unit: "DMG", reward: { coins: 2000, materials: { core: 3 } } },
@@ -120,10 +140,10 @@ const localWeekKey = (date = new Date()) => {
   return localDayKey(monday);
 };
 const newGuildActions = () => ({ mission: 0, expedition: 0, raid: 0, arena: 0, craft: 0, upgrade: 0 });
-const newGuildState = () => ({ weekKey: localWeekKey(), contribution: 0, totalContribution: 0, actions: newGuildActions(), claimedMissions: [], claimedRewards: [], cheerDay: "", lastActivity: "" });
+const newGuildState = () => ({ weekKey: localWeekKey(), contribution: 0, totalContribution: 0, actions: newGuildActions(), claimedMissions: [], claimedRewards: [], cheerDay: "", supplyDay: "", rescueDay: "", rescueDamage: 0, chat: [], lastActivity: "" });
 
 const defaultState = () => ({
-  schema: 7,
+  schema: 8,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -225,7 +245,8 @@ function loadState() {
       ...parsedGuild,
       actions: { ...defaults.guild.actions, ...(parsedGuild.actions || {}) },
       claimedMissions: Array.isArray(parsedGuild.claimedMissions) ? parsedGuild.claimedMissions : [],
-      claimedRewards: Array.isArray(parsedGuild.claimedRewards) ? parsedGuild.claimedRewards : []
+      claimedRewards: Array.isArray(parsedGuild.claimedRewards) ? parsedGuild.claimedRewards : [],
+      chat: Array.isArray(parsedGuild.chat) ? parsedGuild.chat.slice(0, 6) : []
     };
     if (guild.weekKey !== localWeekKey()) {
       guild.weekKey = localWeekKey();
@@ -240,7 +261,7 @@ function loadState() {
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 7,
+      schema: 8,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -267,6 +288,7 @@ function getTeam(currentState = state) { return currentState.team.map(getCommand
 function randomFrom(list) { return list[Math.floor(Math.random() * list.length)]; }
 function randomInt(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
 function formatNumber(value) { return new Intl.NumberFormat("ja-JP").format(value); }
+function escapeHtml(value) { return String(value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }
 
 function playerXpTarget(level = state.player.level) { return 150 + level * 30; }
 
@@ -428,6 +450,54 @@ function cheerGuild() {
   playGatherSound();
   vibrate([15, 25, 45]);
   showToast(`応援を送りました：+20貢献${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
+}
+
+function claimGuildSupply() {
+  if (state.guild.supplyDay === localDayKey()) return showToast("本日の共同補給は受取済みです");
+  const reward = { coins: 500, materials: { ore: 1, fiber: 1 } };
+  state.guild.supplyDay = localDayKey();
+  state.guild.lastActivity = "共同補給を受領 / 境鉄鉱・霊脈繊維";
+  applyReward(reward);
+  const levels = grantPlayerXp(5);
+  saveState();
+  updateUI();
+  playCraftSound();
+  vibrate([20, 25, 45]);
+  showToast(`共同補給：${rewardText(reward)}${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
+}
+
+function sendGuildMessage(message) {
+  const input = document.querySelector("#guild-chat-input");
+  const text = String(message ?? input.value).trim().slice(0, 40);
+  if (!text) return showToast("メッセージを入力してください");
+  const now = new Date();
+  state.guild.chat.unshift({ id: `player-${Date.now()}`, author: "境界局長", role: "YOU", commander: state.team[0], message: text, time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` });
+  state.guild.chat = state.guild.chat.slice(0, 6);
+  input.value = "";
+  saveState();
+  renderGuild();
+  playUISound();
+  vibrate(15);
+  showToast("ギルドチャットへ送信しました");
+}
+
+function requestRaidRescue() {
+  if (state.guild.rescueDay === localDayKey()) return showToast("本日の救援要請は送信済みです");
+  if (state.raid.bossHp <= 0) return showToast("ゴライアスは鎮圧済みです");
+  const assistDamage = Math.min(2400, state.raid.bossHp);
+  state.guild.rescueDay = localDayKey();
+  state.guild.rescueDamage = assistDamage;
+  state.raid.bossHp -= assistDamage;
+  state.guild.actions.raid = (Number(state.guild.actions.raid) || 0) + assistDamage;
+  state.guild.contribution += 10;
+  state.guild.totalContribution += 10;
+  state.guild.lastActivity = `団員3名のレイド救援 / ${formatNumber(assistDamage)}ダメージ・+10貢献`;
+  const levels = grantPlayerXp(5);
+  saveState();
+  updateUI();
+  playRevealSound("SR");
+  vibrate([20, 30, 55]);
+  showToast(`救援到着：${formatNumber(assistDamage)}ダメージ${levels ? ` / PLAYER Lv.${state.player.level}` : ""}`);
 }
 
 function getUnitProgress(id, currentState = state) {
@@ -673,6 +743,11 @@ function renderGuild() {
   const cheered = state.guild.cheerDay === localDayKey();
   cheer.disabled = cheered;
   cheer.innerHTML = cheered ? `<span>本日の応援済み</span><b>✓</b>` : `<span>団員へ応援を送る</span><b>+20</b>`;
+  const supply = document.querySelector("#guild-supply");
+  const supplied = state.guild.supplyDay === localDayKey();
+  supply.disabled = supplied;
+  supply.innerHTML = supplied ? `<span>本日の共同補給 受取済み</span><b>✓</b>` : `<span>共同補給を受け取る</span><b>●500　⬡1　≋1</b>`;
+  document.querySelector("#guild-supply-note").textContent = supplied ? "次回補給 00:00" : "団員の探索成果が到着しています";
   document.querySelector("#guild-reward-list").innerHTML = guildRewardTiers.map(tier => {
     const current = Math.min(tier.points, state.guild.contribution);
     const claimed = state.guild.claimedRewards.includes(tier.id);
@@ -690,6 +765,9 @@ function renderGuild() {
   document.querySelector("#guild-ranking").innerHTML = ranking.map((member, index) => `<article class="guild-member${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b><em>戦力 ${formatNumber(member.power)}</em></span><div><small>WEEKLY</small><b>${formatNumber(member.contribution)}</b></div></article>`).join("");
   const personalFeed = state.guild.lastActivity || "共同任務へ参加すると、ここに活動が表示されます";
   document.querySelector("#guild-feed").innerHTML = `<div class="guild-feed-row player"><i>NOW</i><span><b>境界局長</b><small>${personalFeed}</small></span></div><div class="guild-feed-row"><i>12分</i><span><b>白鷺ユラ</b><small>ゴライアスの境界核を破壊 / +60貢献</small></span></div><div class="guild-feed-row"><i>28分</i><span><b>雨森カイ</b><small>共同制圧任務へ参加 / +25貢献</small></span></div>`;
+  const messages = [...state.guild.chat, ...guildChatSeed].slice(0, 8);
+  document.querySelector("#guild-chat-list").innerHTML = messages.map(message => `<article class="guild-chat-message${message.role === "YOU" ? " player" : ""}"><div class="guild-chat-avatar">${guildAvatarMarkup(message.commander)}</div><div><span><b>${escapeHtml(message.author)}</b><small>${escapeHtml(message.role)} / ${escapeHtml(message.time)}</small></span><p>${escapeHtml(message.message)}</p></div></article>`).join("");
+  document.querySelector("#guild-quick-messages").innerHTML = guildQuickMessages.map(item => `<button type="button" data-guild-quick="${escapeHtml(item.text)}"><i>${item.icon}</i><span>${escapeHtml(item.text)}</span></button>`).join("");
 }
 
 function renderMissions() {
@@ -718,6 +796,11 @@ function renderRaid() {
   document.querySelector("#raid-last-damage").textContent = raid.lastDamage ? `前回 +${formatNumber(raid.lastDamage)}` : "未参加";
   document.querySelector("#raid-run-count").textContent = `${raid.runs} 回`;
   document.querySelector("#raid-party-mini").innerHTML = miniTeamMarkup();
+  const rescued = state.guild.rescueDay === localDayKey();
+  const rescue = document.querySelector("#raid-rescue");
+  rescue.disabled = rescued || raid.bossHp <= 0;
+  rescue.innerHTML = raid.bossHp <= 0 ? `<span>救援不要・鎮圧済み</span><b>✓</b>` : rescued ? `<span>救援到着済み</span><b>-${formatNumber(state.guild.rescueDamage)} HP</b>` : `<span>ギルドへ救援要請</span><b>1日1回</b>`;
+  document.querySelector("#raid-rescue-status").textContent = rescued ? "白鷺ユラ・黒鉄ジン・霞坂ユノが応答" : "団員3名が待機中 / 個人ダメージには加算されません";
   document.querySelector("#raid-part-list").innerHTML = Object.entries(raidBoss.parts).map(([id, part]) => {
     const status = raid.parts[id];
     const active = raid.target === id && !status.broken;
@@ -729,6 +812,9 @@ function renderRaid() {
     const ready = raid.personalDamage >= tier.damage && !claimed;
     return `<article class="raid-reward${ready ? " ready" : ""}"><div><small>TOTAL ${formatNumber(tier.damage)}</small><b>${tier.name}</b><span>${raidRewardSummary(tier)}</span></div><button type="button" data-raid-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : "未達成"}</button></article>`;
   }).join("");
+  const raidPlayer = { name: "境界局長", role: "YOU", commander: state.team[0], damage: raid.personalDamage, isPlayer: true };
+  const raidRanking = [...guildRaidMembers, raidPlayer].sort((a, b) => b.damage - a.damage);
+  document.querySelector("#raid-guild-ranking").innerHTML = raidRanking.map((member, index) => `<article class="raid-guild-rank${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b></span><div><small>DAMAGE</small><b>${formatNumber(member.damage)}</b></div></article>`).join("");
   const start = document.querySelector("#raid-start");
   const disabled = raid.attempts <= 0 || raid.bossHp <= 0 || state.troops <= 0;
   start.disabled = disabled;
@@ -1546,6 +1632,8 @@ document.addEventListener("click", event => {
   if (guildMission) return claimGuildMission(guildMission.dataset.guildMission);
   const guildReward = event.target.closest("[data-guild-reward]");
   if (guildReward) return claimGuildReward(guildReward.dataset.guildReward);
+  const guildQuick = event.target.closest("[data-guild-quick]");
+  if (guildQuick) return sendGuildMessage(guildQuick.dataset.guildQuick);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
 });
@@ -1559,9 +1647,12 @@ document.querySelector("#summon-close").addEventListener("click", closeSummon);
 document.querySelector("#battle-skip").addEventListener("click", showAllBattleLogs);
 document.querySelector("#battle-close").addEventListener("click", closeBattle);
 document.querySelector("#raid-start").addEventListener("click", startRaidBattle);
+document.querySelector("#raid-rescue").addEventListener("click", requestRaidRescue);
 document.querySelector("#daily-login-claim").addEventListener("click", claimLoginReward);
 document.querySelector("#daily-all-claim").addEventListener("click", claimDailyAll);
 document.querySelector("#guild-cheer").addEventListener("click", cheerGuild);
+document.querySelector("#guild-supply").addEventListener("click", claimGuildSupply);
+document.querySelector("#guild-chat-form").addEventListener("submit", event => { event.preventDefault(); sendGuildMessage(); });
 document.querySelector("#replenish-button").addEventListener("click", replenishTroops);
 document.querySelector(".dialog-close").addEventListener("click", () => document.querySelector("#info-dialog").close());
 document.querySelector("#reset-demo").addEventListener("click", resetDemo);
