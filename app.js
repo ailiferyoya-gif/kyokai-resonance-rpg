@@ -58,6 +58,12 @@ const raidRewardTiers = [
   { id: "r3", damage: 6500, name: "上位貢献報酬", crystals: 250, coins: 4000, materials: { core: 3, hide: 3 } }
 ];
 
+const arenaOpponents = [
+  { id: "kasumi", name: "霞坂ユノ", guild: "霞境旅団", rating: 940, level: 1, skillLevel: 1, passiveLevel: 1, gearLevel: 0, team: ["ren", "sana", "touma", "mina", "isami"] },
+  { id: "kurogane", name: "黒鉄ジン", guild: "夜光防衛線", rating: 1080, level: 3, skillLevel: 2, passiveLevel: 2, gearLevel: 1, team: ["sana", "ten", "riku", "mina", "touma"] },
+  { id: "hoshiyomi", name: "星詠ミオ", guild: "天蓋観測局", rating: 1240, level: 6, skillLevel: 3, passiveLevel: 3, gearLevel: 2, team: ["kohaku", "kanade", "setsuna", "riku", "sana"] }
+];
+
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
@@ -65,9 +71,10 @@ const newEquipment = () => ({ weapon: 0, armor: 0, accessory: 0 });
 const newRaidParts = () => Object.fromEntries(Object.entries(raidBoss.parts).map(([id, part]) => [id, { hp: part.maxHp, broken: false }]));
 const localDayKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 const newRaidState = () => ({ attempts: 3, resetDay: localDayKey(), bossHp: raidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "core", parts: newRaidParts(), claimedRewards: [] });
+const newArenaState = () => ({ tickets: 5, resetDay: localDayKey(), rating: 1000, wins: 0, losses: 0, streak: 0, bestStreak: 0, history: [] });
 
 const defaultState = () => ({
-  schema: 4,
+  schema: 5,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -79,6 +86,7 @@ const defaultState = () => ({
   progression: Object.fromEntries(starterTeam.map(id => [id, newProgress()])),
   equipment: Object.fromEntries(starterTeam.map(id => [id, newEquipment()])),
   raid: newRaidState(),
+  arena: newArenaState(),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -131,16 +139,29 @@ function loadState() {
     raid.attempts = Math.max(0, Math.min(3, Number(raid.attempts) || 0));
     const restoredBossHp = Number(raid.bossHp);
     raid.bossHp = Number.isFinite(restoredBossHp) ? Math.max(0, Math.min(raidBoss.maxHp, restoredBossHp)) : raidBoss.initialHp;
+    const parsedArena = parsed.arena || {};
+    const arena = {
+      ...defaults.arena,
+      ...parsedArena,
+      history: Array.isArray(parsedArena.history) ? parsedArena.history.slice(0, 10) : []
+    };
+    if (arena.resetDay !== localDayKey()) {
+      arena.tickets = 5;
+      arena.resetDay = localDayKey();
+    }
+    arena.tickets = Math.max(0, Math.min(5, Number(arena.tickets) || 0));
+    arena.rating = Math.max(0, Number(arena.rating) || defaults.arena.rating);
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 4,
+      schema: 5,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
       progression,
       equipment,
       raid,
+      arena,
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -205,6 +226,42 @@ function getSquadStats(currentState = state) {
   return { team, members, attack, defense, power, capacity: getTeamCapacity(currentState), gear };
 }
 
+function getArenaPlayerStats() {
+  const stats = getSquadStats();
+  return { ...stats, power: stats.attack + stats.defense + Math.round(stats.capacity * 2.2) };
+}
+
+function getArenaOpponentStats(opponent) {
+  const members = opponent.team.map(id => getCommander(id)).filter(Boolean).map(commander => {
+    const levelRate = 1 + (opponent.level - 1) * .035;
+    let attack = Math.round(commander.attack * levelRate);
+    let defense = Math.round(commander.defense * levelRate);
+    const passiveRate = .02 + (opponent.passiveLevel - 1) * .012;
+    if (commander.passive.stat === "attack" || commander.passive.stat === "both") attack += Math.round(commander.attack * passiveRate);
+    if (commander.passive.stat === "defense" || commander.passive.stat === "both") defense += Math.round(commander.defense * passiveRate);
+    return {
+      ...commander,
+      level: opponent.level,
+      skillLevel: opponent.skillLevel,
+      passiveLevel: opponent.passiveLevel,
+      attack: attack + opponent.gearLevel * 67,
+      defense: defense + opponent.gearLevel * 71
+    };
+  });
+  const attack = members.reduce((sum, member) => sum + member.attack, 0);
+  const defense = members.reduce((sum, member) => sum + member.defense, 0);
+  const capacity = members.reduce((sum, member) => sum + member.command, 0);
+  return { members, attack, defense, capacity, power: attack + defense + Math.round(capacity * 2.2) };
+}
+
+function getArenaTier(rating = state.arena.rating) {
+  if (rating >= 1500) return { name: "MASTER", label: "マスター", className: "master" };
+  if (rating >= 1300) return { name: "PLATINUM", label: "プラチナ", className: "platinum" };
+  if (rating >= 1150) return { name: "GOLD", label: "ゴールド", className: "gold" };
+  if (rating >= 1000) return { name: "SILVER", label: "シルバー", className: "silver" };
+  return { name: "BRONZE", label: "ブロンズ", className: "bronze" };
+}
+
 function showToast(message) {
   const toast = document.querySelector("#toast");
   toast.textContent = message;
@@ -222,6 +279,7 @@ function navigateTo(screenName) {
   if (screenName === "units") renderFormation();
   if (screenName === "workshop") renderWorkshop();
   if (screenName === "raid") renderRaid();
+  if (screenName === "arena") renderArena();
   playUISound();
 }
 
@@ -244,6 +302,7 @@ function updateUI() {
   document.querySelector("#mission-team-mini").innerHTML = miniTeamMarkup();
   renderMissions();
   renderRaid();
+  renderArena();
   renderFormation();
   renderWorkshop();
 }
@@ -254,10 +313,43 @@ function artMarkup(commander, className = "") {
     : `<span class="${className} slot-symbol" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.symbol}</span>`;
 }
 
-function miniTeamMarkup() {
-  return getTeam().map(commander => commander.art
+function miniTeamMarkup(teamIds = state.team) {
+  return teamIds.map(getCommander).filter(Boolean).map(commander => commander.art
     ? `<img src="${commander.art}" alt="${commander.name}">`
     : `<span class="mini-symbol" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.symbol}</span>`).join("");
+}
+
+function renderArena() {
+  const root = document.querySelector("#arena-screen");
+  if (!root) return;
+  const arena = state.arena;
+  const tier = getArenaTier();
+  const playerStats = getArenaPlayerStats();
+  document.querySelector("#arena-tier").className = `arena-emblem ${tier.className}`;
+  document.querySelector("#arena-tier-code").textContent = tier.name;
+  document.querySelector("#arena-tier-label").textContent = `${tier.label}級`;
+  document.querySelector("#arena-rating").textContent = formatNumber(arena.rating);
+  document.querySelector("#arena-tickets").textContent = `${arena.tickets} / 5`;
+  document.querySelector("#arena-record").textContent = `${arena.wins}勝 ${arena.losses}敗`;
+  document.querySelector("#arena-streak").textContent = `${arena.streak} 連勝`;
+  document.querySelector("#arena-power").textContent = formatNumber(playerStats.power);
+  document.querySelector("#arena-party-mini").innerHTML = miniTeamMarkup();
+  document.querySelector("#arena-opponent-list").innerHTML = arenaOpponents.map(opponent => {
+    const stats = getArenaOpponentStats(opponent);
+    const leader = stats.members[0];
+    const powerRatio = stats.power / Math.max(1, playerStats.power);
+    const match = powerRatio > 1.15 ? "強敵" : powerRatio < .88 ? "優勢" : "互角";
+    const art = leader.art
+      ? `<img src="${leader.art}" alt="${leader.name}">`
+      : `<i style="background:linear-gradient(145deg,${leader.colors.join(",")})">${leader.symbol}</i>`;
+    return `<article class="arena-opponent glass-card">
+      <div class="arena-opponent-art">${art}<span>Lv.${opponent.level}</span></div>
+      <div class="arena-opponent-main"><small>${opponent.guild}</small><h3>${opponent.name}</h3><div class="arena-opponent-meta"><span>RATE <b>${formatNumber(opponent.rating)}</b></span><span>戦力 <b>${formatNumber(stats.power)}</b></span><em class="${match === "強敵" ? "hard" : match === "優勢" ? "easy" : ""}">${match}</em></div><div class="mini-team">${miniTeamMarkup(opponent.team)}</div></div>
+      <button type="button" data-arena-opponent="${opponent.id}" ${arena.tickets <= 0 ? "disabled" : ""}><span>AUTO</span><b>挑戦</b></button>
+    </article>`;
+  }).join("");
+  const history = arena.history.slice(0, 5);
+  document.querySelector("#arena-history").innerHTML = history.length ? history.map(item => `<div class="arena-history-row ${item.won ? "win" : "loss"}"><b>${item.won ? "WIN" : "LOSE"}</b><span><strong>${item.opponent}</strong><small>${item.date || "模擬戦"}</small></span><em>${item.delta > 0 ? "+" : ""}${item.delta}</em></div>`).join("") : `<div class="arena-empty"><b>NO MATCHES</b><span>最初の対戦相手を選んでください</span></div>`;
 }
 
 function renderMissions() {
@@ -604,10 +696,11 @@ function openBattleReport(report, title, enemyName, art) {
   document.querySelector("#battle-enemy-image").src = art;
   document.querySelector("#battle-enemy-image").alt = enemyName;
   document.querySelector("#battle-team-mini").innerHTML = getSquadStats().members.map(member => `<span>${member.art ? `<img src="${member.art}" alt="">` : `<i style="background:linear-gradient(145deg,${member.colors.join(",")})">${member.symbol}</i>`}<b>${member.name}<small> S${member.skillLevel}</small></b></span>`).join("");
-  document.querySelector("#ally-bar-label").textContent = report.mode === "raid" ? "部隊兵力" : "味方兵力";
-  document.querySelector("#enemy-bar-label").textContent = report.mode === "raid" ? "BOSS HP" : "敵兵力";
+  document.querySelector("#ally-bar-label").textContent = report.mode === "arena" ? "自軍耐久" : report.mode === "raid" ? "部隊兵力" : "味方兵力";
+  document.querySelector("#enemy-bar-label").textContent = report.mode === "arena" ? "相手耐久" : report.mode === "raid" ? "BOSS HP" : "敵兵力";
   document.querySelector("#battle-log").innerHTML = "";
   document.querySelector("#battle-result").classList.add("hidden");
+  document.querySelector("#replenish-button").classList.toggle("hidden", report.mode === "arena");
   document.querySelector("#battle-skip").classList.remove("hidden");
   updateBattleBars(report.allyStart, report.allyStart, report.enemyStart, report.enemyStart, report.mode);
   battleRun = { report, index: 0, timer: null };
@@ -731,6 +824,75 @@ function startRaidBattle() {
   vibrate([30, 35, 60]);
 }
 
+function arenaRatingDelta(won, opponentRating) {
+  const gap = opponentRating - state.arena.rating;
+  if (won) return Math.max(12, Math.min(30, 18 + Math.round(gap / 60)));
+  return -Math.max(7, Math.min(20, 14 - Math.round(gap / 90)));
+}
+
+function simulateArena(opponent) {
+  const player = getArenaPlayerStats();
+  const rival = getArenaOpponentStats(opponent);
+  let ally = player.capacity;
+  let enemy = rival.capacity;
+  const allyStart = ally;
+  const enemyStart = enemy;
+  const logs = [{ round: 0, actor: "PASSIVE", text: `両隊の常時効果を同期。${player.members.map(member => `${member.name}「${member.passive.name}」Lv.${member.passiveLevel}`).join(" / ")}`, critical: false, ally, enemy }];
+  let round = 0;
+  while (round < 12 && ally > 0 && enemy > 0) {
+    round += 1;
+    const commander = player.members[(round - 1) % player.members.length];
+    const roleBonus = commander.role === "攻撃" || commander.role === "遊撃" ? 1.14 : commander.role === "万能" ? 1.1 : 1;
+    const skillBonus = 1 + (commander.skillLevel - 1) * .06;
+    const critical = Math.random() < (.11 + rarityRank[commander.rarity] * .025);
+    const raw = Math.max(24, (player.attack + ally * 2.2 - rival.defense * .42) * .18 * roleBonus * skillBonus);
+    const damage = Math.max(2, Math.floor(raw * (.92 + Math.random() * .16) * (critical ? 1.5 : 1) / 9));
+    enemy -= Math.min(enemy, damage);
+    logs.push({ round, actor: commander.name, text: `${commander.skill.name} Lv.${commander.skillLevel}。相手陣形の耐久-${damage}。${critical ? "会心共鳴！" : ""}`, critical, ally, enemy });
+    if (enemy <= 0) break;
+    const rivalCommander = rival.members[(round - 1) % rival.members.length];
+    const rivalRoleBonus = rivalCommander.role === "攻撃" || rivalCommander.role === "遊撃" ? 1.14 : rivalCommander.role === "万能" ? 1.1 : 1;
+    const rivalSkillBonus = 1 + (rivalCommander.skillLevel - 1) * .06;
+    const rivalCritical = Math.random() < (.1 + rarityRank[rivalCommander.rarity] * .022);
+    const counterRaw = Math.max(24, (rival.attack + enemy * 2.2 - player.defense * .42) * .18 * rivalRoleBonus * rivalSkillBonus);
+    const counter = Math.max(2, Math.floor(counterRaw * (.92 + Math.random() * .16) * (rivalCritical ? 1.5 : 1) / 9));
+    ally -= Math.min(ally, counter);
+    logs.push({ round, actor: rivalCommander.name, text: `${rivalCommander.skill.name} Lv.${rivalCommander.skillLevel}。自軍陣形の耐久-${counter}。${rivalCritical ? "会心共鳴！" : ""}`, critical: rivalCritical, ally, enemy });
+  }
+  const won = enemy <= 0 || (ally > 0 && ally / allyStart >= enemy / enemyStart);
+  const ratingDelta = arenaRatingDelta(won, opponent.rating);
+  const reward = won ? 900 : 250;
+  logs.push({ round, actor: "SYSTEM", text: won ? `${opponent.name}の防衛データを突破。レート上昇を確認。` : "自軍耐久が規定値を下回りました。防衛データを再解析します。", critical: false, ally: Math.max(0, ally), enemy: Math.max(0, enemy) });
+  return { mode: "arena", opponent, logs, won, rounds: round, allyStart, enemyStart, allyRemaining: Math.max(0, ally), enemyRemaining: Math.max(0, enemy), casualties: 0, ratingDelta, ratingBefore: state.arena.rating, reward };
+}
+
+function startArenaBattle(opponentId) {
+  const opponent = arenaOpponents.find(item => item.id === opponentId);
+  if (!opponent) return;
+  if (state.arena.tickets <= 0) return showToast("本日のアリーナ挑戦回数を使い切りました");
+  const report = simulateArena(opponent);
+  state.arena.tickets -= 1;
+  state.arena.rating = Math.max(0, state.arena.rating + report.ratingDelta);
+  report.ratingAfter = state.arena.rating;
+  if (report.won) {
+    state.arena.wins += 1;
+    state.arena.streak += 1;
+    state.arena.bestStreak = Math.max(state.arena.bestStreak, state.arena.streak);
+  } else {
+    state.arena.losses += 1;
+    state.arena.streak = 0;
+  }
+  state.arena.history.unshift({ opponent: opponent.name, won: report.won, delta: report.ratingDelta, date: new Intl.DateTimeFormat("ja-JP", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date()) });
+  state.arena.history = state.arena.history.slice(0, 10);
+  state.coins += report.reward;
+  saveState();
+  updateUI();
+  const leader = getCommander(opponent.team[0]);
+  openBattleReport(report, "境界アリーナ", opponent.name, leader.art || symbolArtData(leader));
+  playRevealSound(report.won ? "SSR" : "SR");
+  vibrate(report.won ? [25, 30, 70] : [35]);
+}
+
 function appendNextBattleLog() {
   if (!battleRun) return;
   const { report } = battleRun;
@@ -774,7 +936,11 @@ function finishBattleDisplay() {
   const report = battleRun.report;
   document.querySelector("#battle-skip").classList.add("hidden");
   document.querySelector("#battle-result").classList.remove("hidden");
-  if (report.mode === "raid") {
+  if (report.mode === "arena") {
+    document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "×";
+    document.querySelector("#battle-result-title").textContent = report.won ? "ARENA WIN" : "ARENA LOSE";
+    document.querySelector("#battle-result-meta").textContent = `RATE ${formatNumber(report.ratingBefore)} → ${formatNumber(report.ratingAfter)}（${report.ratingDelta > 0 ? "+" : ""}${report.ratingDelta}） / ${formatNumber(report.reward)}コイン`;
+  } else if (report.mode === "raid") {
     document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "界";
     document.querySelector("#battle-result-title").textContent = report.won ? "レイド鎮圧" : "共鳴同期完了";
     const breaks = report.newBreaks.length ? ` / 部位破壊 ${report.newBreaks.map(id => raidBoss.parts[id].name).join("・")}` : "";
@@ -787,8 +953,10 @@ function finishBattleDisplay() {
   }
   const missing = Math.max(0, getTeamCapacity() - state.troops);
   const button = document.querySelector("#replenish-button");
-  button.textContent = missing > 0 ? `兵を補充（${formatNumber(missing * 12)}コイン）` : "兵力は最大です";
-  button.disabled = missing === 0;
+  if (report.mode !== "arena") {
+    button.textContent = missing > 0 ? `兵を補充（${formatNumber(missing * 12)}コイン）` : "兵力は最大です";
+    button.disabled = missing === 0;
+  }
   playBattleResultSound(report.mode === "raid" || report.won);
 }
 
@@ -1014,6 +1182,8 @@ document.addEventListener("click", event => {
   if (raidTarget) return selectRaidTarget(raidTarget.dataset.raidTarget);
   const raidReward = event.target.closest("[data-raid-reward]");
   if (raidReward) return claimRaidReward(raidReward.dataset.raidReward);
+  const arenaOpponent = event.target.closest("[data-arena-opponent]");
+  if (arenaOpponent) return startArenaBattle(arenaOpponent.dataset.arenaOpponent);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
 });

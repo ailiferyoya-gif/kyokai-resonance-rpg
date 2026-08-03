@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090414">
-  <meta name="description" content="5人編成・個別育成・オート戦闘・部位破壊レイド・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
+  <meta name="description" content="5人編成・個別育成・オート戦闘・非同期PvPアリーナ・部位破壊レイド・素材探索・キャラ別装備・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
   <title>境界共鳴 — Social RPG Prototype</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
   <link rel="preload" href="assets/commander-ren-v2.png" as="image">
-  <link rel="stylesheet" href="styles.css?v=4.1">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -54,6 +54,7 @@
           <button class="operation-card glass-card" type="button" data-screen-target="missions"><span class="operation-icon cyan">⌖</span><span class="operation-copy"><small>AUTO MISSION</small><strong>ネオン街の追跡者</strong><em>5人連携 / 消費 6</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="workshop"><span class="operation-icon green">⚒</span><span class="operation-copy"><small>TRAIN & CRAFT</small><strong>個別育成・境界工房</strong><em>スキル強化 / キャラ別装備</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="raid"><span class="operation-icon red">◉</span><span class="operation-copy"><small>CO-OP RAID</small><strong>境界喰らい・ゴライアス</strong><em>残り2日 / 参加 12,480人</em></span><span class="chevron">›</span></button>
+          <button class="operation-card glass-card" type="button" data-screen-target="arena"><span class="operation-icon gold">冠</span><span class="operation-copy"><small>ASYNC ARENA</small><strong>境界アリーナ</strong><em>5対5オート / レート戦</em></span><span class="chevron">›</span></button>
         </div>
       </section>
 
@@ -93,6 +94,21 @@
         <aside class="system-note"><b>非同期レイド・プロトタイプ</b><p>挑戦ごとのダメージを全体HPと個人累積へ反映。部位破壊効果は次の行動から自動適用されます。</p></aside>
       </section>
 
+      <section id="arena-screen" class="screen" data-title="境界アリーナ" aria-labelledby="arena-heading">
+        <div class="section-heading page-heading"><div><span>ASYNC PVP / SEASON 01</span><h2 id="arena-heading">境界アリーナ</h2></div><span class="level-chip">残り <b id="arena-tickets">5 / 5</b></span></div>
+        <article class="arena-rank-card vivid-frame">
+          <div id="arena-tier" class="arena-emblem silver"><i>界</i><span id="arena-tier-code">SILVER</span></div>
+          <div class="arena-rank-copy"><small>ARENA RATE</small><strong id="arena-rating">1,000</strong><span id="arena-tier-label">シルバー級</span></div>
+          <div class="arena-rank-stats"><span><small>戦績</small><b id="arena-record">0勝 0敗</b></span><span><small>連勝</small><b id="arena-streak">0 連勝</b></span></div>
+        </article>
+        <article class="arena-defense glass-card"><div id="arena-party-mini" class="mini-team"></div><div><small>YOUR DEFENSE / 5 UNIT</small><strong>第零遊撃隊</strong><span>アリーナ戦力 <b id="arena-power">0</b></span></div><button type="button" data-screen-target="units">編成</button></article>
+        <div class="section-heading"><div><span>MATCHING LIST</span><h2>対戦相手</h2></div><small>挑戦時に1消費</small></div>
+        <div id="arena-opponent-list" class="arena-opponent-list"></div>
+        <div class="section-heading"><div><span>BATTLE RECORD</span><h2>直近の戦績</h2></div><small>最大5件表示</small></div>
+        <div id="arena-history" class="arena-history glass-card"></div>
+        <aside class="system-note"><b>非同期PvP・静的プロトタイプ</b><p>保存された模擬防衛データと5対5で完全オート対戦します。兵力は消費せず、キャラLv・スキル・パッシブ・個別装備が戦力へ反映されます。</p></aside>
+      </section>
+
       <section id="units-screen" class="screen" data-title="5人編成" aria-labelledby="units-heading">
         <div class="section-heading page-heading"><div><span>FORMATION</span><h2 id="units-heading">第零遊撃隊</h2></div><span id="unit-count" class="level-chip">5 / 10</span></div>
         <article class="formation-summary glass-card"><div><small>TEAM POWER</small><strong id="formation-power">0</strong></div><span>選択中の枠へ指揮官を配置</span><button type="button" data-screen-target="workshop">育成</button></article>
@@ -124,7 +140,8 @@
           <label><span><b>召喚結果をすぐ表示</b><small>導入演出を省略</small></span><input id="instant-toggle" type="checkbox"><i></i></label>
         </article>
         <button class="menu-shortcut glass-card" type="button" data-screen-target="workshop"><span>⚒</span><div><small>CRAFT & INVENTORY</small><strong>素材探索・境界工房</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PROTOTYPE v0.4</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、素材探索、任務、ガチャ、部位破壊レイドを実装。PvPは同じ戦闘基盤で拡張予定です。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>レイド</i><b>部位破壊 / 累積報酬</b></div></article>
+        <button class="menu-shortcut glass-card" type="button" data-screen-target="arena"><span>冠</span><div><small>RATED AUTO BATTLE</small><strong>境界アリーナ</strong></div><b>›</b></button>
+        <article class="about-card glass-card"><span>PROTOTYPE v0.5</span><h3>境界共鳴</h3><p>5人編成、個別育成、キャラ別装備、素材探索、任務、ガチャ、部位破壊レイド、非同期PvPアリーナを実装。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>戦闘</i><b>5人・基本オート</b></div><div><i>PvP</i><b>レート / 日次5戦</b></div></article>
       </section>
     </div>
 
@@ -156,6 +173,6 @@
   </section>
 
   <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
-  <script src="app.js?v=4.1"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
