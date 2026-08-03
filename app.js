@@ -63,7 +63,8 @@ const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
 const newEquipment = () => ({ weapon: 0, armor: 0, accessory: 0 });
 const newRaidParts = () => Object.fromEntries(Object.entries(raidBoss.parts).map(([id, part]) => [id, { hp: part.maxHp, broken: false }]));
-const newRaidState = () => ({ attempts: 3, bossHp: raidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "core", parts: newRaidParts(), claimedRewards: [] });
+const localDayKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const newRaidState = () => ({ attempts: 3, resetDay: localDayKey(), bossHp: raidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "core", parts: newRaidParts(), claimedRewards: [] });
 
 const defaultState = () => ({
   schema: 4,
@@ -123,8 +124,13 @@ function loadState() {
       parts: Object.fromEntries(Object.keys(raidBoss.parts).map(id => [id, { ...defaults.raid.parts[id], ...(parsedRaid.parts?.[id] || {}) }])),
       claimedRewards: Array.isArray(parsedRaid.claimedRewards) ? parsedRaid.claimedRewards : []
     };
+    if (raid.resetDay !== localDayKey()) {
+      raid.attempts = 3;
+      raid.resetDay = localDayKey();
+    }
     raid.attempts = Math.max(0, Math.min(3, Number(raid.attempts) || 0));
-    raid.bossHp = Math.max(0, Math.min(raidBoss.maxHp, Number(raid.bossHp) || raidBoss.initialHp));
+    const restoredBossHp = Number(raid.bossHp);
+    raid.bossHp = Number.isFinite(restoredBossHp) ? Math.max(0, Math.min(raidBoss.maxHp, restoredBossHp)) : raidBoss.initialHp;
     const restored = {
       ...defaults,
       ...parsed,
