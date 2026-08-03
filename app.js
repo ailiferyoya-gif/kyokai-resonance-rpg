@@ -1,4 +1,5 @@
 const STORAGE_KEY = "kyokai-resonance-demo-v1";
+const STAMINA_RECOVERY_MS = 5 * 60 * 1000;
 const rarityRank = { R: 1, SR: 2, SSR: 3, UR: 4 };
 
 const commanders = [
@@ -11,13 +12,23 @@ const commanders = [
   { id: "kanade", name: "カナデ", title: "星砕きの奏者", rarity: "SSR", role: "攻撃", symbol: "✦", attack: 168, defense: 118, command: 25, colors: ["#ffba24", "#f3299b"], skill: { name: "星霜連爆", detail: "音律弾を連続起爆" }, passive: { name: "高揚旋律", stat: "attack", detail: "自身の攻撃を常時強化" } },
   { id: "riku", name: "リク", title: "玻璃の疾風", rarity: "SSR", role: "遊撃", symbol: "≋", attack: 154, defense: 124, command: 26, colors: ["#21e8ef", "#7c36e8"], skill: { name: "残響突破", detail: "残像と共に防衛線を突破" }, passive: { name: "疾風装填", stat: "attack", detail: "自身の攻撃を常時強化" } },
   { id: "setsuna", name: "セツナ", title: "常夜の守護者", rarity: "SSR", role: "防御", symbol: "☾", attack: 132, defense: 176, command: 27, colors: ["#334dd8", "#d625b5"], skill: { name: "常夜結界", detail: "夜色の結界で敵を封鎖" }, passive: { name: "守護誓約", stat: "defense", detail: "自身の防御を常時強化" } },
-  { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/ur-exorcist.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } }
+  { id: "ao", name: "アオ", title: "蒼雷の修験槍", rarity: "SSR", role: "遊撃", symbol: "槍", attack: 174, defense: 138, command: 27, colors: ["#19cfff", "#263ccf", "#d7ff27", "#f126cf"], art: "assets/char-ao-v1.png", skill: { name: "雷禅一閃", detail: "帯電した薙刀で防衛線を貫く" }, passive: { name: "導雷歩法", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "suzune", name: "スズネ", title: "祭電の信号手", rarity: "SSR", role: "攻撃", symbol: "銃", attack: 181, defense: 116, command: 25, colors: ["#ff7a22", "#19e6ff", "#f126cf", "#ffd53d"], art: "assets/char-suzune-v1.png", skill: { name: "祝砲レゾナンス", detail: "祭礼弾で標的信号を連続射抜く" }, passive: { name: "照準共鳴", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "tsuzuri", name: "ツヅリ", title: "彩紋の結界師", rarity: "SR", role: "支援", symbol: "扇", attack: 112, defense: 136, command: 24, colors: ["#16d7d0", "#f126cf", "#ffd53d", "#23103e"], art: "assets/char-tsuzuri-v1.png", skill: { name: "彩界扇陣", detail: "色彩結界で五人の共鳴を保護" }, passive: { name: "護符編纂", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/ur-exorcist.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "kagari", name: "カガリ", title: "紅界の鬼舞", rarity: "UR", role: "攻撃", symbol: "鬼", attack: 208, defense: 152, command: 31, colors: ["#ff304f", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/char-kagari-v1.png", skill: { name: "紅蓮界断", detail: "鬼面の界刀で全戦線を切り開く" }, passive: { name: "鬼舞共鳴", stat: "attack", detail: "自身の攻撃を大きく強化" } }
 ];
 
 const missions = [
-  { stage: "1-1", zone: "NEON MARKET / RAIN", title: "ネオン街の追跡者", enemy: "裂界猟犬", description: "市場へ侵入した追跡機を排除せよ", stamina: 6, recommended: 760, enemyTroops: 58, enemyAttack: 390, enemyDefense: 320, reward: 800, art: "assets/enemy-rift-hound-v1.png", drops: { ore: 2, hide: 1 } },
-  { stage: "1-2", zone: "INDUSTRIAL / NIGHT", title: "雨上がりの高架線", enemy: "猟犬機・強襲型", description: "輸送路を塞ぐ機械獣を追跡せよ", stamina: 8, recommended: 880, enemyTroops: 70, enemyAttack: 455, enemyDefense: 380, reward: 980, art: "assets/enemy-rift-hound-v1.png", drops: { fiber: 2, core: 1 } },
-  { stage: "1-3", zone: "BORDER GATE", title: "境界門、再起動", enemy: "門衛猟犬アルファ", description: "門衛機の暴走信号を遮断せよ", stamina: 10, recommended: 1020, enemyTroops: 84, enemyAttack: 525, enemyDefense: 450, reward: 1200, art: "assets/enemy-rift-hound-v1.png", drops: { core: 2, hide: 2 } }
+  { id: "m1-1", chapter: 1, stage: "1-1", zone: "NEON MARKET / RAIN", title: "ネオン街の追跡者", enemy: "裂界猟犬", description: "市場へ侵入した追跡機を排除せよ", stamina: 5, recommended: 760, enemyTroops: 58, enemyAttack: 390, enemyDefense: 320, reward: 800, art: "assets/enemy-rift-hound-v1.png", drops: { ore: 2, hide: 1 }, firstReward: { crystals: 80, materials: { ore: 2 } } },
+  { id: "m1-2", chapter: 1, stage: "1-2", zone: "INDUSTRIAL / NIGHT", title: "雨上がりの高架線", enemy: "猟犬機・強襲型", description: "輸送路を塞ぐ機械獣を追跡せよ", stamina: 6, recommended: 880, enemyTroops: 70, enemyAttack: 455, enemyDefense: 380, reward: 980, art: "assets/enemy-rift-hound-v1.png", drops: { fiber: 2, core: 1 }, firstReward: { crystals: 90, materials: { fiber: 2 } } },
+  { id: "m1-3", chapter: 1, stage: "1-3", zone: "BORDER GATE", title: "境界門、再起動", enemy: "門衛猟犬アルファ", description: "門衛機の暴走信号を遮断せよ", stamina: 7, recommended: 1020, enemyTroops: 84, enemyAttack: 525, enemyDefense: 450, reward: 1200, art: "assets/enemy-rift-hound-v1.png", drops: { core: 2, hide: 2 }, firstReward: { crystals: 120, materials: { core: 2 } } },
+  { id: "m2-1", chapter: 2, stage: "2-1", zone: "GREEN LAB / RUINS", title: "翠環研究棟", enemy: "培養殻ウォード", description: "閉鎖研究棟で増殖する装甲殻を停止", stamina: 7, recommended: 1120, enemyTroops: 88, enemyAttack: 555, enemyDefense: 475, reward: 1350, art: "assets/enemy-goliath-v1.png", drops: { fiber: 3, hide: 2 }, firstReward: { crystals: 130, coins: 1200 } },
+  { id: "m2-2", chapter: 2, stage: "2-2", zone: "PORCELAIN BRIDGE", title: "白磁橋の重力波", enemy: "境界殻・重圧型", description: "橋梁を歪める重力信号を突破せよ", stamina: 8, recommended: 1240, enemyTroops: 96, enemyAttack: 610, enemyDefense: 520, reward: 1500, art: "assets/enemy-goliath-v1.png", drops: { ore: 3, core: 2 }, firstReward: { crystals: 140, materials: { core: 2 } } },
+  { id: "m2-3", chapter: 2, stage: "2-3", zone: "MECH HANGAR", title: "未成体ゴライアス", enemy: "ゴライアス未成体", description: "起動前の巨大境界機を鎮圧せよ", stamina: 9, recommended: 1380, enemyTroops: 108, enemyAttack: 675, enemyDefense: 570, reward: 1800, art: "assets/enemy-goliath-v1.png", drops: { core: 3, hide: 3 }, firstReward: { crystals: 180, materials: { core: 3 } } },
+  { id: "m3-1", chapter: 3, stage: "3-1", zone: "FESTIVAL AFTERGLOW", title: "祭路に残る九尾", enemy: "夜神楽の残響", description: "祭礼跡に残る自律信号を回収せよ", stamina: 8, recommended: 1460, enemyTroops: 112, enemyAttack: 710, enemyDefense: 600, reward: 1950, art: "assets/event-yorukagura-v1.png", drops: { fiber: 3, ore: 3 }, firstReward: { crystals: 180, coins: 1800 } },
+  { id: "m3-2", chapter: 3, stage: "3-2", zone: "NINE-TAIL COORDINATE", title: "九尾座標の迷宮", enemy: "ヨルカグラ分体", description: "書き換えられた街路座標を復元せよ", stamina: 9, recommended: 1580, enemyTroops: 122, enemyAttack: 760, enemyDefense: 645, reward: 2200, art: "assets/event-yorukagura-v1.png", drops: { core: 3, fiber: 3 }, firstReward: { crystals: 220, materials: { core: 3 } } },
+  { id: "m3-3", chapter: 3, stage: "3-3", zone: "DAWN BOUNDARY", title: "朝焼けの境界", enemy: "祭禍核・最終残響", description: "五人の共鳴で境界の夜を終わらせる", stamina: 10, recommended: 1720, enemyTroops: 134, enemyAttack: 825, enemyDefense: 700, reward: 2600, art: "assets/event-yorukagura-v1.png", drops: { core: 4, hide: 3 }, firstReward: { crystals: 300, materials: { core: 4 } } }
 ];
 
 const materials = {
@@ -198,12 +209,16 @@ const newGuildState = () => ({ weekKey: localWeekKey(), contribution: 0, totalCo
 const newEventRaidParts = () => Object.fromEntries(Object.entries(eventRaidBoss.parts).map(([id, part]) => [id, { hp: part.maxHp, broken: false }]));
 const newEventRaidState = () => ({ attempts: 3, resetDay: localDayKey(), bossHp: eventRaidBoss.initialHp, personalDamage: 0, lastDamage: 0, runs: 0, target: "tails", parts: newEventRaidParts(), claimedRewards: [], supportDay: "", supportDamage: 0 });
 const newEventState = () => ({ seasonId: eventSeasonId, points: 0, tokens: 0, clears: {}, claimedRewards: [], exchange: {}, storyRead: [], raid: newEventRaidState() });
+const createPlayerId = () => `BR-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+const newProfileState = () => ({ id: createPlayerId(), name: "境界局長", createdAt: Date.now() });
+const newCampaignState = () => ({ unlocked: 1, clears: {}, firstRewards: [] });
+const newLifetimeState = () => ({ battles: 0, missionWins: 0, raidRuns: 0, arenaWins: 0, draws: 0 });
 
 const defaultState = () => ({
-  schema: 10,
+  schema: 11,
   crystals: 4500,
   coins: 12800,
-  stamina: 48,
+  stamina: 60,
   pity: 72,
   troops: 100,
   owned: Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }])),
@@ -217,6 +232,10 @@ const defaultState = () => ({
   daily: newDailyState(),
   guild: newGuildState(),
   event: newEventState(),
+  campaign: newCampaignState(),
+  profile: newProfileState(),
+  lifetime: newLifetimeState(),
+  staminaUpdatedAt: Date.now(),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -345,10 +364,23 @@ function loadState() {
     if (event.seasonId !== eventSeasonId) event = newEventState();
     event.points = Math.max(0, Number(event.points) || 0);
     event.tokens = Math.max(0, Number(event.tokens) || 0);
+    const parsedCampaign = parsed.campaign || {};
+    const campaign = {
+      ...defaults.campaign,
+      ...parsedCampaign,
+      clears: { ...defaults.campaign.clears, ...(parsedCampaign.clears || {}) },
+      firstRewards: Array.isArray(parsedCampaign.firstRewards) ? parsedCampaign.firstRewards : []
+    };
+    campaign.unlocked = Math.max(1, Math.min(missions.length, Number(campaign.unlocked) || 1));
+    const profile = { ...defaults.profile, ...(parsed.profile || {}) };
+    profile.name = String(profile.name || defaults.profile.name).trim().slice(0, 16) || defaults.profile.name;
+    profile.id = String(profile.id || defaults.profile.id).slice(0, 16);
+    const lifetime = { ...defaults.lifetime, ...(parsed.lifetime || {}) };
+    Object.keys(defaults.lifetime).forEach(key => lifetime[key] = Math.max(0, Number(lifetime[key]) || 0));
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 10,
+      schema: 11,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -360,6 +392,10 @@ function loadState() {
       daily,
       guild,
       event,
+      campaign,
+      profile,
+      lifetime,
+      staminaUpdatedAt: Number(parsed.staminaUpdatedAt) || Date.now(),
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -377,6 +413,40 @@ function randomFrom(list) { return list[Math.floor(Math.random() * list.length)]
 function randomInt(min, max) { return Math.floor(min + Math.random() * (max - min + 1)); }
 function formatNumber(value) { return new Intl.NumberFormat("ja-JP").format(value); }
 function escapeHtml(value) { return String(value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }
+
+function applyStaminaRecovery() {
+  const now = Date.now();
+  if (!Number.isFinite(state.staminaUpdatedAt)) state.staminaUpdatedAt = now;
+  if (state.stamina >= 60) {
+    state.stamina = 60;
+    state.staminaUpdatedAt = now;
+    return false;
+  }
+  const recovered = Math.floor((now - state.staminaUpdatedAt) / STAMINA_RECOVERY_MS);
+  if (recovered <= 0) return false;
+  state.stamina = Math.min(60, state.stamina + recovered);
+  state.staminaUpdatedAt += recovered * STAMINA_RECOVERY_MS;
+  if (state.stamina >= 60) state.staminaUpdatedAt = now;
+  return true;
+}
+
+function staminaClockText() {
+  if (state.stamina >= 60) return "MAX";
+  const remaining = Math.max(0, STAMINA_RECOVERY_MS - (Date.now() - state.staminaUpdatedAt));
+  const minutes = Math.floor(remaining / 60000);
+  const seconds = Math.floor((remaining % 60000) / 1000);
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function updateStaminaClock() {
+  if (applyStaminaRecovery()) {
+    saveState();
+    updateUI();
+    return;
+  }
+  const clock = document.querySelector("#stamina-timer");
+  if (clock) clock.textContent = staminaClockText();
+}
 
 function playerXpTarget(level = state.player.level) { return 150 + level * 30; }
 
@@ -441,7 +511,10 @@ function recordGuildActivity(activity, value = 1) {
 function applyReward(reward) {
   state.crystals += reward.crystals || 0;
   state.coins += reward.coins || 0;
-  state.stamina = Math.min(60, state.stamina + (reward.stamina || 0));
+  if (reward.stamina) {
+    state.stamina = Math.min(60, state.stamina + reward.stamina);
+    state.staminaUpdatedAt = Date.now();
+  }
   Object.entries(reward.materials || {}).forEach(([key, amount]) => state.materials[key] += amount);
 }
 
@@ -568,7 +641,7 @@ function sendGuildMessage(message) {
   const text = String(message ?? input.value).trim().slice(0, 40);
   if (!text) return showToast("メッセージを入力してください");
   const now = new Date();
-  state.guild.chat.unshift({ id: `player-${Date.now()}`, author: "境界局長", role: "YOU", commander: state.team[0], message: text, time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` });
+  state.guild.chat.unshift({ id: `player-${Date.now()}`, author: state.profile.name, role: "YOU", commander: state.team[0], message: text, time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` });
   state.guild.chat = state.guild.chat.slice(0, 6);
   input.value = "";
   saveState();
@@ -708,16 +781,19 @@ function updateUI() {
   const dailyReset = ensureDailyReset();
   const guildReset = ensureGuildReset();
   const eventRaidReset = ensureEventRaidReset();
-  if (dailyReset || guildReset || eventRaidReset) saveState();
+  const staminaRecovered = applyStaminaRecovery();
+  if (dailyReset || guildReset || eventRaidReset || staminaRecovered) saveState();
   const stats = getSquadStats();
   state.troops = Math.min(state.troops, stats.capacity);
   document.querySelector("#stamina-value").textContent = `${state.stamina}/60`;
+  document.querySelector("#stamina-timer").textContent = staminaClockText();
   document.querySelector("#crystal-value").textContent = formatNumber(state.crystals);
   document.querySelector("#coin-value").textContent = formatNumber(state.coins);
   document.querySelector("#pity-remaining").textContent = Math.max(0, 80 - state.pity);
   document.querySelector("#pity-bar").style.width = `${Math.min(100, state.pity / 80 * 100)}%`;
   document.querySelector("#troop-summary").textContent = `${state.troops} / ${stats.capacity}`;
   document.querySelector("#home-power").textContent = formatNumber(stats.power);
+  document.querySelector("#home-profile-name").textContent = state.profile.name;
   document.querySelector("#squad-power").textContent = formatNumber(stats.power);
   document.querySelector("#player-level").textContent = String(state.player.level).padStart(2, "0");
   document.querySelector("#home-xp-bar").style.width = `${Math.min(100, state.player.xp / playerXpTarget() * 100)}%`;
@@ -733,6 +809,12 @@ function updateUI() {
   document.querySelector("#instant-toggle").checked = state.settings.instant;
   document.body.classList.toggle("reduced-flash", state.settings.reduceFlash);
   document.querySelector("#mission-team-mini").innerHTML = miniTeamMarkup();
+  const clearCount = missions.filter(mission => (state.campaign.clears[mission.id] || 0) > 0).length;
+  const nextMission = missions[Math.min(state.campaign.unlocked - 1, missions.length - 1)];
+  document.querySelector("#home-next-mission").textContent = clearCount === missions.length ? "境界踏破 完了" : `${nextMission.stage} ${nextMission.title}`;
+  document.querySelector("#home-campaign-progress").textContent = `${clearCount} / ${missions.length} CLEAR`;
+  renderProfile();
+  renderArtTestGallery();
   renderMissions();
   renderRaid();
   renderArena();
@@ -861,11 +943,11 @@ function renderGuild() {
     const ready = current >= mission.goal && !claimed;
     return `<article class="guild-mission glass-card${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><div class="guild-mission-code"><small>${mission.code}</small><b>${mission.activity === "raid" ? "◉" : mission.activity === "arena" ? "冠" : "⌖"}</b></div><div><h3>${mission.name}</h3><p>${mission.detail}</p><u><i style="width:${current / mission.goal * 100}%"></i></u><em>${formatNumber(current)} / ${formatNumber(mission.goal)} ${mission.unit}</em><span>${rewardText(mission.reward)}</span></div><button type="button" data-guild-mission="${mission.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : "進行中"}</button></article>`;
   }).join("");
-  const player = { name: "境界局長", role: "YOU", power: getArenaPlayerStats().power, contribution: state.guild.contribution, commander: state.team[0], isPlayer: true };
+  const player = { name: state.profile.name, role: "YOU", power: getArenaPlayerStats().power, contribution: state.guild.contribution, commander: state.team[0], isPlayer: true };
   const ranking = [...guildMembers, player].sort((a, b) => b.contribution - a.contribution);
-  document.querySelector("#guild-ranking").innerHTML = ranking.map((member, index) => `<article class="guild-member${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b><em>戦力 ${formatNumber(member.power)}</em></span><div><small>WEEKLY</small><b>${formatNumber(member.contribution)}</b></div></article>`).join("");
+  document.querySelector("#guild-ranking").innerHTML = ranking.map((member, index) => `<article class="guild-member${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${escapeHtml(member.name)}</b><em>戦力 ${formatNumber(member.power)}</em></span><div><small>WEEKLY</small><b>${formatNumber(member.contribution)}</b></div></article>`).join("");
   const personalFeed = state.guild.lastActivity || "共同任務へ参加すると、ここに活動が表示されます";
-  document.querySelector("#guild-feed").innerHTML = `<div class="guild-feed-row player"><i>NOW</i><span><b>境界局長</b><small>${personalFeed}</small></span></div><div class="guild-feed-row"><i>12分</i><span><b>白鷺ユラ</b><small>ゴライアスの境界核を破壊 / +60貢献</small></span></div><div class="guild-feed-row"><i>28分</i><span><b>雨森カイ</b><small>共同制圧任務へ参加 / +25貢献</small></span></div>`;
+  document.querySelector("#guild-feed").innerHTML = `<div class="guild-feed-row player"><i>NOW</i><span><b>${escapeHtml(state.profile.name)}</b><small>${personalFeed}</small></span></div><div class="guild-feed-row"><i>12分</i><span><b>白鷺ユラ</b><small>ゴライアスの境界核を破壊 / +60貢献</small></span></div><div class="guild-feed-row"><i>28分</i><span><b>雨森カイ</b><small>共同制圧任務へ参加 / +25貢献</small></span></div>`;
   const messages = [...state.guild.chat, ...guildChatSeed].slice(0, 8);
   document.querySelector("#guild-chat-list").innerHTML = messages.map(message => `<article class="guild-chat-message${message.role === "YOU" ? " player" : ""}"><div class="guild-chat-avatar">${guildAvatarMarkup(message.commander)}</div><div><span><b>${escapeHtml(message.author)}</b><small>${escapeHtml(message.role)} / ${escapeHtml(message.time)}</small></span><p>${escapeHtml(message.message)}</p></div></article>`).join("");
   document.querySelector("#guild-quick-messages").innerHTML = guildQuickMessages.map(item => `<button type="button" data-guild-quick="${escapeHtml(item.text)}"><i>${item.icon}</i><span>${escapeHtml(item.text)}</span></button>`).join("");
@@ -931,9 +1013,9 @@ function renderEvent() {
     const ready = current >= tier.damage && !claimed;
     return `<article class="event-raid-reward${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><div><small>TOTAL ${formatNumber(tier.damage)} DMG</small><b>${tier.name}</b><span>${rewardText(tier.reward)}</span><u><i style="width:${current / tier.damage * 100}%"></i></u></div><button type="button" data-event-raid-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : `${formatNumber(current)}/${formatNumber(tier.damage)}`}</button></article>`;
   }).join("");
-  const raidPlayer = { name: "境界局長", role: "YOU", commander: state.team[0], damage: raid.personalDamage, isPlayer: true };
+  const raidPlayer = { name: state.profile.name, role: "YOU", commander: state.team[0], damage: raid.personalDamage, isPlayer: true };
   const ranking = [...eventRaidMembers, raidPlayer].sort((a, b) => b.damage - a.damage);
-  document.querySelector("#event-raid-ranking").innerHTML = ranking.map((member, index) => `<article class="event-raid-rank${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b></span><div><small>DAMAGE</small><b>${formatNumber(member.damage)}</b></div></article>`).join("");
+  document.querySelector("#event-raid-ranking").innerHTML = ranking.map((member, index) => `<article class="event-raid-rank${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${escapeHtml(member.name)}</b></span><div><small>DAMAGE</small><b>${formatNumber(member.damage)}</b></div></article>`).join("");
   const start = document.querySelector("#event-raid-start");
   start.disabled = raid.attempts <= 0 || raid.bossHp <= 0 || state.troops <= 0;
   start.innerHTML = raid.bossHp <= 0 ? `<span>祭禍鎮圧完了</span><b>✓</b>` : raid.attempts <= 0 ? `<span>本日の共鳴終了</span><b>0 / 3</b>` : `<span>5人オートで共鳴</span><b>挑戦 ${raid.attempts}</b>`;
@@ -1028,12 +1110,53 @@ function requestEventRaidSupport() {
   showToast(`団員支援 -${formatNumber(damage)} HP / 祭札+20 / +50 PT`);
 }
 
+function renderProfile() {
+  const stats = getSquadStats();
+  const clearCount = missions.filter(mission => (state.campaign.clears[mission.id] || 0) > 0).length;
+  document.querySelector("#profile-player-id").textContent = state.profile.id;
+  document.querySelector("#profile-player-name").textContent = state.profile.name;
+  document.querySelector("#profile-player-level").textContent = state.player.level;
+  document.querySelector("#profile-player-power").textContent = formatNumber(stats.power);
+  document.querySelector("#profile-owned-count").textContent = `${Object.keys(state.owned).length} / ${commanders.length}`;
+  document.querySelector("#profile-mission-count").textContent = `${clearCount} / ${missions.length}`;
+  document.querySelector("#profile-battle-count").textContent = formatNumber(state.lifetime.battles);
+  document.querySelector("#profile-draw-count").textContent = formatNumber(state.lifetime.draws);
+  const input = document.querySelector("#profile-name-input");
+  if (document.activeElement !== input) input.value = state.profile.name;
+}
+
+function renderArtTestGallery() {
+  const root = document.querySelector("#art-test-gallery");
+  if (!root) return;
+  root.innerHTML = ["kagari", "ao", "suzune", "tsuzuri"].map(id => {
+    const commander = getCommander(id);
+    return `<button type="button" class="art-test-card" data-art-preview="${id}"><span><img loading="lazy" src="${commander.art}" alt="${commander.name} 全身イラスト"></span><small>${commander.rarity} / ${commander.role}</small><strong>${commander.name}</strong><em>${commander.title}</em></button>`;
+  }).join("");
+}
+
+function showArtPreview(id) {
+  const commander = getCommander(id);
+  if (!commander) return;
+  const unit = getUnitStats(id);
+  document.querySelector("#dialog-content").innerHTML = `<div class="art-preview-dialog"><img src="${commander.art}" alt="${commander.name} 全身イラスト"><div><span class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</span><small>${commander.role}</small><h2>${commander.title}<br>${commander.name}</h2><p>${commander.skill.name} Lv.${unit.skillLevel}<br>${commander.skill.detail}</p><p>${commander.passive.name} Lv.${unit.passiveLevel}<br>${commander.passive.detail}</p><em>攻撃 ${unit.attack} / 防御 ${unit.defense}</em></div></div>`;
+  document.querySelector("#info-dialog").showModal();
+}
+
 function renderMissions() {
+  const clearCount = missions.filter(mission => (state.campaign.clears[mission.id] || 0) > 0).length;
+  const nextMission = missions[Math.min(state.campaign.unlocked - 1, missions.length - 1)];
+  document.querySelector("#campaign-progress-text").textContent = `${clearCount} / ${missions.length} CLEAR`;
+  document.querySelector("#campaign-progress-bar").style.width = `${clearCount / missions.length * 100}%`;
+  document.querySelector("#campaign-chapter").textContent = `CHAPTER ${String(nextMission.chapter).padStart(2, "0")}`;
   document.querySelector("#mission-list").innerHTML = missions.map((mission, index) => {
+    const locked = index >= state.campaign.unlocked;
+    const clears = Number(state.campaign.clears[mission.id]) || 0;
+    const firstClaimed = state.campaign.firstRewards.includes(mission.id);
     const dropNames = Object.keys(mission.drops).map(key => materials[key].name).join("・");
-    return `<article class="mission-card vivid-card has-image">
-      <div class="mission-thumb"><img src="${mission.art}" alt="${mission.enemy}"><b>${mission.stage}</b></div>
-      <div class="mission-body"><div class="mission-main"><span>${mission.zone}</span><h3>${mission.title}</h3><p>${mission.description}</p><div class="mission-drops"><i>推奨 ${mission.recommended}</i><i>ϟ ${mission.stamina}</i><i>${dropNames}</i></div></div><button type="button" class="sortie-button" data-mission="${index}">出撃</button></div>
+    const firstReward = firstClaimed ? "初回報酬 受取済" : `初回 ${rewardText(mission.firstReward)}`;
+    return `<article class="mission-card vivid-card has-image${locked ? " locked" : ""}${clears ? " cleared" : ""}">
+      <div class="mission-thumb"><img loading="lazy" src="${mission.art}" alt="${mission.enemy}"><b>${mission.stage}</b>${locked ? "<i>LOCK</i>" : clears ? "<i>CLEAR</i>" : ""}</div>
+      <div class="mission-body"><div class="mission-main"><span>CH.${mission.chapter} / ${mission.zone}</span><h3>${mission.title}</h3><p>${mission.description}</p><div class="mission-drops"><i>推奨 ${mission.recommended}</i><i>ϟ ${mission.stamina}</i><i>${dropNames}</i><i class="first-reward">${firstReward}</i>${clears ? `<i>${clears}回踏破</i>` : ""}</div></div><button type="button" class="sortie-button" data-mission="${index}" ${locked ? "disabled" : ""}>${locked ? "封鎖" : "出撃"}</button></div>
     </article>`;
   }).join("");
 }
@@ -1070,9 +1193,9 @@ function renderRaid() {
     const ready = raid.personalDamage >= tier.damage && !claimed;
     return `<article class="raid-reward${ready ? " ready" : ""}"><div><small>TOTAL ${formatNumber(tier.damage)}</small><b>${tier.name}</b><span>${raidRewardSummary(tier)}</span></div><button type="button" data-raid-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : "未達成"}</button></article>`;
   }).join("");
-  const raidPlayer = { name: "境界局長", role: "YOU", commander: state.team[0], damage: raid.personalDamage, isPlayer: true };
+  const raidPlayer = { name: state.profile.name, role: "YOU", commander: state.team[0], damage: raid.personalDamage, isPlayer: true };
   const raidRanking = [...guildRaidMembers, raidPlayer].sort((a, b) => b.damage - a.damage);
-  document.querySelector("#raid-guild-ranking").innerHTML = raidRanking.map((member, index) => `<article class="raid-guild-rank${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${member.name}</b></span><div><small>DAMAGE</small><b>${formatNumber(member.damage)}</b></div></article>`).join("");
+  document.querySelector("#raid-guild-ranking").innerHTML = raidRanking.map((member, index) => `<article class="raid-guild-rank${member.isPlayer ? " player" : ""}"><strong>${index + 1}</strong><div class="guild-member-avatar">${guildAvatarMarkup(member.commander)}</div><span><small>${member.role}${member.isPlayer ? " / CURRENT" : ""}</small><b>${escapeHtml(member.name)}</b></span><div><small>DAMAGE</small><b>${formatNumber(member.damage)}</b></div></article>`).join("");
   const start = document.querySelector("#raid-start");
   const disabled = raid.attempts <= 0 || raid.bossHp <= 0 || state.troops <= 0;
   start.disabled = disabled;
@@ -1296,6 +1419,7 @@ function performDraw(count) {
   const pityBefore = state.pity;
   state.crystals -= cost;
   const results = makeDraw(count);
+  state.lifetime.draws += count;
   saveState();
   updateUI();
   startSummon(results, pityBefore);
@@ -1400,13 +1524,26 @@ function openBattleReport(report, title, enemyName, art) {
 
 function startBattle(missionIndex) {
   const mission = missions[missionIndex];
+  if (!mission || missionIndex >= state.campaign.unlocked) return showToast("前の任務をクリアすると解放されます");
   if (state.stamina < mission.stamina) return showToast("スタミナが不足しています");
   if (state.troops <= 0) return showToast("兵を補充してから出撃してください");
   const report = simulateBattle(mission);
   state.stamina -= mission.stamina;
+  state.staminaUpdatedAt = Date.now();
   state.troops = report.allyRemaining;
   state.coins += report.reward;
-  if (report.won) Object.entries(mission.drops).forEach(([key, amount]) => state.materials[key] += amount);
+  state.lifetime.battles += 1;
+  if (report.won) {
+    Object.entries(mission.drops).forEach(([key, amount]) => state.materials[key] += amount);
+    state.campaign.clears[mission.id] = (Number(state.campaign.clears[mission.id]) || 0) + 1;
+    state.campaign.unlocked = Math.max(state.campaign.unlocked, Math.min(missions.length, missionIndex + 2));
+    state.lifetime.missionWins += 1;
+    if (!state.campaign.firstRewards.includes(mission.id)) {
+      state.campaign.firstRewards.push(mission.id);
+      applyReward(mission.firstReward);
+      report.firstClear = rewardText(mission.firstReward);
+    }
+  }
   report.levelsGained = recordDailyActivity(report.won ? "mission" : "", report.won ? 25 : 8);
   if (report.won) recordGuildActivity("mission");
   report.playerLevel = state.player.level;
@@ -1424,6 +1561,8 @@ function startEventBattle(stageIndex) {
   report.mode = "event";
   report.eventStage = stage;
   state.stamina -= stage.stamina;
+  state.staminaUpdatedAt = Date.now();
+  state.lifetime.battles += 1;
   state.troops = report.allyRemaining;
   state.coins += report.reward;
   if (report.won) {
@@ -1432,6 +1571,7 @@ function startEventBattle(stageIndex) {
     state.event.clears[stage.id] = (Number(state.event.clears[stage.id]) || 0) + 1;
     report.eventPoints = stage.points;
     report.eventTokens = stage.token;
+    state.lifetime.missionWins += 1;
   }
   report.levelsGained = recordDailyActivity(report.won ? "mission" : "", report.won ? 25 : 8);
   if (report.won) recordGuildActivity("mission");
@@ -1506,6 +1646,8 @@ function startEventRaidBattle() {
   if (raid.bossHp <= 0) return showToast("ヨルカグラは鎮圧済みです");
   if (state.troops <= 0) return showToast("兵を補充してから共鳴してください");
   const report = simulateEventRaid();
+  state.lifetime.battles += 1;
+  state.lifetime.raidRuns += 1;
   raid.attempts -= 1;
   raid.bossHp = report.enemyRemaining;
   raid.personalDamage += report.damage;
@@ -1621,6 +1763,8 @@ function startRaidBattle() {
   if (state.raid.bossHp <= 0) return showToast("ゴライアスは鎮圧済みです");
   if (state.troops <= 0) return showToast("兵を補充してから出撃してください");
   const report = simulateRaid();
+  state.lifetime.battles += 1;
+  state.lifetime.raidRuns += 1;
   state.raid.attempts -= 1;
   state.raid.bossHp = report.enemyRemaining;
   state.raid.personalDamage += report.damage;
@@ -1688,10 +1832,12 @@ function startArenaBattle(opponentId) {
   if (!opponent) return;
   if (state.arena.tickets <= 0) return showToast("本日のアリーナ挑戦回数を使い切りました");
   const report = simulateArena(opponent);
+  state.lifetime.battles += 1;
   state.arena.tickets -= 1;
   state.arena.rating = Math.max(0, state.arena.rating + report.ratingDelta);
   report.ratingAfter = state.arena.rating;
   if (report.won) {
+    state.lifetime.arenaWins += 1;
     state.arena.wins += 1;
     state.arena.streak += 1;
     state.arena.bestStreak = Math.max(state.arena.bestStreak, state.arena.streak);
@@ -1780,7 +1926,8 @@ function finishBattleDisplay() {
     document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "!";
     document.querySelector("#battle-result-title").textContent = report.won ? "任務完了" : "部隊撤退";
     const drops = report.won ? ` / ${Object.entries(report.mission.drops).map(([key, amount]) => `${materials[key].name}×${amount}`).join("・")}` : "";
-    document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${drops}${growth}`;
+    const firstClear = report.firstClear ? ` / 初回報酬 ${report.firstClear}` : "";
+    document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${drops}${firstClear}${growth}`;
   }
   const missing = Math.max(0, getTeamCapacity() - state.troops);
   const button = document.querySelector("#replenish-button");
@@ -1821,6 +1968,60 @@ function showInfoDialog(type) {
     content.innerHTML = `<div class="dialog-body"><h2>天井・重複</h2><ul><li>10連はSR以上1体確定</li><li>61回目からUR確率が段階上昇</li><li>80回目までにUR確定</li><li>UR獲得でカウンターをリセット</li><li>重複は記憶片へ自動変換</li></ul></div>`;
   }
   document.querySelector("#info-dialog").showModal();
+}
+
+function saveProfileName() {
+  const input = document.querySelector("#profile-name-input");
+  const name = input.value.trim().slice(0, 16);
+  if (!name) return showToast("プレイヤー名を入力してください");
+  state.profile.name = name;
+  saveState();
+  updateUI();
+  showToast(`プレイヤー名を「${name}」に変更しました`);
+}
+
+function encodeSaveCode(payload = state) {
+  const bytes = new TextEncoder().encode(JSON.stringify(payload));
+  let binary = "";
+  bytes.forEach(byte => binary += String.fromCharCode(byte));
+  return btoa(binary);
+}
+
+function decodeSaveCode(code) {
+  const binary = atob(code.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+async function copySaveCode() {
+  const textarea = document.querySelector("#save-code");
+  textarea.value = encodeSaveCode();
+  textarea.focus();
+  textarea.select();
+  try {
+    await navigator.clipboard.writeText(textarea.value);
+  } catch {
+    document.execCommand("copy");
+  }
+  showToast("現在のセーブコードをコピーしました");
+}
+
+function loadSaveCode() {
+  const textarea = document.querySelector("#save-code");
+  try {
+    const imported = decodeSaveCode(textarea.value.trim());
+    if (!imported || typeof imported !== "object" || !Array.isArray(imported.team) || !imported.owned) throw new Error("invalid save");
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
+    state = loadState();
+    activeSlot = 0;
+    workshopUnitId = state.team[0];
+    saveState();
+    updateUI();
+    navigateTo("home");
+    showToast("セーブデータを読み込みました");
+  } catch {
+    showToast("セーブコードを確認してください");
+  }
 }
 
 function resetDemo() {
@@ -1997,6 +2198,8 @@ document.addEventListener("click", event => {
   if (targetNav) return navigateTo(targetNav.dataset.screenTarget);
   const mission = event.target.closest("[data-mission]");
   if (mission) return startBattle(Number(mission.dataset.mission));
+  const artPreview = event.target.closest("[data-art-preview]");
+  if (artPreview) return showArtPreview(artPreview.dataset.artPreview);
   const slot = event.target.closest("[data-slot]");
   if (slot) return selectTeamSlot(Number(slot.dataset.slot));
   const unit = event.target.closest("[data-unit]");
@@ -2059,6 +2262,9 @@ document.querySelector("#guild-chat-form").addEventListener("submit", event => {
 document.querySelector("#replenish-button").addEventListener("click", replenishTroops);
 document.querySelector(".dialog-close").addEventListener("click", () => document.querySelector("#info-dialog").close());
 document.querySelector("#reset-demo").addEventListener("click", resetDemo);
+document.querySelector("#profile-name-save").addEventListener("click", saveProfileName);
+document.querySelector("#save-code-copy").addEventListener("click", copySaveCode);
+document.querySelector("#save-code-load").addEventListener("click", loadSaveCode);
 
 [["sound-toggle", "sound"], ["haptic-toggle", "haptic"], ["flash-toggle", "reduceFlash"], ["instant-toggle", "instant"]].forEach(([id, key]) => {
   document.querySelector(`#${id}`).addEventListener("change", event => {
@@ -2069,3 +2275,4 @@ document.querySelector("#reset-demo").addEventListener("click", resetDemo);
 });
 
 updateUI();
+setInterval(updateStaminaClock, 1000);

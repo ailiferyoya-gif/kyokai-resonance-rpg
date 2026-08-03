@@ -10,7 +10,7 @@
   <link rel="preload" href="assets/ur-exorcist.png" as="image">
   <link rel="preload" href="assets/commander-ren-v2.png" as="image">
   <link rel="preload" href="assets/event-yorukagura-v1.png" as="image">
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -23,7 +23,7 @@
         <div><p class="eyebrow">BORDER RESONANCE</p><h1 id="screen-title">境界局</h1></div>
       </div>
       <div class="resource-row" aria-label="所持資源">
-        <span class="resource stamina"><i>ϟ</i><b id="stamina-value">48/60</b></span>
+        <span class="resource stamina"><i>ϟ</i><b id="stamina-value">48/60</b><small id="stamina-timer">05:00</small></span>
         <span class="resource crystal"><i>◆</i><b id="crystal-value">4,500</b></span>
         <span class="resource coin"><i>●</i><b id="coin-value">12,800</b></span>
       </div>
@@ -36,7 +36,7 @@
         <h2 id="home-heading" class="sr-only">ホーム</h2>
         <article class="profile-card glass-card">
           <div class="avatar-ring">局</div>
-          <div class="profile-copy"><span>PLAYER LEVEL <b id="player-level">07</b></span><strong>境界局長</strong><small>第零遊撃隊　5人編成戦力 <b id="home-power">0</b></small><div class="profile-xp"><i id="home-xp-bar"></i><em id="home-xp-text">0 / 0</em></div></div>
+          <div class="profile-copy"><span>PLAYER LEVEL <b id="player-level">07</b></span><strong id="home-profile-name">境界局長</strong><small>第零遊撃隊　5人編成戦力 <b id="home-power">0</b></small><div class="profile-xp"><i id="home-xp-bar"></i><em id="home-xp-text">0 / 0</em></div></div>
           <button class="icon-button" type="button" data-screen-target="menu" aria-label="設定を開く">⚙</button>
         </article>
 
@@ -55,7 +55,7 @@
           <button class="operation-card glass-card event-operation" type="button" data-screen-target="event"><span class="operation-icon event">祭</span><span class="operation-copy"><small>LIMITED EVENT / 12 DAYS</small><strong>夜神楽、境界に灯る</strong><em><b id="home-event-points">0 PT</b> / 共闘レイド・交換所</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="guild"><span class="operation-icon guild">結</span><span class="operation-copy"><small>GUILD CO-OP</small><strong>第零共鳴団・共同任務</strong><em><b id="home-guild-contribution">0 貢献</b> / 週間ランキング</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="daily"><span class="operation-icon pink">✓</span><span class="operation-copy"><small>DAILY OPERATIONS</small><strong>デイリー作戦・ログイン補給</strong><em><b id="home-daily-progress">0 / 4</b> 達成 / <span id="home-login-state">補給受取可</span></em></span><span class="chevron">›</span></button>
-          <button class="operation-card glass-card" type="button" data-screen-target="missions"><span class="operation-icon cyan">⌖</span><span class="operation-copy"><small>AUTO MISSION</small><strong>ネオン街の追跡者</strong><em>5人連携 / 消費 6</em></span><span class="chevron">›</span></button>
+          <button class="operation-card glass-card" type="button" data-screen-target="missions"><span class="operation-icon cyan">⌖</span><span class="operation-copy"><small>AUTO CAMPAIGN</small><strong id="home-next-mission">ネオン街の追跡者</strong><em id="home-campaign-progress">1 / 9 解放</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="workshop"><span class="operation-icon green">⚒</span><span class="operation-copy"><small>TRAIN & CRAFT</small><strong>個別育成・境界工房</strong><em>スキル強化 / キャラ別装備</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="raid"><span class="operation-icon red">◉</span><span class="operation-copy"><small>CO-OP RAID</small><strong>境界喰らい・ゴライアス</strong><em>残り2日 / 参加 12,480人</em></span><span class="chevron">›</span></button>
           <button class="operation-card glass-card" type="button" data-screen-target="arena"><span class="operation-icon gold">冠</span><span class="operation-copy"><small>ASYNC ARENA</small><strong>境界アリーナ</strong><em>5対5オート / レート戦</em></span><span class="chevron">›</span></button>
@@ -75,6 +75,8 @@
           <button id="draw-ten" class="primary-button draw-button" type="button"><span><small>SR以上1体確定</small><strong>10連召喚</strong></span><b>◆ 1,500</b></button>
           <button id="draw-one" class="secondary-button draw-button" type="button"><span><small>単発召喚</small><strong>1回召喚</strong></span><b>◆ 150</b></button>
         </div>
+        <div class="section-heading"><div><span>NEW ART TEST</span><h2>新規指揮官プレビュー</h2></div><small>タップで全身確認</small></div>
+        <div id="art-test-gallery" class="art-test-gallery"></div>
         <div class="gacha-links"><button type="button" data-dialog="rates">提供割合</button><button type="button" data-dialog="rules">天井・重複</button><button type="button" id="reset-demo">デモ初期化</button></div>
       </section>
 
@@ -108,7 +110,8 @@
       </section>
 
       <section id="missions-screen" class="screen" data-title="任務" aria-labelledby="missions-heading">
-        <div class="section-heading page-heading"><div><span>AUTO OPERATION</span><h2 id="missions-heading">任務選択</h2></div><span class="level-chip">CHAPTER 01</span></div>
+        <div class="section-heading page-heading"><div><span>AUTO CAMPAIGN</span><h2 id="missions-heading">境界踏破</h2></div><span id="campaign-chapter" class="level-chip">CHAPTER 01</span></div>
+        <article class="campaign-progress glass-card"><span><small>STORY PROGRESS</small><strong id="campaign-progress-text">0 / 9 CLEAR</strong></span><u><i id="campaign-progress-bar"></i></u><em>勝利すると次の任務と初回報酬を解放</em></article>
         <article class="squad-strip glass-card"><div id="mission-team-mini" class="mini-team"></div><div><small>出撃部隊 / 5 UNIT</small><strong>第零遊撃隊</strong><span>兵力 <b id="troop-summary">0</b>名</span></div><em>戦力 <b id="squad-power">0</b></em></article>
         <div id="mission-list" class="mission-list"></div>
         <aside class="system-note"><b>完全オート戦闘</b><p>5人のキャラLv、スキルLv、パッシブ、個別装備を反映。各ラウンドでは指揮官が育成済みスキルを自動発動します。</p></aside>
@@ -206,7 +209,14 @@
       </section>
 
       <section id="menu-screen" class="screen" data-title="メニュー" aria-labelledby="menu-heading">
-        <div class="section-heading page-heading"><div><span>SETTINGS</span><h2 id="menu-heading">演出設定</h2></div></div>
+        <div class="section-heading page-heading"><div><span>PLAYTEST DATA</span><h2 id="menu-heading">プレイデータ・設定</h2></div></div>
+        <article class="playtest-profile glass-card">
+          <div class="playtest-profile-head"><div class="avatar-ring">局</div><span><small>PLAYER ID <b id="profile-player-id">BR-000000</b></small><strong id="profile-player-name">境界局長</strong><em>Lv.<b id="profile-player-level">7</b> / 戦力 <b id="profile-player-power">0</b></em></span></div>
+          <div class="playtest-stats"><span><small>所持</small><b id="profile-owned-count">5</b></span><span><small>任務</small><b id="profile-mission-count">0</b></span><span><small>戦闘</small><b id="profile-battle-count">0</b></span><span><small>召喚</small><b id="profile-draw-count">0</b></span></div>
+          <label class="profile-name-edit"><span>プレイヤー名</span><input id="profile-name-input" type="text" maxlength="16" autocomplete="off"><button id="profile-name-save" type="button">保存</button></label>
+        </article>
+        <article class="save-share glass-card"><div><small>SAVE SHARE</small><h3>テスト用セーブコード</h3><p>コピーして別端末や他のブラウザへ貼り付けると、同じ進行データで続けられます。</p></div><textarea id="save-code" rows="4" spellcheck="false" placeholder="ここにセーブコードを貼り付け"></textarea><div><button id="save-code-copy" type="button">現在データをコピー</button><button id="save-code-load" type="button">貼付データを読込</button></div></article>
+        <div class="section-heading"><div><span>SETTINGS</span><h2>演出設定</h2></div></div>
         <article class="settings-card glass-card">
           <label><span><b>サウンド</b><small>ガチャSE・UI音</small></span><input id="sound-toggle" type="checkbox" checked><i></i></label>
           <label><span><b>触覚フィードバック</b><small>対応端末のみ</small></span><input id="haptic-toggle" type="checkbox" checked><i></i></label>
@@ -218,7 +228,7 @@
         <button class="menu-shortcut glass-card" type="button" data-screen-target="daily"><span>✓</span><div><small>DAILY & PLAYER LEVEL</small><strong>デイリー作戦・ログイン補給</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card guild-shortcut" type="button" data-screen-target="guild"><span>結</span><div><small>WEEKLY GUILD CO-OP</small><strong>第零共鳴団・共同任務</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card event-shortcut" type="button" data-screen-target="event"><span>祭</span><div><small>LIMITED EVENT</small><strong>夜神楽、境界に灯る</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PROTOTYPE v1.0</span><h3>境界共鳴</h3><p>5人編成、個別育成、期間イベント共闘、デイリー、ギルド交流・救援、ガチャ、部位破壊レイド、非同期PvPアリーナを実装。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>運営</i><b>ストーリー / 周回 / 交換所</b></div><div><i>交流</i><b>ギルド / 共闘レイド / PvP</b></div></article>
+        <article class="about-card glass-card"><span>PLAYABLE BUILD v1.1</span><h3>境界共鳴</h3><p>9任務のキャンペーン、14名の指揮官、個別育成、期間共闘、デイリー、ギルド、ガチャ、レイド、非同期PvPを端末内保存でプレイ可能。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>保存</i><b>自動保存 / セーブコード</b></div><div><i>人数</i><b>ソロ / 少人数テスト</b></div></article>
       </section>
     </div>
 
@@ -250,6 +260,6 @@
   </section>
 
   <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

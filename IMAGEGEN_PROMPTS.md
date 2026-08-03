@@ -1,4 +1,24 @@
-# Image generation prompts — v0.3
+# Image generation prompts — v1.1
+
+## v1.1 test commander set
+
+Shared direction for all four assets: original full-body mobile social RPG commander illustration, portrait 2:3. Use the supplied image only as a reference for vivid color placement and graphic energy—not character identity, clothing, pose, weapon, or motifs. Crisp anime-inspired cel rendering, bold black/eggplant shadows, high-saturation magenta/cyan/yellow/red accents, chromatic offset edges, energetic ribbons, geometric shards, and sparse halftone textures. Each character may use a different dominant palette, but must feel vivid. Clean anatomy is mandatory: exactly two arms and two hands, five naturally articulated fingers per visible hand, coherent wrists and weapon grips. No text, logo, UI, border, watermark, copied mask, or copied costume.
+
+### char-kagari-v1.png
+
+Create Kagari, an original young adult female oni-mask swordswoman titled “Crimson Boundary Demon Dance.” Long black hair with violet/magenta ribbons, small original white ritual mask worn above the head, black/white/red combat shrine outfit, and one broad boundary blade. Dynamic airborne diagonal slash, fierce composed eyes, readable sword grip. Make crimson and hot magenta dominant, with electric cyan and sharp yellow registration accents over deep black-purple energy.
+
+### char-ao-v1.png
+
+Create Ao, an original young adult male storm ascetic lancer titled “Azure Thunder Shugendo Spear.” Short dark-blue hair, calm focused face, asymmetric modern mountain-ascetic combat uniform, and a long double-ended lightning spear. Strong three-quarter lunging pose in rain and storm arcs. Make electric cyan and cobalt dominant, with acid lime, hot magenta, and restrained red accents over black-violet shadows.
+
+### char-suzune-v1.png
+
+Create Suzune, an original young adult female festival signal gunner titled “Festival-Electric Signaler.” Warm confident expression, dark auburn high ponytail, cropped modern festival jacket with technical cords, and one compact signal pistol. Energetic twisting full-body pose, pistol hand clearly readable, free hand open and anatomically correct. Make vivid orange/coral dominant, with electric cyan, hot magenta, lemon yellow, and black-purple graphic blocks.
+
+### char-tsuzuri-v1.png
+
+Create Tsuzuri, an original young adult male ward support caster titled “Chromatic Sigil Barrier Scribe.” Soft but resolute face, dark teal-black hair, layered modern ritual coat, one open folding fan in a natural grip, and the other hand forming a clean protective gesture. Flowing full-body pose surrounded by paper wards and circular boundary glyph fragments. Make turquoise/teal and hot magenta dominant, with lemon yellow, white, and deep eggplant accents.
 
 ## v0.3 color direction
 
