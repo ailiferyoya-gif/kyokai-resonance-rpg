@@ -124,6 +124,34 @@ const guildRewardTiers = [
 
 const guildContributionPoints = { mission: 25, expedition: 15, raid: 60, arena: 35, craft: 15, upgrade: 10 };
 
+const eventSeasonId = "night-festival-01";
+const eventBossArt = "assets/event-yorukagura-v1.png";
+const eventStories = [
+  { id: "story-1", episode: "EPISODE 01", title: "消えた祭灯", summary: "境界祭の灯りが一斉に沈黙する。", reward: { crystals: 10 }, body: ["年に一度、境界の内と外を結ぶ『共鳴祭』。開祭の鐘が鳴った瞬間、ネオン街の祭灯がすべて黒く染まった。", "レンたち第零遊撃隊は、雨の参道に残された九つの巨大な足跡を追う。"] },
+  { id: "story-2", episode: "EPISODE 02", title: "九尾機、巡行", summary: "白磁の獣が祭路を境界へ変えていく。", reward: { crystals: 10 }, body: ["祭路の上空に現れたのは、旧時代の祭礼機構『ヨルカグラ』。九本の尾が現実座標を書き換え、街そのものを巨大な祭壇へ変えていた。", "サナは中央のシアン核に人の祈りが取り込まれていることを見抜く。破壊だけでは、祭に集った記憶まで失われてしまう。"] },
+  { id: "story-3", episode: "FINAL EPISODE", title: "夜神楽を終わらせて", summary: "五人の共鳴で祭禍機の核を解放する。", reward: { crystals: 20 }, body: ["コハクが界紋を開き、五人の共鳴を一本の光へ束ねる。狙うのは機体ではなく、暴走した祭礼命令だけ。", "夜明けと共に白磁の九尾は静止し、奪われた灯りが街へ戻る。境界祭は、今度こそ人々自身の手で再開された。"] }
+];
+
+const eventStages = [
+  { id: "event-1", stage: "E-1", zone: "FESTIVAL / RAIN", title: "灯消えの参道", enemy: "祭灯の影", description: "黒く染まった祭灯群を鎮める", stamina: 6, recommended: 760, enemyTroops: 50, enemyAttack: 360, enemyDefense: 300, reward: 650, token: 35, points: 120, art: eventBossArt, drops: {} },
+  { id: "event-2", stage: "E-2", zone: "TORII DISTRICT", title: "九尾機の巡行", enemy: "ヨルカグラ分体", description: "祭路を侵食する白磁装甲を突破", stamina: 8, recommended: 900, enemyTroops: 66, enemyAttack: 435, enemyDefense: 365, reward: 900, token: 50, points: 190, art: eventBossArt, drops: {} },
+  { id: "event-3", stage: "E-3", zone: "BOUNDARY ALTAR", title: "祭禍機ヨルカグラ", enemy: "祭禍機ヨルカグラ", description: "五人の共鳴で祭礼命令を停止せよ", stamina: 10, recommended: 1040, enemyTroops: 82, enemyAttack: 510, enemyDefense: 435, reward: 1300, token: 75, points: 290, art: eventBossArt, drops: {} }
+];
+
+const eventPointRewards = [
+  { id: "event-p1", points: 100, name: "祭灯の記録 I", reward: { crystals: 50 } },
+  { id: "event-p2", points: 300, name: "祭灯の記録 II", reward: { coins: 1200, materials: { ore: 2 } } },
+  { id: "event-p3", points: 600, name: "祭灯の記録 III", reward: { crystals: 120, materials: { fiber: 3 } } },
+  { id: "event-p4", points: 1000, name: "夜神楽の証", reward: { crystals: 220, materials: { core: 3 } } }
+];
+
+const eventExchangeItems = [
+  { id: "event-coins", name: "コイン×1,000", icon: "●", cost: 30, stock: 3, reward: { coins: 1000 } },
+  { id: "event-materials", name: "祭路素材セット", icon: "⚒", cost: 40, stock: 3, reward: { materials: { ore: 2, fiber: 2 } } },
+  { id: "event-stamina", name: "共鳴活性剤 ϟ10", icon: "ϟ", cost: 50, stock: 2, reward: { stamina: 10 } },
+  { id: "event-core", name: "共鳴核×3", icon: "◆", cost: 90, stock: 1, reward: { materials: { core: 3 } } }
+];
+
 const starterTeam = ["ren", "sana", "touma", "mina", "isami"];
 const starterOwned = Object.fromEntries(starterTeam.map(id => [id, { shards: 0 }]));
 const newProgress = () => ({ level: 1, skillLevel: 1, passiveLevel: 1 });
@@ -141,9 +169,10 @@ const localWeekKey = (date = new Date()) => {
 };
 const newGuildActions = () => ({ mission: 0, expedition: 0, raid: 0, arena: 0, craft: 0, upgrade: 0 });
 const newGuildState = () => ({ weekKey: localWeekKey(), contribution: 0, totalContribution: 0, actions: newGuildActions(), claimedMissions: [], claimedRewards: [], cheerDay: "", supplyDay: "", rescueDay: "", rescueDamage: 0, chat: [], lastActivity: "" });
+const newEventState = () => ({ seasonId: eventSeasonId, points: 0, tokens: 0, clears: {}, claimedRewards: [], exchange: {}, storyRead: [] });
 
 const defaultState = () => ({
-  schema: 8,
+  schema: 9,
   crystals: 4500,
   coins: 12800,
   stamina: 48,
@@ -159,6 +188,7 @@ const defaultState = () => ({
   player: { level: 7, xp: 85 },
   daily: newDailyState(),
   guild: newGuildState(),
+  event: newEventState(),
   expeditions: 0,
   demoFirstTen: true,
   settings: { sound: true, haptic: true, reduceFlash: false, instant: false }
@@ -258,10 +288,22 @@ function loadState() {
     }
     guild.contribution = Math.max(0, Number(guild.contribution) || 0);
     guild.totalContribution = Math.max(0, Number(guild.totalContribution) || 0);
+    const parsedEvent = parsed.event || {};
+    let event = {
+      ...defaults.event,
+      ...parsedEvent,
+      clears: { ...defaults.event.clears, ...(parsedEvent.clears || {}) },
+      exchange: { ...defaults.event.exchange, ...(parsedEvent.exchange || {}) },
+      claimedRewards: Array.isArray(parsedEvent.claimedRewards) ? parsedEvent.claimedRewards : [],
+      storyRead: Array.isArray(parsedEvent.storyRead) ? parsedEvent.storyRead : []
+    };
+    if (event.seasonId !== eventSeasonId) event = newEventState();
+    event.points = Math.max(0, Number(event.points) || 0);
+    event.tokens = Math.max(0, Number(event.tokens) || 0);
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 8,
+      schema: 9,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -272,6 +314,7 @@ function loadState() {
       player,
       daily,
       guild,
+      event,
       settings: { ...defaults.settings, ...(parsed.settings || {}) }
     };
     const restoredTroops = Number(restored.troops);
@@ -346,6 +389,7 @@ function recordGuildActivity(activity, value = 1) {
 function applyReward(reward) {
   state.crystals += reward.crystals || 0;
   state.coins += reward.coins || 0;
+  state.stamina = Math.min(60, state.stamina + (reward.stamina || 0));
   Object.entries(reward.materials || {}).forEach(([key, amount]) => state.materials[key] += amount);
 }
 
@@ -353,6 +397,7 @@ function rewardText(reward) {
   const parts = [];
   if (reward.crystals) parts.push(`◆${formatNumber(reward.crystals)}`);
   if (reward.coins) parts.push(`●${formatNumber(reward.coins)}`);
+  if (reward.stamina) parts.push(`ϟ${formatNumber(reward.stamina)}`);
   Object.entries(reward.materials || {}).forEach(([key, amount]) => parts.push(`${materials[key].icon}${amount}`));
   return parts.join("　");
 }
@@ -603,6 +648,7 @@ function navigateTo(screenName) {
   if (screenName === "arena") renderArena();
   if (screenName === "daily") renderDaily();
   if (screenName === "guild") renderGuild();
+  if (screenName === "event") renderEvent();
   playUISound();
 }
 
@@ -627,6 +673,7 @@ function updateUI() {
   document.querySelector("#home-daily-progress").textContent = `${dailyComplete} / ${dailyTasks.length}`;
   document.querySelector("#home-login-state").textContent = state.daily.loginLastDay === localDayKey() ? "補給受取済" : "補給受取可";
   document.querySelector("#home-guild-contribution").textContent = `${formatNumber(state.guild.contribution)} 貢献`;
+  document.querySelector("#home-event-points").textContent = `${formatNumber(state.event.points)} PT`;
   document.querySelector("#sound-toggle").checked = state.settings.sound;
   document.querySelector("#haptic-toggle").checked = state.settings.haptic;
   document.querySelector("#flash-toggle").checked = state.settings.reduceFlash;
@@ -638,6 +685,7 @@ function updateUI() {
   renderArena();
   renderDaily();
   renderGuild();
+  renderEvent();
   renderFormation();
   renderWorkshop();
 }
@@ -768,6 +816,76 @@ function renderGuild() {
   const messages = [...state.guild.chat, ...guildChatSeed].slice(0, 8);
   document.querySelector("#guild-chat-list").innerHTML = messages.map(message => `<article class="guild-chat-message${message.role === "YOU" ? " player" : ""}"><div class="guild-chat-avatar">${guildAvatarMarkup(message.commander)}</div><div><span><b>${escapeHtml(message.author)}</b><small>${escapeHtml(message.role)} / ${escapeHtml(message.time)}</small></span><p>${escapeHtml(message.message)}</p></div></article>`).join("");
   document.querySelector("#guild-quick-messages").innerHTML = guildQuickMessages.map(item => `<button type="button" data-guild-quick="${escapeHtml(item.text)}"><i>${item.icon}</i><span>${escapeHtml(item.text)}</span></button>`).join("");
+}
+
+function renderEvent() {
+  const root = document.querySelector("#event-screen");
+  if (!root) return;
+  const maxPoints = eventPointRewards.at(-1).points;
+  document.querySelector("#event-points").textContent = formatNumber(state.event.points);
+  document.querySelector("#event-tokens").textContent = formatNumber(state.event.tokens);
+  document.querySelector("#event-point-bar").style.width = `${Math.min(100, state.event.points / maxPoints * 100)}%`;
+  document.querySelector("#event-story-list").innerHTML = eventStories.map((story, index) => {
+    const read = state.event.storyRead.includes(story.id);
+    return `<button type="button" class="event-story${read ? " read" : ""}" data-event-story="${story.id}"><i>${String(index + 1).padStart(2, "0")}</i><span><small>${story.episode}</small><b>${story.title}</b><em>${story.summary}</em></span><strong>${read ? "読了" : rewardText(story.reward)}</strong></button>`;
+  }).join("");
+  document.querySelector("#event-stage-list").innerHTML = eventStages.map((stage, index) => `<article class="event-stage glass-card"><div class="event-stage-art"><img src="${stage.art}" alt="${stage.enemy}"><b>${stage.stage}</b></div><div><small>${stage.zone}</small><h3>${stage.title}</h3><p>${stage.description}</p><span><i>推奨 ${stage.recommended}</i><i>ϟ${stage.stamina}</i><i>祭札 ${stage.token}</i></span><em>クリア ${state.event.clears[stage.id] || 0}回 / +${stage.points} PT</em></div><button type="button" data-event-stage="${index}" ${state.stamina < stage.stamina || state.troops <= 0 ? "disabled" : ""}><small>AUTO</small><b>出撃</b></button></article>`).join("");
+  document.querySelector("#event-point-rewards").innerHTML = eventPointRewards.map(tier => {
+    const current = Math.min(tier.points, state.event.points);
+    const claimed = state.event.claimedRewards.includes(tier.id);
+    const ready = current >= tier.points && !claimed;
+    return `<article class="event-point-reward${ready ? " ready" : ""}${claimed ? " claimed" : ""}"><div><small>${formatNumber(tier.points)} PT</small><b>${tier.name}</b><span>${rewardText(tier.reward)}</span><u><i style="width:${current / tier.points * 100}%"></i></u></div><button type="button" data-event-reward="${tier.id}" ${ready ? "" : "disabled"}>${claimed ? "受取済" : ready ? "受取" : `${formatNumber(current)}/${formatNumber(tier.points)}`}</button></article>`;
+  }).join("");
+  document.querySelector("#event-exchange-list").innerHTML = eventExchangeItems.map(item => {
+    const used = Number(state.event.exchange[item.id]) || 0;
+    const remaining = Math.max(0, item.stock - used);
+    const ready = remaining > 0 && state.event.tokens >= item.cost;
+    return `<article class="event-exchange-item"><i>${item.icon}</i><div><small>残り ${remaining} / ${item.stock}</small><b>${item.name}</b><span>祭札 ${item.cost}</span></div><button type="button" data-event-exchange="${item.id}" ${ready ? "" : "disabled"}>${remaining ? "交換" : "完売"}</button></article>`;
+  }).join("");
+}
+
+function showEventStory(id) {
+  const story = eventStories.find(item => item.id === id);
+  if (!story) return;
+  const firstRead = !state.event.storyRead.includes(id);
+  if (firstRead) {
+    state.event.storyRead.push(id);
+    applyReward(story.reward);
+    grantPlayerXp(5);
+    saveState();
+    updateUI();
+  }
+  document.querySelector("#dialog-content").innerHTML = `<div class="dialog-body event-story-dialog"><small>${story.episode}</small><h2>${story.title}</h2>${story.body.map(paragraph => `<p>${paragraph}</p>`).join("")}<div><span>${firstRead ? "初回読了報酬" : "READ COMPLETE"}</span><b>${firstRead ? rewardText(story.reward) : "✓ 読了済み"}</b></div></div>`;
+  document.querySelector("#info-dialog").showModal();
+  playUISound();
+  if (firstRead) showToast(`${story.title}：${rewardText(story.reward)}`);
+}
+
+function claimEventPointReward(id) {
+  const tier = eventPointRewards.find(item => item.id === id);
+  if (!tier || state.event.points < tier.points || state.event.claimedRewards.includes(id)) return;
+  state.event.claimedRewards.push(id);
+  applyReward(tier.reward);
+  saveState();
+  updateUI();
+  playRevealSound("SSR");
+  vibrate([20, 30, 65]);
+  showToast(`${tier.name}：${rewardText(tier.reward)}`);
+}
+
+function exchangeEventItem(id) {
+  const item = eventExchangeItems.find(entry => entry.id === id);
+  if (!item) return;
+  const used = Number(state.event.exchange[id]) || 0;
+  if (used >= item.stock || state.event.tokens < item.cost) return;
+  state.event.tokens -= item.cost;
+  state.event.exchange[id] = used + 1;
+  applyReward(item.reward);
+  saveState();
+  updateUI();
+  playCraftSound();
+  vibrate([20, 25, 45]);
+  showToast(`${item.name}を交換しました`);
 }
 
 function renderMissions() {
@@ -1156,6 +1274,32 @@ function startBattle(missionIndex) {
   openBattleReport(report, mission.title, mission.enemy, mission.art);
 }
 
+function startEventBattle(stageIndex) {
+  const stage = eventStages[stageIndex];
+  if (!stage) return;
+  if (state.stamina < stage.stamina) return showToast("スタミナが不足しています");
+  if (state.troops <= 0) return showToast("兵を補充してから出撃してください");
+  const report = simulateBattle(stage);
+  report.mode = "event";
+  report.eventStage = stage;
+  state.stamina -= stage.stamina;
+  state.troops = report.allyRemaining;
+  state.coins += report.reward;
+  if (report.won) {
+    state.event.points += stage.points;
+    state.event.tokens += stage.token;
+    state.event.clears[stage.id] = (Number(state.event.clears[stage.id]) || 0) + 1;
+    report.eventPoints = stage.points;
+    report.eventTokens = stage.token;
+  }
+  report.levelsGained = recordDailyActivity(report.won ? "mission" : "", report.won ? 25 : 8);
+  if (report.won) recordGuildActivity("mission");
+  report.playerLevel = state.player.level;
+  saveState();
+  updateUI();
+  openBattleReport(report, `限定任務 ${stage.title}`, stage.enemy, stage.art);
+}
+
 function simulateBattle(mission) {
   const stats = getSquadStats();
   let ally = state.troops;
@@ -1387,6 +1531,11 @@ function finishBattleDisplay() {
     document.querySelector("#battle-result-title").textContent = report.won ? "レイド鎮圧" : "共鳴同期完了";
     const breaks = report.newBreaks.length ? ` / 部位破壊 ${report.newBreaks.map(id => raidBoss.parts[id].name).join("・")}` : "";
     document.querySelector("#battle-result-meta").textContent = `与ダメージ ${formatNumber(report.damage)} / 損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${breaks}${growth}`;
+  } else if (report.mode === "event") {
+    document.querySelector("#battle-result-icon").textContent = report.won ? "祭" : "!";
+    document.querySelector("#battle-result-title").textContent = report.won ? "イベント任務完了" : "部隊撤退";
+    const eventReward = report.won ? ` / 祭札 +${report.eventTokens} / EVENT +${report.eventPoints} PT` : "";
+    document.querySelector("#battle-result-meta").textContent = `損耗 ${report.casualties}名 / ${formatNumber(report.reward)}コイン${eventReward}${growth}`;
   } else {
     document.querySelector("#battle-result-icon").textContent = report.won ? "✓" : "!";
     document.querySelector("#battle-result-title").textContent = report.won ? "任務完了" : "部隊撤退";
@@ -1634,6 +1783,14 @@ document.addEventListener("click", event => {
   if (guildReward) return claimGuildReward(guildReward.dataset.guildReward);
   const guildQuick = event.target.closest("[data-guild-quick]");
   if (guildQuick) return sendGuildMessage(guildQuick.dataset.guildQuick);
+  const eventStage = event.target.closest("[data-event-stage]");
+  if (eventStage) return startEventBattle(Number(eventStage.dataset.eventStage));
+  const eventStory = event.target.closest("[data-event-story]");
+  if (eventStory) return showEventStory(eventStory.dataset.eventStory);
+  const eventReward = event.target.closest("[data-event-reward]");
+  if (eventReward) return claimEventPointReward(eventReward.dataset.eventReward);
+  const eventExchange = event.target.closest("[data-event-exchange]");
+  if (eventExchange) return exchangeEventItem(eventExchange.dataset.eventExchange);
   const dialogButton = event.target.closest("[data-dialog]");
   if (dialogButton) return showInfoDialog(dialogButton.dataset.dialog);
 });
