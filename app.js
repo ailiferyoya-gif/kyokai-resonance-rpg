@@ -14,6 +14,8 @@ const commanders = [
   { id: "setsuna", name: "セツナ", title: "常夜の守護者", rarity: "SSR", role: "防御", symbol: "☾", attack: 132, defense: 176, command: 27, colors: ["#334dd8", "#d625b5"], skill: { name: "常夜結界", detail: "夜色の結界で敵を封鎖" }, passive: { name: "守護誓約", stat: "defense", detail: "自身の防御を常時強化" } },
   { id: "ao", name: "アオ", title: "蒼雷の修験槍", rarity: "SSR", role: "遊撃", symbol: "槍", attack: 174, defense: 138, command: 27, colors: ["#19cfff", "#263ccf", "#d7ff27", "#f126cf"], art: "assets/char-ao-v2.png", skill: { name: "雷禅一閃", detail: "帯電した薙刀で防衛線を貫く" }, passive: { name: "導雷歩法", stat: "attack", detail: "自身の攻撃を常時強化" } },
   { id: "suzune", name: "スズネ", title: "祭電の信号手", rarity: "SSR", role: "攻撃", symbol: "銃", attack: 181, defense: 116, command: 25, colors: ["#ff7a22", "#19e6ff", "#f126cf", "#ffd53d"], art: "assets/char-suzune-v2.png", skill: { name: "祝砲レゾナンス", detail: "祭礼弾で標的信号を連続射抜く" }, passive: { name: "照準共鳴", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "matoi", name: "マトイ", title: "紅符の砕界士", rarity: "SSR", role: "攻撃", symbol: "槌", attack: 188, defense: 121, command: 26, colors: ["#ff3057", "#f126cf", "#6e25d9", "#19e6ff"], art: "assets/commander-matoi-v1.png", skill: { name: "砕界・紅符墜", detail: "大型符槌で敵陣と防壁を同時に粉砕" }, passive: { name: "破砕共鳴", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "ibuki", name: "イブキ", title: "白環の城塞守", rarity: "SSR", role: "防御", symbol: "盾", attack: 137, defense: 186, command: 28, colors: ["#f6f3ff", "#17cfe3", "#6847df", "#f126cf"], art: "assets/commander-ibuki-v1.png", skill: { name: "白環城塞", detail: "円環障壁を展開し部隊の損耗を抑制" }, passive: { name: "守域拡張", stat: "defense", detail: "自身の防御を常時強化" } },
   { id: "tsuzuri", name: "ツヅリ", title: "彩紋の結界師", rarity: "SR", role: "支援", symbol: "扇", attack: 112, defense: 136, command: 24, colors: ["#16d7d0", "#f126cf", "#ffd53d", "#23103e"], art: "assets/char-tsuzuri-v2.png", skill: { name: "彩界扇陣", detail: "色彩結界で五人の共鳴を保護" }, passive: { name: "護符編纂", stat: "both", detail: "自身の攻撃と防御を強化" } },
   { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/commander-kohaku-v2.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } },
   { id: "kagari", name: "カガリ", title: "紅界の鬼舞", rarity: "UR", role: "攻撃", symbol: "鬼", attack: 208, defense: 152, command: 31, colors: ["#ff304f", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/char-kagari-v2.png", skill: { name: "紅蓮界断", detail: "鬼面の界刀で全戦線を切り開く" }, passive: { name: "鬼舞共鳴", stat: "attack", detail: "自身の攻撃を大きく強化" } }
@@ -21,14 +23,17 @@ const commanders = [
 
 const missions = [
   { id: "m1-1", chapter: 1, stage: "1-1", zone: "NEON MARKET / RAIN", title: "ネオン街の追跡者", enemy: "裂界猟犬", description: "市場へ侵入した追跡機を排除せよ", stamina: 5, recommended: 760, enemyTroops: 58, enemyAttack: 390, enemyDefense: 320, reward: 800, art: "assets/enemy-rift-hound-v1.png", drops: { ore: 2, hide: 1 }, firstReward: { crystals: 80, materials: { ore: 2 } } },
-  { id: "m1-2", chapter: 1, stage: "1-2", zone: "INDUSTRIAL / NIGHT", title: "雨上がりの高架線", enemy: "猟犬機・強襲型", description: "輸送路を塞ぐ機械獣を追跡せよ", stamina: 6, recommended: 880, enemyTroops: 70, enemyAttack: 455, enemyDefense: 380, reward: 980, art: "assets/enemy-rift-hound-v1.png", drops: { fiber: 2, core: 1 }, firstReward: { crystals: 90, materials: { fiber: 2 } } },
+  { id: "m1-2", chapter: 1, stage: "1-2", zone: "INDUSTRIAL / NIGHT", title: "雨上がりの高架線", enemy: "晶刃機プリズムマンティス", description: "高架線へ降下した晶刃追跡機を停止せよ", stamina: 6, recommended: 880, enemyTroops: 70, enemyAttack: 455, enemyDefense: 380, reward: 980, art: "assets/enemy-prism-mantis-v1.png", drops: { fiber: 2, core: 1 }, firstReward: { crystals: 90, materials: { fiber: 2 } } },
   { id: "m1-3", chapter: 1, stage: "1-3", zone: "BORDER GATE", title: "境界門、再起動", enemy: "門衛猟犬アルファ", description: "門衛機の暴走信号を遮断せよ", stamina: 7, recommended: 1020, enemyTroops: 84, enemyAttack: 525, enemyDefense: 450, reward: 1200, art: "assets/enemy-rift-hound-v1.png", drops: { core: 2, hide: 2 }, firstReward: { crystals: 120, materials: { core: 2 } } },
   { id: "m2-1", chapter: 2, stage: "2-1", zone: "GREEN LAB / RUINS", title: "翠環研究棟", enemy: "培養殻ウォード", description: "閉鎖研究棟で増殖する装甲殻を停止", stamina: 7, recommended: 1120, enemyTroops: 88, enemyAttack: 555, enemyDefense: 475, reward: 1350, art: "assets/enemy-ward-v1.png", drops: { fiber: 3, hide: 2 }, firstReward: { crystals: 130, coins: 1200 } },
-  { id: "m2-2", chapter: 2, stage: "2-2", zone: "PORCELAIN BRIDGE", title: "白磁橋の重力波", enemy: "境界殻・重圧型", description: "橋梁を歪める重力信号を突破せよ", stamina: 8, recommended: 1240, enemyTroops: 96, enemyAttack: 610, enemyDefense: 520, reward: 1500, art: "assets/enemy-ward-v1.png", drops: { ore: 3, core: 2 }, firstReward: { crystals: 140, materials: { core: 2 } } },
+  { id: "m2-2", chapter: 2, stage: "2-2", zone: "PORCELAIN BRIDGE", title: "白磁橋の重力波", enemy: "白磁重力鰩グラヴィレイ", description: "橋梁を歪める浮遊重力核を突破せよ", stamina: 8, recommended: 1240, enemyTroops: 96, enemyAttack: 610, enemyDefense: 520, reward: 1500, art: "assets/enemy-gravity-ray-v1.png", drops: { ore: 3, core: 2 }, firstReward: { crystals: 140, materials: { core: 2 } } },
   { id: "m2-3", chapter: 2, stage: "2-3", zone: "MECH HANGAR", title: "未成体ゴライアス", enemy: "ゴライアス未成体", description: "起動前の巨大境界機を鎮圧せよ", stamina: 9, recommended: 1380, enemyTroops: 108, enemyAttack: 675, enemyDefense: 570, reward: 1800, art: "assets/enemy-goliath-v1.png", drops: { core: 3, hide: 3 }, firstReward: { crystals: 180, materials: { core: 3 } } },
   { id: "m3-1", chapter: 3, stage: "3-1", zone: "FESTIVAL AFTERGLOW", title: "祭路に残る九尾", enemy: "夜神楽の残響", description: "祭礼跡に残る自律信号を回収せよ", stamina: 8, recommended: 1460, enemyTroops: 112, enemyAttack: 710, enemyDefense: 600, reward: 1950, art: "assets/enemy-festival-echo-v1.png", drops: { fiber: 3, ore: 3 }, firstReward: { crystals: 180, coins: 1800 } },
   { id: "m3-2", chapter: 3, stage: "3-2", zone: "NINE-TAIL COORDINATE", title: "九尾座標の迷宮", enemy: "ヨルカグラ分体", description: "書き換えられた街路座標を復元せよ", stamina: 9, recommended: 1580, enemyTroops: 122, enemyAttack: 760, enemyDefense: 645, reward: 2200, art: "assets/enemy-festival-echo-v1.png", drops: { core: 3, fiber: 3 }, firstReward: { crystals: 220, materials: { core: 3 } } },
-  { id: "m3-3", chapter: 3, stage: "3-3", zone: "DAWN BOUNDARY", title: "朝焼けの境界", enemy: "祭禍核・最終残響", description: "五人の共鳴で境界の夜を終わらせる", stamina: 10, recommended: 1720, enemyTroops: 134, enemyAttack: 825, enemyDefense: 700, reward: 2600, art: "assets/event-yorukagura-v1.png", drops: { core: 4, hide: 3 }, firstReward: { crystals: 300, materials: { core: 4 } } }
+  { id: "m3-3", chapter: 3, stage: "3-3", zone: "DAWN BOUNDARY", title: "朝焼けの境界", enemy: "祭禍核・最終残響", description: "五人の共鳴で境界の夜を終わらせる", stamina: 10, recommended: 1720, enemyTroops: 134, enemyAttack: 825, enemyDefense: 700, reward: 2600, art: "assets/event-yorukagura-v1.png", drops: { core: 4, hide: 3 }, firstReward: { crystals: 300, materials: { core: 4 } } },
+  { id: "m4-1", chapter: 4, stage: "4-1", zone: "SEALED ARCHIVE", title: "閉ざされた記録灯", enemy: "記録灯機アーカイヴ", description: "封印記録庫を巡回する自律灯機を解除せよ", stamina: 10, recommended: 1840, enemyTroops: 142, enemyAttack: 885, enemyDefense: 750, reward: 3000, art: "assets/enemy-archive-lantern-v1.png", drops: { fiber: 4, ore: 3 }, firstReward: { crystals: 320, materials: { fiber: 4 } } },
+  { id: "m4-2", chapter: 4, stage: "4-2", zone: "MIRROR CORRIDOR", title: "鏡層回廊の番人", enemy: "鏡鎧武者ミラージュ", description: "反射座標を守る空洞の鏡鎧を打ち破れ", stamina: 11, recommended: 1980, enemyTroops: 154, enemyAttack: 950, enemyDefense: 815, reward: 3400, art: "assets/enemy-mirror-armor-v1.png", drops: { core: 4, hide: 4 }, firstReward: { crystals: 360, coins: 3000 } },
+  { id: "m4-3", chapter: 4, stage: "4-3", zone: "ZERO BOUNDARY", title: "零境に眠る熾天核", enemy: "境界熾天核セラフ", description: "全座標を初期化する六翼の中枢核を鎮圧せよ", stamina: 12, recommended: 2160, enemyTroops: 168, enemyAttack: 1020, enemyDefense: 880, reward: 4000, art: "assets/enemy-boundary-seraph-v1.png", drops: { core: 5, ore: 4 }, firstReward: { crystals: 450, materials: { core: 5 } } }
 ];
 
 const materials = {
@@ -215,7 +220,7 @@ const newCampaignState = () => ({ unlocked: 1, clears: {}, firstRewards: [] });
 const newLifetimeState = () => ({ battles: 0, missionWins: 0, raidRuns: 0, arenaWins: 0, draws: 0 });
 
 const defaultState = () => ({
-  schema: 11,
+  schema: 13,
   crystals: 4500,
   coins: 12800,
   stamina: 60,
@@ -372,7 +377,8 @@ function loadState() {
       clears: { ...defaults.campaign.clears, ...(parsedCampaign.clears || {}) },
       firstRewards: Array.isArray(parsedCampaign.firstRewards) ? parsedCampaign.firstRewards : []
     };
-    campaign.unlocked = Math.max(1, Math.min(missions.length, Number(campaign.unlocked) || 1));
+    const inferredUnlock = missions.reduce((highest, mission, index) => campaign.clears[mission.id] ? Math.max(highest, index + 2) : highest, 1);
+    campaign.unlocked = Math.max(1, Math.min(missions.length, Math.max(Number(campaign.unlocked) || 1, inferredUnlock)));
     const profile = { ...defaults.profile, ...(parsed.profile || {}) };
     profile.name = String(profile.name || defaults.profile.name).trim().slice(0, 16) || defaults.profile.name;
     profile.id = String(profile.id || defaults.profile.id).slice(0, 16);
@@ -381,7 +387,7 @@ function loadState() {
     const restored = {
       ...defaults,
       ...parsed,
-      schema: 11,
+      schema: 13,
       owned,
       team,
       materials: { ...defaults.materials, ...(parsed.materials || {}) },
@@ -1129,7 +1135,7 @@ function renderProfile() {
 function renderArtTestGallery() {
   const root = document.querySelector("#art-test-gallery");
   if (!root) return;
-  root.innerHTML = ["kohaku", "ren", "sana", "kagari", "ao", "suzune", "tsuzuri"].map(id => {
+  root.innerHTML = ["kohaku", "ren", "sana", "kagari", "ao", "suzune", "tsuzuri", "matoi", "ibuki"].map(id => {
     const commander = getCommander(id);
     return `<button type="button" class="art-test-card" data-art-preview="${id}"><span><img loading="lazy" src="${commander.art}" alt="${commander.name} 全身イラスト"></span><small>${commander.rarity} / ${commander.role}</small><strong>${commander.name}</strong><em>${commander.title}</em></button>`;
   }).join("");
@@ -1140,6 +1146,17 @@ function showArtPreview(id) {
   if (!commander) return;
   const unit = getUnitStats(id);
   document.querySelector("#dialog-content").innerHTML = `<div class="art-preview-dialog"><img src="${commander.art}" alt="${commander.name} 全身イラスト"><div><span class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</span><small>${commander.role}</small><h2>${commander.title}<br>${commander.name}</h2><p>${commander.skill.name} Lv.${unit.skillLevel}<br>${commander.skill.detail}</p><p>${commander.passive.name} Lv.${unit.passiveLevel}<br>${commander.passive.detail}</p><em>攻撃 ${unit.attack} / 防御 ${unit.defense}</em></div></div>`;
+  document.querySelector("#info-dialog").showModal();
+}
+
+function getEnemyArchive() {
+  return [...new Map(missions.map(mission => [mission.art, mission])).values()];
+}
+
+function showEnemyPreview(index) {
+  const mission = getEnemyArchive()[index];
+  if (!mission) return;
+  document.querySelector("#dialog-content").innerHTML = `<div class="enemy-preview-dialog"><img src="${mission.art}" alt="${mission.enemy}"><div><span>ENEMY ARCHIVE / CH.${mission.chapter}</span><small>${mission.zone}</small><h2>${mission.enemy}</h2><p>${mission.description}</p><em>初出任務 ${mission.stage}「${mission.title}」</em><b>攻撃 ${formatNumber(mission.enemyAttack)} / 防御 ${formatNumber(mission.enemyDefense)}</b></div></div>`;
   document.querySelector("#info-dialog").showModal();
 }
 
@@ -1160,6 +1177,8 @@ function renderMissions() {
       <div class="mission-body"><div class="mission-main"><span>CH.${mission.chapter} / ${mission.zone}</span><h3>${mission.title}</h3><p>${mission.description}</p><div class="mission-drops"><i>推奨 ${mission.recommended}</i><i>ϟ ${mission.stamina}</i><i>${dropNames}</i><i class="first-reward">${firstReward}</i>${clears ? `<i>${clears}回踏破</i>` : ""}</div></div><button type="button" class="sortie-button" data-mission="${index}" ${locked ? "disabled" : ""}>${locked ? "封鎖" : "出撃"}</button></div>
     </article>`;
   }).join("");
+  const archiveRoot = document.querySelector("#enemy-archive-grid");
+  if (archiveRoot) archiveRoot.innerHTML = getEnemyArchive().map((mission, index) => `<button type="button" class="enemy-archive-card" data-enemy-preview="${index}"><span><img loading="lazy" src="${mission.art}" alt="${mission.enemy}"><i>CH.${mission.chapter}</i></span><small>${mission.zone}</small><strong>${mission.enemy}</strong><em>${mission.stage} ${mission.title}</em></button>`).join("");
 }
 
 function raidRewardSummary(tier) {
@@ -2309,6 +2328,8 @@ document.addEventListener("click", event => {
   if (mission) return startBattle(Number(mission.dataset.mission));
   const artPreview = event.target.closest("[data-art-preview]");
   if (artPreview) return showArtPreview(artPreview.dataset.artPreview);
+  const enemyPreview = event.target.closest("[data-enemy-preview]");
+  if (enemyPreview) return showEnemyPreview(Number(enemyPreview.dataset.enemyPreview));
   const slot = event.target.closest("[data-slot]");
   if (slot) return selectTeamSlot(Number(slot.dataset.slot));
   const unit = event.target.closest("[data-unit]");

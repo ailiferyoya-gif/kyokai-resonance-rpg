@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090414">
-  <meta name="description" content="5人編成・個別育成・オート戦闘・期間限定イベント共闘レイド・ギルド共闘・非同期PvPアリーナ・部位破壊レイド・素材探索・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
+  <meta name="description" content="5人編成・16名の指揮官・4章12任務・敵図鑑・個別育成・オート戦闘・期間限定イベント共闘レイド・ギルド共闘・非同期PvPアリーナ・素材探索・リッチなガチャ演出を体験できる、iPhone向けソーシャルRPG『境界共鳴』Webプロトタイプ。">
   <title>境界共鳴 — Social RPG Prototype</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/commander-kohaku-v2.png" as="image">
   <link rel="preload" href="assets/commander-ren-v3.png" as="image">
   <link rel="preload" href="assets/event-yorukagura-v1.png" as="image">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -76,7 +76,7 @@
           <button id="draw-ten" class="primary-button draw-button" type="button"><span><small>SR以上1体確定</small><strong>10連召喚</strong></span><b>◆ 1,500</b></button>
           <button id="draw-one" class="secondary-button draw-button" type="button"><span><small>単発召喚</small><strong>1回召喚</strong></span><b>◆ 150</b></button>
         </div>
-        <div class="section-heading"><div><span>STYLE LOCK v1.2</span><h2>統一アートプレビュー</h2></div><small>7名 / タップで全身</small></div>
+        <div class="section-heading"><div><span>STYLE LOCK v1.3</span><h2>統一アートプレビュー</h2></div><small>9名 / タップで全身</small></div>
         <div id="art-test-gallery" class="art-test-gallery"></div>
         <div class="gacha-links"><button type="button" data-dialog="rates">提供割合</button><button type="button" data-dialog="rules">天井・重複</button><button type="button" id="reset-demo">デモ初期化</button></div>
       </section>
@@ -112,9 +112,11 @@
 
       <section id="missions-screen" class="screen" data-title="任務" aria-labelledby="missions-heading">
         <div class="section-heading page-heading"><div><span>AUTO CAMPAIGN</span><h2 id="missions-heading">境界踏破</h2></div><span id="campaign-chapter" class="level-chip">CHAPTER 01</span></div>
-        <article class="campaign-progress glass-card"><span><small>STORY PROGRESS</small><strong id="campaign-progress-text">0 / 9 CLEAR</strong></span><u><i id="campaign-progress-bar"></i></u><em>勝利すると次の任務と初回報酬を解放</em></article>
+        <article class="campaign-progress glass-card"><span><small>STORY PROGRESS</small><strong id="campaign-progress-text">0 / 12 CLEAR</strong></span><u><i id="campaign-progress-bar"></i></u><em>勝利すると次の任務と初回報酬を解放</em></article>
         <article class="squad-strip glass-card"><div id="mission-team-mini" class="mini-team"></div><div><small>出撃部隊 / 5 UNIT</small><strong>第零遊撃隊</strong><span>兵力 <b id="troop-summary">0</b>名</span></div><em>戦力 <b id="squad-power">0</b></em></article>
         <div id="mission-list" class="mission-list"></div>
+        <div class="section-heading"><div><span>ENEMY ARCHIVE v1.3</span><h2>遭遇敵図鑑</h2></div><small>タップで詳細</small></div>
+        <div id="enemy-archive-grid" class="enemy-archive-grid"></div>
         <aside class="system-note"><b>完全オート戦闘</b><p>5人のキャラLv、スキルLv、パッシブ、個別装備を反映。各ラウンドでは指揮官が育成済みスキルを自動発動します。</p></aside>
       </section>
 
@@ -229,7 +231,7 @@
         <button class="menu-shortcut glass-card" type="button" data-screen-target="daily"><span>✓</span><div><small>DAILY & PLAYER LEVEL</small><strong>デイリー作戦・ログイン補給</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card guild-shortcut" type="button" data-screen-target="guild"><span>結</span><div><small>WEEKLY GUILD CO-OP</small><strong>第零共鳴団・共同任務</strong></div><b>›</b></button>
         <button class="menu-shortcut glass-card event-shortcut" type="button" data-screen-target="event"><span>祭</span><div><small>LIMITED EVENT</small><strong>夜神楽、境界に灯る</strong></div><b>›</b></button>
-        <article class="about-card glass-card"><span>PLAYABLE BUILD v1.2</span><h3>境界共鳴</h3><p>7名の統一キャラアート、追加任務敵、戦闘・召喚SE v3を搭載。9任務、14名の指揮官、個別育成、期間共闘、ガチャ、レイド、非同期PvPを端末内保存でプレイ可能。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>保存</i><b>自動保存 / セーブコード</b></div><div><i>人数</i><b>ソロ / 少人数テスト</b></div></article>
+        <article class="about-card glass-card"><span>PLAYABLE BUILD v1.3</span><h3>境界共鳴</h3><p>新規指揮官2名、敵5体、敵図鑑、第4章を追加。4章12任務、16名の指揮官、個別育成、期間共闘、ガチャ、レイド、非同期PvPを端末内保存でプレイ可能。</p><div><i>対応</i><b>iPhone / Web</b></div><div><i>保存</i><b>自動保存 / セーブコード</b></div><div><i>人数</i><b>ソロ / 少人数テスト</b></div></article>
       </section>
     </div>
 
@@ -261,6 +263,6 @@
   </section>
 
   <dialog id="info-dialog"><button class="dialog-close" type="button" aria-label="閉じる">×</button><div id="dialog-content"></div></dialog>
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>

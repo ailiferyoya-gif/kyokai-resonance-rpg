@@ -263,6 +263,26 @@ dialog { width: min(calc(100% - 30px),400px); max-height: 74vh; padding: 19px; b
 .art-preview-dialog h2 { margin: 10px 0; font-size: 21px; line-height: 1.05; }
 .art-preview-dialog p { color: #d9cfdf; font-size: 9px; line-height: 1.5; }
 .art-preview-dialog em { color: var(--gold); font-size: 9px; font-style: normal; }
+.enemy-archive-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
+.enemy-archive-card { min-width: 0; padding: 0 0 9px; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(145deg,rgba(29,18,47,.97),rgba(11,7,20,.99)); color: var(--ink); text-align: left; cursor: pointer; }
+.enemy-archive-card > span { height: 142px; position: relative; display: block; overflow: hidden; background: #f8f7fb; }
+.enemy-archive-card > span::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 58%,rgba(12,7,21,.88)); }
+.enemy-archive-card img { width: 100%; height: 100%; object-fit: cover; object-position: center 35%; transition: transform .25s ease; }
+.enemy-archive-card:active img { transform: scale(1.045); }
+.enemy-archive-card > span i { position: absolute; z-index: 1; left: 7px; bottom: 6px; color: var(--gold); font-size: 7px; font-style: normal; font-weight: 950; }
+.enemy-archive-card small,.enemy-archive-card strong,.enemy-archive-card em { display: block; margin-inline: 9px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.enemy-archive-card small { margin-top: 7px; color: var(--cyan); font-size: 6px; font-weight: 900; }
+.enemy-archive-card strong { margin-top: 2px; font-size: 10px; }
+.enemy-archive-card em { margin-top: 2px; color: var(--muted); font-size: 6px; font-style: normal; }
+.enemy-preview-dialog { display: grid; grid-template-columns: minmax(0,1.08fr) minmax(120px,.92fr); gap: 13px; align-items: end; min-height: 430px; }
+.enemy-preview-dialog > img { width: 100%; max-height: 540px; object-fit: contain; align-self: stretch; border-radius: 15px; background: #f8f7fb; }
+.enemy-preview-dialog > div { padding-bottom: 10px; display: flex; flex-direction: column; }
+.enemy-preview-dialog span { color: var(--pink); font-size: 7px; font-weight: 950; letter-spacing: .1em; }
+.enemy-preview-dialog small { margin-top: 3px; color: var(--muted); font-size: 7px; }
+.enemy-preview-dialog h2 { margin: 9px 0; font-size: 20px; line-height: 1.08; }
+.enemy-preview-dialog p { color: #d9cfdf; font-size: 9px; line-height: 1.6; }
+.enemy-preview-dialog em { color: var(--gold); font-size: 8px; font-style: normal; }
+.enemy-preview-dialog b { margin-top: 8px; color: var(--cyan); font-size: 8px; }
 
 .playtest-profile,.save-share { margin-bottom: 13px; padding: 14px; }
 .playtest-profile-head { display: flex; align-items: center; gap: 11px; }
@@ -464,6 +484,9 @@ dialog { width: min(calc(100% - 30px),400px); max-height: 74vh; padding: 19px; b
   .art-test-card > span { height: 158px; }
   .art-preview-dialog { grid-template-columns: 1fr; align-items: start; }
   .art-preview-dialog > img { max-height: 330px; }
+  .enemy-preview-dialog { grid-template-columns: 1fr; align-items: start; }
+  .enemy-preview-dialog > img { max-height: 320px; }
+  .enemy-archive-card > span { height: 126px; }
   .profile-name-edit { grid-template-columns: 1fr auto; }
   .profile-name-edit > span { grid-column: 1 / -1; }
 }

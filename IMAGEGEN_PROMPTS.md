@@ -1,4 +1,36 @@
-# Image generation prompts — v1.2
+# Image generation prompts — v1.3
+
+## v1.3 commander and enemy expansion
+
+All seven v1.3 assets use the supplied character image only as a style and color-placement reference. Shared lock: original portrait 2:3 mobile social RPG art; crisp flat 2D anime/game cel rendering; thick clean black contours; white and pale-lilac negative space; vivid violet, cobalt, hot pink, cyan, scarlet and lemon graphic masses; cyan/yellow offset registration edges; sparse halftone print texture; readable full silhouette; no copied identity, costume, parasol, pose or motifs; no text, logo, UI, border or watermark.
+
+### commander-matoi-v1.png
+
+Original young adult female SSR assault commander “Crimson Seal Breaker.” Short black bob with coral underside, asymmetric white-and-black modern ritual combat coat, one oversized rectangular talisman hammer held securely with both hands in a dynamic downward strike. Exactly two arms and hands, five fingers per visible hand, coherent two-handed grip. Scarlet and hot magenta dominate with violet, cyan and lemon accents.
+
+### commander-ibuki-v1.png
+
+Original young adult male SSR defense commander “Ivory Rampart Warden.” Silver-teal hair, layered white armored street-ritual uniform, one circular barrier shield firmly strapped to the left forearm, right hand open in a five-finger command gesture. Full-body braced stance. White and turquoise dominate with cobalt, vivid purple, hot pink and lemon accents.
+
+### enemy-prism-mantis-v1.png
+
+Original neon-city Prism Mantis pursuit machine. Exactly six mechanical limbs total—two scythe forelimbs and four walking legs—plus exactly two angular wing panels, one central black-violet body and one cyan sensor head. Cobalt and cyan dominate with hot-pink joints, lemon edges and white armor shards.
+
+### enemy-gravity-ray-v1.png
+
+Original floating Porcelain Gravity Ray defense drone. One manta-shaped porcelain-white body, exactly two swept fins, one violet core, three broken gravity rings, no arms or legs. White and pale gray dominate with emerald, violet, cyan, hot pink and lemon accents.
+
+### enemy-archive-lantern-v1.png
+
+Original Archive Lantern Machine. One black-violet bell-and-lantern body, exactly four attached wing-like paper panels, two cyan sensor eyes, one hanging crystal core, no arms or legs. Orange and scarlet dominate with violet, cyan, magenta, white and lemon accents.
+
+### enemy-mirror-armor-v1.png
+
+Original possessed empty Mirror Armor Warrior. Exactly two armored arms and hands with five metal fingers each holding one mirror-bladed spear coherently, exactly two legs, faceted helmet and black void visor. Silver-white and black-violet dominate with crimson, hot pink, cyan and lemon accents.
+
+### enemy-boundary-seraph-v1.png
+
+Original colossal non-humanoid Boundary Seraph Core. One porcelain-white diamond core with magenta eye, exactly six symmetrical blade-wings in three pairs, two broken cyan halo rings, no arms, hands, legs or human face. White and deep violet dominate with scarlet, cyan, hot pink, cobalt and lemon accents.
 
 ## v1.2 unified art lock
 
