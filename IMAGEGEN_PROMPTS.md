@@ -1,4 +1,44 @@
-# Image generation prompts — v1.1
+# Image generation prompts — v1.2
+
+## v1.2 unified art lock
+
+All nine v1.2 assets were generated with the supplied character image as a style-only reference. Shared lock: original portrait 2:3 mobile social RPG illustration; crisp flat 2D anime cel rendering; thick clean black outlines; white and pale-lilac negative space; large violet, cobalt, hot-pink, cyan and lemon-yellow graphic masses; cyan/yellow offset registration edges; sparse halftone dots; dense silhouette but readable face, weapon and limbs; no text, logo, UI, border or watermark; no copying of the reference character, costume, pose, umbrella or motifs. Human assets must have exactly two arms and two hands, coherent wrists, five fingers on every visible hand, and anatomically correct weapon grips.
+
+### commander-kohaku-v2.png
+
+Original young adult female boundary exorcist, long black-purple hair, white/red/black asymmetric modern ritual battle outfit, small original ornamental mask at the waist, one katana held with a clean two-hand-ready grip, airborne diagonal pose. Scarlet, hot magenta and eggplant dominate, with electric cyan and sharp yellow offset edges.
+
+### commander-ren-v3.png
+
+Original youthful male arc-rifle commander, short indigo hair, calm sharp eyes, futuristic street-military coat and one compact blue rifle. Forward three-quarter full-body pose; cobalt and electric cyan dominate, with violet, hot pink and lemon registration accents.
+
+### commander-sana-v3.png
+
+Original young adult female field alchemist and healer, coral side braid, warm confident face, white modern tech-ritual coat, emerald medicine case at the hip, one open healing gesture. Emerald, coral and white dominate, with violet, cyan and yellow graphic accents.
+
+### char-kagari-v2.png
+
+Original young adult female oni-mask swordswoman, long dark hair, small original ritual mask worn above the head, one broad boundary sword in a coherent grip, energetic airborne slash. Violet and hot magenta dominate, with black-purple shadow, electric cyan and yellow edges.
+
+### char-ao-v2.png
+
+Original young adult male storm ascetic lancer, short dark-blue hair, asymmetric modern ascetic combat uniform, one double-ended lightning spear held coherently, low lunging pose. Cobalt and cyan dominate, with acid lime, magenta and black-violet blocks.
+
+### char-suzune-v2.png
+
+Original young adult female festival signal gunner, auburn high ponytail, cropped modern festival jacket, one compact orange signal pistol, energetic twisting pose with readable trigger hand. Vivid orange dominates, with cyan, magenta, lemon and deep purple accents.
+
+### char-tsuzuri-v2.png
+
+Original young adult male barrier scribe, dark teal hair, layered modern ritual coat, one open folding fan in a clean grip and one protective gesture. Turquoise and white dominate, with magenta, lemon and eggplant graphic masses.
+
+### enemy-ward-v1.png
+
+Original non-humanoid white-and-green biomechanical laboratory ward: exactly six coherent mechanical legs, two large pincer forelimbs, one central luminous core and a readable single body. Clean white field with emerald, cyan, violet and lemon offset graphic fragments.
+
+### enemy-festival-echo-v1.png
+
+Original floating non-humanoid festival echo: one cracked porcelain signal mask, exactly three coherent ribbon-like energy tails, magenta-black core, no human anatomy. White field with hot pink, violet, cyan and lemon offset fragments.
 
 ## v1.1 test commander set
 

@@ -6,28 +6,28 @@ const commanders = [
   { id: "touma", name: "トウマ", title: "街路の斥候", rarity: "R", role: "偵察", symbol: "➤", attack: 96, defense: 78, command: 18, colors: ["#1fc9ff", "#2948d5"], skill: { name: "先読み射線", detail: "弱点を捉える精密射撃" }, passive: { name: "雨路適応", stat: "attack", detail: "自身の攻撃を常時強化" } },
   { id: "mina", name: "ミナ", title: "境界の衛士", rarity: "R", role: "防御", symbol: "◆", attack: 82, defense: 108, command: 20, colors: ["#31c5f4", "#3945ad"], skill: { name: "境界防壁", detail: "防壁越しの反撃を展開" }, passive: { name: "護衛陣形", stat: "defense", detail: "自身の防御を常時強化" } },
   { id: "isami", name: "イサミ", title: "火花の整備士", rarity: "R", role: "補給", symbol: "⚙", attack: 90, defense: 88, command: 19, colors: ["#ff644d", "#7825ba"], skill: { name: "応急再装填", detail: "即席弾薬で一斉支援" }, passive: { name: "現地整備", stat: "both", detail: "自身の攻撃と防御を強化" } },
-  { id: "ren", name: "レン", title: "蒼雷の遊撃手", rarity: "SR", role: "攻撃", symbol: "ϟ", attack: 128, defense: 88, command: 22, colors: ["#ff304f", "#7d27e8", "#19cfff"], art: "assets/commander-ren-v2.png", skill: { name: "蒼雷連鎖", detail: "雷撃を隣接目標へ連鎖" }, passive: { name: "雷導加速", stat: "attack", detail: "自身の攻撃を常時強化" } },
-  { id: "sana", name: "サナ", title: "翠環の調律師", rarity: "SR", role: "支援", symbol: "⌁", attack: 106, defense: 104, command: 21, colors: ["#ff5870", "#8e2de2", "#ffd91a", "#13cfff"], art: "assets/commander-sana-v2.png", skill: { name: "翠環共振", detail: "共鳴波で部隊を援護" }, passive: { name: "循環触媒", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "ren", name: "レン", title: "蒼雷の遊撃手", rarity: "SR", role: "攻撃", symbol: "ϟ", attack: 128, defense: 88, command: 22, colors: ["#ff304f", "#7d27e8", "#19cfff"], art: "assets/commander-ren-v3.png", skill: { name: "蒼雷連鎖", detail: "雷撃を隣接目標へ連鎖" }, passive: { name: "雷導加速", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "sana", name: "サナ", title: "翠環の調律師", rarity: "SR", role: "支援", symbol: "⌁", attack: 106, defense: 104, command: 21, colors: ["#ff5870", "#8e2de2", "#ffd91a", "#13cfff"], art: "assets/commander-sana-v3.png", skill: { name: "翠環共振", detail: "共鳴波で部隊を援護" }, passive: { name: "循環触媒", stat: "both", detail: "自身の攻撃と防御を強化" } },
   { id: "ten", name: "テン", title: "黒鋼の盾役", rarity: "SR", role: "防御", symbol: "⬢", attack: 102, defense: 142, command: 22, colors: ["#562c8a", "#181526"], skill: { name: "黒鋼反射", detail: "障壁で衝撃を反射" }, passive: { name: "不動心", stat: "defense", detail: "自身の防御を常時強化" } },
   { id: "kanade", name: "カナデ", title: "星砕きの奏者", rarity: "SSR", role: "攻撃", symbol: "✦", attack: 168, defense: 118, command: 25, colors: ["#ffba24", "#f3299b"], skill: { name: "星霜連爆", detail: "音律弾を連続起爆" }, passive: { name: "高揚旋律", stat: "attack", detail: "自身の攻撃を常時強化" } },
   { id: "riku", name: "リク", title: "玻璃の疾風", rarity: "SSR", role: "遊撃", symbol: "≋", attack: 154, defense: 124, command: 26, colors: ["#21e8ef", "#7c36e8"], skill: { name: "残響突破", detail: "残像と共に防衛線を突破" }, passive: { name: "疾風装填", stat: "attack", detail: "自身の攻撃を常時強化" } },
   { id: "setsuna", name: "セツナ", title: "常夜の守護者", rarity: "SSR", role: "防御", symbol: "☾", attack: 132, defense: 176, command: 27, colors: ["#334dd8", "#d625b5"], skill: { name: "常夜結界", detail: "夜色の結界で敵を封鎖" }, passive: { name: "守護誓約", stat: "defense", detail: "自身の防御を常時強化" } },
-  { id: "ao", name: "アオ", title: "蒼雷の修験槍", rarity: "SSR", role: "遊撃", symbol: "槍", attack: 174, defense: 138, command: 27, colors: ["#19cfff", "#263ccf", "#d7ff27", "#f126cf"], art: "assets/char-ao-v1.png", skill: { name: "雷禅一閃", detail: "帯電した薙刀で防衛線を貫く" }, passive: { name: "導雷歩法", stat: "attack", detail: "自身の攻撃を常時強化" } },
-  { id: "suzune", name: "スズネ", title: "祭電の信号手", rarity: "SSR", role: "攻撃", symbol: "銃", attack: 181, defense: 116, command: 25, colors: ["#ff7a22", "#19e6ff", "#f126cf", "#ffd53d"], art: "assets/char-suzune-v1.png", skill: { name: "祝砲レゾナンス", detail: "祭礼弾で標的信号を連続射抜く" }, passive: { name: "照準共鳴", stat: "attack", detail: "自身の攻撃を常時強化" } },
-  { id: "tsuzuri", name: "ツヅリ", title: "彩紋の結界師", rarity: "SR", role: "支援", symbol: "扇", attack: 112, defense: 136, command: 24, colors: ["#16d7d0", "#f126cf", "#ffd53d", "#23103e"], art: "assets/char-tsuzuri-v1.png", skill: { name: "彩界扇陣", detail: "色彩結界で五人の共鳴を保護" }, passive: { name: "護符編纂", stat: "both", detail: "自身の攻撃と防御を強化" } },
-  { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/ur-exorcist.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } },
-  { id: "kagari", name: "カガリ", title: "紅界の鬼舞", rarity: "UR", role: "攻撃", symbol: "鬼", attack: 208, defense: 152, command: 31, colors: ["#ff304f", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/char-kagari-v1.png", skill: { name: "紅蓮界断", detail: "鬼面の界刀で全戦線を切り開く" }, passive: { name: "鬼舞共鳴", stat: "attack", detail: "自身の攻撃を大きく強化" } }
+  { id: "ao", name: "アオ", title: "蒼雷の修験槍", rarity: "SSR", role: "遊撃", symbol: "槍", attack: 174, defense: 138, command: 27, colors: ["#19cfff", "#263ccf", "#d7ff27", "#f126cf"], art: "assets/char-ao-v2.png", skill: { name: "雷禅一閃", detail: "帯電した薙刀で防衛線を貫く" }, passive: { name: "導雷歩法", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "suzune", name: "スズネ", title: "祭電の信号手", rarity: "SSR", role: "攻撃", symbol: "銃", attack: 181, defense: 116, command: 25, colors: ["#ff7a22", "#19e6ff", "#f126cf", "#ffd53d"], art: "assets/char-suzune-v2.png", skill: { name: "祝砲レゾナンス", detail: "祭礼弾で標的信号を連続射抜く" }, passive: { name: "照準共鳴", stat: "attack", detail: "自身の攻撃を常時強化" } },
+  { id: "tsuzuri", name: "ツヅリ", title: "彩紋の結界師", rarity: "SR", role: "支援", symbol: "扇", attack: 112, defense: 136, command: 24, colors: ["#16d7d0", "#f126cf", "#ffd53d", "#23103e"], art: "assets/char-tsuzuri-v2.png", skill: { name: "彩界扇陣", detail: "色彩結界で五人の共鳴を保護" }, passive: { name: "護符編纂", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/commander-kohaku-v2.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } },
+  { id: "kagari", name: "カガリ", title: "紅界の鬼舞", rarity: "UR", role: "攻撃", symbol: "鬼", attack: 208, defense: 152, command: 31, colors: ["#ff304f", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/char-kagari-v2.png", skill: { name: "紅蓮界断", detail: "鬼面の界刀で全戦線を切り開く" }, passive: { name: "鬼舞共鳴", stat: "attack", detail: "自身の攻撃を大きく強化" } }
 ];
 
 const missions = [
   { id: "m1-1", chapter: 1, stage: "1-1", zone: "NEON MARKET / RAIN", title: "ネオン街の追跡者", enemy: "裂界猟犬", description: "市場へ侵入した追跡機を排除せよ", stamina: 5, recommended: 760, enemyTroops: 58, enemyAttack: 390, enemyDefense: 320, reward: 800, art: "assets/enemy-rift-hound-v1.png", drops: { ore: 2, hide: 1 }, firstReward: { crystals: 80, materials: { ore: 2 } } },
   { id: "m1-2", chapter: 1, stage: "1-2", zone: "INDUSTRIAL / NIGHT", title: "雨上がりの高架線", enemy: "猟犬機・強襲型", description: "輸送路を塞ぐ機械獣を追跡せよ", stamina: 6, recommended: 880, enemyTroops: 70, enemyAttack: 455, enemyDefense: 380, reward: 980, art: "assets/enemy-rift-hound-v1.png", drops: { fiber: 2, core: 1 }, firstReward: { crystals: 90, materials: { fiber: 2 } } },
   { id: "m1-3", chapter: 1, stage: "1-3", zone: "BORDER GATE", title: "境界門、再起動", enemy: "門衛猟犬アルファ", description: "門衛機の暴走信号を遮断せよ", stamina: 7, recommended: 1020, enemyTroops: 84, enemyAttack: 525, enemyDefense: 450, reward: 1200, art: "assets/enemy-rift-hound-v1.png", drops: { core: 2, hide: 2 }, firstReward: { crystals: 120, materials: { core: 2 } } },
-  { id: "m2-1", chapter: 2, stage: "2-1", zone: "GREEN LAB / RUINS", title: "翠環研究棟", enemy: "培養殻ウォード", description: "閉鎖研究棟で増殖する装甲殻を停止", stamina: 7, recommended: 1120, enemyTroops: 88, enemyAttack: 555, enemyDefense: 475, reward: 1350, art: "assets/enemy-goliath-v1.png", drops: { fiber: 3, hide: 2 }, firstReward: { crystals: 130, coins: 1200 } },
-  { id: "m2-2", chapter: 2, stage: "2-2", zone: "PORCELAIN BRIDGE", title: "白磁橋の重力波", enemy: "境界殻・重圧型", description: "橋梁を歪める重力信号を突破せよ", stamina: 8, recommended: 1240, enemyTroops: 96, enemyAttack: 610, enemyDefense: 520, reward: 1500, art: "assets/enemy-goliath-v1.png", drops: { ore: 3, core: 2 }, firstReward: { crystals: 140, materials: { core: 2 } } },
+  { id: "m2-1", chapter: 2, stage: "2-1", zone: "GREEN LAB / RUINS", title: "翠環研究棟", enemy: "培養殻ウォード", description: "閉鎖研究棟で増殖する装甲殻を停止", stamina: 7, recommended: 1120, enemyTroops: 88, enemyAttack: 555, enemyDefense: 475, reward: 1350, art: "assets/enemy-ward-v1.png", drops: { fiber: 3, hide: 2 }, firstReward: { crystals: 130, coins: 1200 } },
+  { id: "m2-2", chapter: 2, stage: "2-2", zone: "PORCELAIN BRIDGE", title: "白磁橋の重力波", enemy: "境界殻・重圧型", description: "橋梁を歪める重力信号を突破せよ", stamina: 8, recommended: 1240, enemyTroops: 96, enemyAttack: 610, enemyDefense: 520, reward: 1500, art: "assets/enemy-ward-v1.png", drops: { ore: 3, core: 2 }, firstReward: { crystals: 140, materials: { core: 2 } } },
   { id: "m2-3", chapter: 2, stage: "2-3", zone: "MECH HANGAR", title: "未成体ゴライアス", enemy: "ゴライアス未成体", description: "起動前の巨大境界機を鎮圧せよ", stamina: 9, recommended: 1380, enemyTroops: 108, enemyAttack: 675, enemyDefense: 570, reward: 1800, art: "assets/enemy-goliath-v1.png", drops: { core: 3, hide: 3 }, firstReward: { crystals: 180, materials: { core: 3 } } },
-  { id: "m3-1", chapter: 3, stage: "3-1", zone: "FESTIVAL AFTERGLOW", title: "祭路に残る九尾", enemy: "夜神楽の残響", description: "祭礼跡に残る自律信号を回収せよ", stamina: 8, recommended: 1460, enemyTroops: 112, enemyAttack: 710, enemyDefense: 600, reward: 1950, art: "assets/event-yorukagura-v1.png", drops: { fiber: 3, ore: 3 }, firstReward: { crystals: 180, coins: 1800 } },
-  { id: "m3-2", chapter: 3, stage: "3-2", zone: "NINE-TAIL COORDINATE", title: "九尾座標の迷宮", enemy: "ヨルカグラ分体", description: "書き換えられた街路座標を復元せよ", stamina: 9, recommended: 1580, enemyTroops: 122, enemyAttack: 760, enemyDefense: 645, reward: 2200, art: "assets/event-yorukagura-v1.png", drops: { core: 3, fiber: 3 }, firstReward: { crystals: 220, materials: { core: 3 } } },
+  { id: "m3-1", chapter: 3, stage: "3-1", zone: "FESTIVAL AFTERGLOW", title: "祭路に残る九尾", enemy: "夜神楽の残響", description: "祭礼跡に残る自律信号を回収せよ", stamina: 8, recommended: 1460, enemyTroops: 112, enemyAttack: 710, enemyDefense: 600, reward: 1950, art: "assets/enemy-festival-echo-v1.png", drops: { fiber: 3, ore: 3 }, firstReward: { crystals: 180, coins: 1800 } },
+  { id: "m3-2", chapter: 3, stage: "3-2", zone: "NINE-TAIL COORDINATE", title: "九尾座標の迷宮", enemy: "ヨルカグラ分体", description: "書き換えられた街路座標を復元せよ", stamina: 9, recommended: 1580, enemyTroops: 122, enemyAttack: 760, enemyDefense: 645, reward: 2200, art: "assets/enemy-festival-echo-v1.png", drops: { core: 3, fiber: 3 }, firstReward: { crystals: 220, materials: { core: 3 } } },
   { id: "m3-3", chapter: 3, stage: "3-3", zone: "DAWN BOUNDARY", title: "朝焼けの境界", enemy: "祭禍核・最終残響", description: "五人の共鳴で境界の夜を終わらせる", stamina: 10, recommended: 1720, enemyTroops: 134, enemyAttack: 825, enemyDefense: 700, reward: 2600, art: "assets/event-yorukagura-v1.png", drops: { core: 4, hide: 3 }, firstReward: { crystals: 300, materials: { core: 4 } } }
 ];
 
@@ -252,6 +252,7 @@ let particleFrame;
 let battleRun = null;
 let audioSystem = null;
 let soundPreviewTimer = [];
+let battleSoundPreviewTimer = [];
 
 function loadState() {
   const defaults = defaultState();
@@ -1128,7 +1129,7 @@ function renderProfile() {
 function renderArtTestGallery() {
   const root = document.querySelector("#art-test-gallery");
   if (!root) return;
-  root.innerHTML = ["kagari", "ao", "suzune", "tsuzuri"].map(id => {
+  root.innerHTML = ["kohaku", "ren", "sana", "kagari", "ao", "suzune", "tsuzuri"].map(id => {
     const commander = getCommander(id);
     return `<button type="button" class="art-test-card" data-art-preview="${id}"><span><img loading="lazy" src="${commander.art}" alt="${commander.name} 全身イラスト"></span><small>${commander.rarity} / ${commander.role}</small><strong>${commander.name}</strong><em>${commander.title}</em></button>`;
   }).join("");
@@ -1519,6 +1520,8 @@ function openBattleReport(report, title, enemyName, art) {
   document.querySelector("#battle-skip").classList.remove("hidden");
   updateBattleBars(report.allyStart, report.allyStart, report.enemyStart, report.enemyStart, report.mode);
   battleRun = { report, index: 0, timer: null };
+  playSortieSound();
+  pulseBattle("sortie-pulse");
   appendNextBattleLog();
 }
 
@@ -1868,7 +1871,7 @@ function appendNextBattleLog() {
   battleRun.timer = setTimeout(appendNextBattleLog, 390);
 }
 
-function appendLogElement(log) {
+function appendLogElement(log, silent = false) {
   const element = document.createElement("div");
   element.className = `log-entry${log.critical ? " critical" : ""}${log.actor === "BREAK" ? " break" : ""}${log.actor === "PHASE" ? " phase" : ""}`;
   element.innerHTML = `<b>${log.actor === "SYSTEM" ? "END" : log.actor === "PASSIVE" ? "PASS" : log.actor === "BREAK" ? "BRK" : log.actor === "PHASE" ? "PHS" : `R${log.round}`}</b><span><strong>${log.actor === "PASSIVE" ? "パッシブ共鳴" : log.actor === "BREAK" ? "部位破壊" : log.actor === "PHASE" ? "段階移行" : log.actor}</strong><small>${log.text}</small></span>`;
@@ -1876,14 +1879,42 @@ function appendLogElement(log) {
   container.append(element);
   container.scrollTop = container.scrollHeight;
   updateBattleBars(log.ally, battleRun.report.allyStart, log.enemy, battleRun.report.enemyStart);
-  if (log.critical) { playImpactSound(); vibrate(25); }
+  if (silent) return;
+  if (log.actor === "PASSIVE") {
+    playPassiveSound();
+    pulseBattle("passive-pulse");
+  } else if (log.actor === "BREAK") {
+    playBreakSound();
+    pulseBattle("break-pulse");
+    vibrate([28, 25, 62]);
+  } else if (log.actor === "PHASE") {
+    playPhaseSound();
+    pulseBattle("phase-pulse");
+  } else if (log.actor !== "SYSTEM" && log.critical) {
+    playCriticalSound();
+    pulseBattle("critical-pulse");
+    vibrate([20, 18, 45]);
+  } else if (log.actor !== "SYSTEM") {
+    const enemyAction = /反撃|重圧|耐久-|損耗|衝撃/.test(log.text);
+    playBattleHitSound(enemyAction, log.round);
+    pulseBattle(enemyAction ? "enemy-hit-pulse" : "hit-pulse");
+  }
+}
+
+function pulseBattle(className) {
+  const overlay = document.querySelector("#battle-overlay");
+  const effects = ["sortie-pulse", "hit-pulse", "enemy-hit-pulse", "critical-pulse", "break-pulse", "passive-pulse", "phase-pulse", "victory-pulse"];
+  overlay.classList.remove(...effects);
+  void overlay.offsetWidth;
+  overlay.classList.add(className);
+  setTimeout(() => overlay.classList.remove(className), className === "victory-pulse" ? 900 : 420);
 }
 
 function showAllBattleLogs() {
   if (!battleRun) return;
   clearTimeout(battleRun.timer);
   while (battleRun.index < battleRun.report.logs.length) {
-    appendLogElement(battleRun.report.logs[battleRun.index]);
+    appendLogElement(battleRun.report.logs[battleRun.index], true);
     battleRun.index += 1;
   }
   finishBattleDisplay();
@@ -1935,7 +1966,10 @@ function finishBattleDisplay() {
     button.textContent = missing > 0 ? `兵を補充（${formatNumber(missing * 12)}コイン）` : "兵力は最大です";
     button.disabled = missing === 0;
   }
-  playBattleResultSound(report.mode === "raid" || report.mode === "event-raid" || report.won);
+  const success = report.mode === "raid" || report.mode === "event-raid" || report.won;
+  playBattleResultSound(success);
+  pulseBattle(success ? "victory-pulse" : "enemy-hit-pulse");
+  if (success && (report.firstClear || report.reward || report.eventTokens)) setTimeout(playRewardSound, 520);
 }
 
 function replenishTroops() {
@@ -1956,7 +1990,7 @@ function closeBattle() {
   if (battleRun) clearTimeout(battleRun.timer);
   battleRun = null;
   const overlay = document.querySelector("#battle-overlay");
-  overlay.classList.remove("active");
+  overlay.className = "full-overlay battle-overlay";
   overlay.setAttribute("aria-hidden", "true");
 }
 
@@ -2120,6 +2154,7 @@ function playIgnitionSound() {
   tone(230, .24, .04, 720, "triangle", .42, .55);
   tone(310, .28, .045, 1180, "triangle", .72, -.15);
   tone(980, .18, .025, 1480, "sine", .9, .4);
+  [1240, 1560, 1980, 2480].forEach((frequency, index) => tone(frequency, .13, .018, frequency * 1.25, "sine", .18 + index * .19, index % 2 ? .65 : -.65));
 }
 
 function playRevealSound(rarity) {
@@ -2135,6 +2170,7 @@ function playRevealSound(rarity) {
   if (rarity === "UR") {
     tone(65.4, 1.2, .1, 130.8, "sine", .2);
     noiseSweep(.8, .026, 1800, 9800, .25, .25);
+    [1046, 1318, 1568, 2093].forEach((frequency, index) => tone(frequency, .72, .022, null, "sine", .25 + index * .11, [-.7, .7, -.3, .3][index]));
   }
 }
 
@@ -2157,7 +2193,80 @@ function previewGachaSound() {
 }
 
 function playImpactSound() { noiseSweep(.12, .045, 1800, 120); tone(110, .18, .05, 60, "square"); }
-function playBattleResultSound(won) { if (won) [392, 494, 587, 784].forEach((frequency, index) => tone(frequency, .58, .035, null, "sine", index * .1, index % 2 ? .3 : -.3)); else tone(150, .6, .06, 72, "sawtooth"); }
+
+function playSortieSound() {
+  noiseSweep(.46, .045, 260, 4200, 0, -.25);
+  tone(82, .5, .075, 164, "sawtooth", 0, .1);
+  [294, 392, 587].forEach((frequency, index) => tone(frequency, .3, .028, frequency * 1.35, "triangle", .08 + index * .09, [-.55, 0, .55][index]));
+}
+
+function playPassiveSound() {
+  [523, 659, 784].forEach((frequency, index) => tone(frequency, .28, .025, frequency * 1.12, "sine", index * .045, [-.4, 0, .4][index]));
+}
+
+function playBattleHitSound(enemyAction = false, round = 1) {
+  const variation = Number(round || 1) % 3;
+  const pan = enemyAction ? .42 : -.42;
+  noiseSweep(.09, .03, enemyAction ? 1200 : 2200, 150, 0, pan);
+  tone(enemyAction ? 96 + variation * 8 : 145 + variation * 14, .13, .04, 58, enemyAction ? "sawtooth" : "square", 0, pan);
+  tone(enemyAction ? 360 : 620, .08, .018, enemyAction ? 220 : 920, "triangle", .018, -pan);
+}
+
+function playCriticalSound() {
+  noiseSweep(.24, .09, 6400, 110, 0, -.15);
+  tone(72, .42, .13, 38, "sine");
+  tone(172, .2, .07, 68, "square", 0, .35);
+  [880, 1174, 1568].forEach((frequency, index) => tone(frequency, .23, .026, frequency * 1.18, "triangle", .04 + index * .045, [-.65, 0, .65][index]));
+}
+
+function playBreakSound() {
+  noiseSweep(.34, .1, 5200, 90);
+  tone(58, .55, .15, 31, "sawtooth");
+  [1680, 2380, 3180, 4160].forEach((frequency, index) => tone(frequency, .18, .02, frequency * .62, "triangle", .03 + index * .035, index % 2 ? .62 : -.62));
+}
+
+function playPhaseSound() {
+  noiseSweep(.65, .045, 280, 6200);
+  [196, 247, 330, 494].forEach((frequency, index) => tone(frequency, .62, .032, frequency * 1.5, "sine", index * .075, [-.5, -.15, .2, .55][index]));
+}
+
+function playRewardSound() {
+  [784, 988, 1175, 1568, 1976].forEach((frequency, index) => tone(frequency, .46, .026, null, index % 2 ? "triangle" : "sine", index * .065, [-.6, -.25, 0, .25, .6][index]));
+}
+
+function playBattleResultSound(won) {
+  if (won) {
+    tone(65, .9, .075, 130, "sine");
+    noiseSweep(.5, .034, 340, 6200, 0, .15);
+    [392, 494, 587, 784, 988].forEach((frequency, index) => tone(frequency, .7, .038, null, index % 2 ? "triangle" : "sine", .04 + index * .095, index % 2 ? .4 : -.4));
+  } else {
+    noiseSweep(.42, .04, 900, 120);
+    tone(150, .7, .075, 62, "sawtooth");
+    tone(110, .55, .045, 48, "triangle", .2);
+  }
+}
+
+function previewBattleSound() {
+  const button = document.querySelector("#battle-sound-preview");
+  if (!state.settings.sound) {
+    state.settings.sound = true;
+    saveState();
+    updateUI();
+    showToast("サウンドをONにしました");
+  }
+  battleSoundPreviewTimer.forEach(clearTimeout);
+  button.classList.add("playing");
+  button.querySelector(":scope > b").textContent = "•••";
+  playSortieSound();
+  battleSoundPreviewTimer = [
+    setTimeout(() => playBattleHitSound(false, 1), 520),
+    setTimeout(() => { playCriticalSound(); vibrate([20, 16, 42]); }, 830),
+    setTimeout(playBreakSound, 1260),
+    setTimeout(playBattleResultSound, 1700, true),
+    setTimeout(playRewardSound, 2220),
+    setTimeout(() => { button.classList.remove("playing"); button.querySelector(":scope > b").textContent = "▶"; }, 3000)
+  ];
+}
 function vibrate(pattern) { if (state.settings.haptic && navigator.vibrate) navigator.vibrate(pattern); }
 
 function startParticles(colors) {
@@ -2245,6 +2354,7 @@ document.addEventListener("click", event => {
 document.querySelector("#draw-ten").addEventListener("click", () => performDraw(10));
 document.querySelector("#draw-one").addEventListener("click", () => performDraw(1));
 document.querySelector("#sound-preview").addEventListener("click", previewGachaSound);
+document.querySelector("#battle-sound-preview").addEventListener("click", previewBattleSound);
 document.querySelector("#summon-skip").addEventListener("click", () => showSummonResults());
 document.querySelector("#summon-hero").addEventListener("click", () => showSummonResults());
 document.querySelector("#summon-close").addEventListener("click", closeSummon);
