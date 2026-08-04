@@ -18,7 +18,11 @@ const commanders = [
   { id: "ibuki", name: "イブキ", title: "白環の城塞守", rarity: "SSR", role: "防御", symbol: "盾", attack: 137, defense: 186, command: 28, colors: ["#f6f3ff", "#17cfe3", "#6847df", "#f126cf"], art: "assets/commander-ibuki-v1.png", skill: { name: "白環城塞", detail: "円環障壁を展開し部隊の損耗を抑制" }, passive: { name: "守域拡張", stat: "defense", detail: "自身の防御を常時強化" } },
   { id: "tsuzuri", name: "ツヅリ", title: "彩紋の結界師", rarity: "SR", role: "支援", symbol: "扇", attack: 112, defense: 136, command: 24, colors: ["#16d7d0", "#f126cf", "#ffd53d", "#23103e"], art: "assets/char-tsuzuri-v2.png", skill: { name: "彩界扇陣", detail: "色彩結界で五人の共鳴を保護" }, passive: { name: "護符編纂", stat: "both", detail: "自身の攻撃と防御を強化" } },
   { id: "kohaku", name: "コハク", title: "界紋を拓く者", rarity: "UR", role: "万能", symbol: "界", attack: 196, defense: 164, command: 30, colors: ["#19e6ff", "#f126cf", "#ffd53d"], art: "assets/commander-kohaku-v2.png", skill: { name: "万象展開", detail: "界紋を開き全域を制圧" }, passive: { name: "界紋共鳴", stat: "both", detail: "自身の攻撃と防御を強化" } },
-  { id: "kagari", name: "カガリ", title: "紅界の鬼舞", rarity: "UR", role: "攻撃", symbol: "鬼", attack: 208, defense: 152, command: 31, colors: ["#ff304f", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/char-kagari-v2.png", skill: { name: "紅蓮界断", detail: "鬼面の界刀で全戦線を切り開く" }, passive: { name: "鬼舞共鳴", stat: "attack", detail: "自身の攻撃を大きく強化" } }
+  { id: "kagari", name: "カガリ", title: "紅界の鬼舞", rarity: "UR", role: "攻撃", symbol: "鬼", attack: 208, defense: 152, command: 31, colors: ["#ff304f", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/char-kagari-v2.png", skill: { name: "紅蓮界断", detail: "鬼面の界刀で全戦線を切り開く" }, passive: { name: "鬼舞共鳴", stat: "attack", detail: "自身の攻撃を大きく強化" } },
+  { id: "shion", name: "シオン", title: "紫電の界斬姫", rarity: "UR", role: "攻撃", symbol: "閃", attack: 224, defense: 148, command: 32, colors: ["#7d35ff", "#f126cf", "#19e6ff", "#ffd53d"], art: "assets/commander-shion-v1.png", skill: { name: "紫電天衝", detail: "境界を裂く大剣へ紫雷を収束し一刀で薙ぎ払う" }, passive: { name: "雷華連唱", stat: "attack", detail: "連続共鳴で自身の攻撃を大きく強化" } },
+  { id: "hotaru", name: "ホタル", title: "星灯の祈導師", rarity: "SSR", role: "支援", symbol: "灯", attack: 149, defense: 165, command: 29, colors: ["#ff7069", "#19d9e6", "#ffd53d", "#f126cf"], art: "assets/commander-hotaru-v1.png", skill: { name: "星灯再生陣", detail: "星灯端末を展開し五人の共鳴と戦線を立て直す" }, passive: { name: "灯脈循環", stat: "both", detail: "星灯の循環で自身の攻撃と防御を強化" } },
+  { id: "gendo", name: "ゲンドウ", title: "黒鉄の城壁", rarity: "SR", role: "防御", symbol: "壁", attack: 103, defense: 151, command: 25, colors: ["#181b25", "#19e6ff", "#ff7024", "#f126cf"], art: "assets/commander-gendo-v1.png", skill: { name: "不動境壁", detail: "黒鉄の大盾を固定し衝撃を正面から受け止める" }, passive: { name: "鉄心増幅", stat: "defense", detail: "揺るがぬ鉄心で自身の防御を常時強化" } },
+  { id: "nagi", name: "ナギ", title: "影縫いの符術士", rarity: "R", role: "妨害", symbol: "縫", attack: 100, defense: 86, command: 21, colors: ["#b8f21f", "#11141d", "#19d9e6", "#f126cf"], art: "assets/commander-nagi-v1.png", skill: { name: "影縛封陣", detail: "符を打ち込み敵の進路と共鳴回路を同時に縫い止める" }, passive: { name: "裏路観測", stat: "attack", detail: "死角の観測で自身の攻撃を常時強化" } }
 ];
 
 const missions = [
@@ -77,7 +81,8 @@ const raidRewardTiers = [
 const arenaOpponents = [
   { id: "kasumi", name: "霞坂ユノ", guild: "霞境旅団", rating: 940, level: 1, skillLevel: 1, passiveLevel: 1, gearLevel: 0, team: ["ren", "sana", "touma", "mina", "isami"] },
   { id: "kurogane", name: "黒鉄ジン", guild: "夜光防衛線", rating: 1080, level: 3, skillLevel: 2, passiveLevel: 2, gearLevel: 1, team: ["sana", "ten", "riku", "mina", "touma"] },
-  { id: "hoshiyomi", name: "星詠ミオ", guild: "天蓋観測局", rating: 1240, level: 6, skillLevel: 3, passiveLevel: 3, gearLevel: 2, team: ["kohaku", "kanade", "setsuna", "riku", "sana"] }
+  { id: "hoshiyomi", name: "星詠ミオ", guild: "天蓋観測局", rating: 1240, level: 6, skillLevel: 3, passiveLevel: 3, gearLevel: 2, team: ["kohaku", "kanade", "setsuna", "riku", "sana"] },
+  { id: "shiden", name: "紫藤レイカ", guild: "天雷境界局", rating: 1420, level: 8, skillLevel: 4, passiveLevel: 4, gearLevel: 2, team: ["shion", "hotaru", "gendo", "nagi", "kagari"] }
 ];
 
 const dailyTasks = [
@@ -1144,7 +1149,7 @@ function renderProfile() {
 function renderArtTestGallery() {
   const root = document.querySelector("#art-test-gallery");
   if (!root) return;
-  root.innerHTML = ["kohaku", "ren", "sana", "kagari", "ao", "suzune", "tsuzuri", "matoi", "ibuki"].map(id => {
+  root.innerHTML = ["shion", "hotaru", "gendo", "nagi", "kohaku", "ren", "sana", "kagari", "ao", "suzune", "tsuzuri", "matoi", "ibuki"].map(id => {
     const commander = getCommander(id);
     return `<button type="button" class="art-test-card" data-art-preview="${id}"><span><img loading="lazy" src="${commander.art}" alt="${commander.name} 全身イラスト"></span><small>${commander.rarity} / ${commander.role}</small><strong>${commander.name}</strong><em>${commander.title}</em></button>`;
   }).join("");
