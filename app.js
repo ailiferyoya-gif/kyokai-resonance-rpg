@@ -37,10 +37,10 @@ const missions = [
 ];
 
 const materials = {
-  ore: { name: "境鉄鉱", icon: "⬡", color: "#19e6ff" },
-  fiber: { name: "霊脈繊維", icon: "≋", color: "#f126cf" },
-  core: { name: "共鳴核", icon: "◆", color: "#ffd53d" },
-  hide: { name: "機獣外皮", icon: "◈", color: "#5fffb0" }
+  ore: { name: "境鉄鉱", icon: "⬡", color: "#19e6ff", art: "assets/material-border-ore-v1.png" },
+  fiber: { name: "霊脈繊維", icon: "≋", color: "#f126cf", art: "assets/material-spirit-fiber-v1.png" },
+  core: { name: "共鳴核", icon: "◆", color: "#ffd53d", art: "assets/material-resonance-core-v1.png" },
+  hide: { name: "機獣外皮", icon: "◈", color: "#5fffb0", art: "assets/material-mech-hide-v1.png" }
 };
 
 const expeditions = [
@@ -50,9 +50,9 @@ const expeditions = [
 ];
 
 const recipes = [
-  { id: "arcRifle", slot: "weapon", name: "雷紋式アークライフル", type: "武器", icon: "⌁", effect: "対象キャラの攻撃 +42 / Lv", max: 5, costs: { ore: 6, core: 3 }, coins: 800 },
-  { id: "borderCoat", slot: "armor", name: "境界織りの外套", type: "防具", icon: "♢", effect: "対象キャラの防御 +46 / Lv", max: 5, costs: { fiber: 5, hide: 4 }, coins: 700 },
-  { id: "resonanceSigil", slot: "accessory", name: "五連共鳴紋章", type: "装飾", icon: "✦", effect: "対象キャラの攻防 +25 / Lv", max: 5, costs: { core: 5, fiber: 3 }, coins: 1000 }
+  { id: "arcRifle", slot: "weapon", name: "雷紋式アークライフル", type: "武器", icon: "⌁", art: "assets/item-arc-rifle-v1.png", effect: "対象キャラの攻撃 +42 / Lv", max: 5, costs: { ore: 6, core: 3 }, coins: 800 },
+  { id: "borderCoat", slot: "armor", name: "境界織りの外套", type: "防具", icon: "♢", art: "assets/item-border-coat-v1.png", effect: "対象キャラの防御 +46 / Lv", max: 5, costs: { fiber: 5, hide: 4 }, coins: 700 },
+  { id: "resonanceSigil", slot: "accessory", name: "五連共鳴紋章", type: "装飾", icon: "✦", art: "assets/item-resonance-sigil-v1.png", effect: "対象キャラの攻防 +25 / Lv", max: 5, costs: { core: 5, fiber: 3 }, coins: 1000 }
 ];
 
 const raidBoss = {
@@ -1302,8 +1302,13 @@ function canPay(cost) {
   return state.coins >= cost.coins && Object.entries(cost.materials).every(([key, amount]) => state.materials[key] >= amount);
 }
 
+function materialIconMarkup(key, alt = "") {
+  const material = materials[key];
+  return `<img src="${material.art}" alt="${alt}" loading="lazy">`;
+}
+
 function costMarkup(cost) {
-  return `${Object.entries(cost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materials[key].icon} ${state.materials[key]}/${amount}</i>`).join("")}<i class="${state.coins >= cost.coins ? "ready" : ""}">● ${formatNumber(cost.coins)}</i>`;
+  return `${Object.entries(cost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materialIconMarkup(key)}<span>${state.materials[key]}/${amount}</span></i>`).join("")}<i class="${state.coins >= cost.coins ? "ready" : ""}">● ${formatNumber(cost.coins)}</i>`;
 }
 
 function getRecipeUpgradeCost(recipe, currentLevel) {
@@ -1338,18 +1343,18 @@ function renderWorkshop() {
   const progress = getUnitProgress(workshopUnitId);
   const equipment = getUnitEquipment(workshopUnitId);
   document.querySelector("#workshop-unit-label").textContent = commander.name;
-  document.querySelector("#material-wallet").innerHTML = Object.entries(materials).map(([key, material]) => `<div class="material-item" style="--material:${material.color}"><i>${material.icon}</i><span><small>${material.name}</small></span><b>${state.materials[key]}</b></div>`).join("");
+  document.querySelector("#material-wallet").innerHTML = Object.entries(materials).map(([key, material]) => `<div class="material-item" style="--material:${material.color}"><i>${materialIconMarkup(key)}</i><span><small>${material.name}</small></span><b>${state.materials[key]}</b></div>`).join("");
   document.querySelector("#workshop-unit-tabs").innerHTML = Object.keys(state.owned).map(getCommander).filter(Boolean).sort((a, b) => rarityRank[b.rarity] - rarityRank[a.rarity]).map(unit => `<button type="button" class="workshop-unit-chip${unit.id === workshopUnitId ? " active" : ""}" data-workshop-unit="${unit.id}">${unit.art ? `<img src="${unit.art}" alt="">` : `<i style="background:linear-gradient(145deg,${unit.colors.join(",")})">${unit.symbol}</i>`}<span><b>${unit.name}</b><small>Lv.${getUnitProgress(unit.id).level}</small></span></button>`).join("");
   document.querySelector("#training-panel").innerHTML = `<div class="training-hero"><div class="training-portrait" style="background:linear-gradient(145deg,${commander.colors.join(",")})">${commander.art ? `<img src="${commander.art}" alt="${commander.name}">` : `<i>${commander.symbol}</i>`}</div><div><span class="rarity ${commander.rarity.toLowerCase()}">${commander.rarity}</span><h3>${commander.title}<br>${commander.name}</h3><p>${commander.role} / Lvが高いほど成長量アップ</p></div><b>戦力 ${formatNumber(getUnitStats(commander.id).attack + getUnitStats(commander.id).defense)}</b></div>${renderGrowthRow("level", "CHARACTER", "キャラクターLv", "攻撃・防御の伸び幅がLvごとに加速", progress.level, getUpgradeCost("level", progress))}${renderGrowthRow("skill", "ACTIVE SKILL", commander.skill.name, commander.skill.detail, progress.skillLevel, getUpgradeCost("skill", progress))}${renderGrowthRow("passive", "PASSIVE SKILL", commander.passive.name, commander.passive.detail, progress.passiveLevel, getUpgradeCost("passive", progress))}`;
-  document.querySelector("#expedition-list").innerHTML = expeditions.map((expedition, index) => `<article class="expedition-card" style="--expedition-bg:${expedition.background}"><small>${expedition.code}</small><h3>${expedition.name}</h3><p>${expedition.detail}</p><div class="drop-chips">${Object.keys(expedition.drops).map(key => `<i>${materials[key].icon} ${materials[key].name}</i>`).join("")}</div><button type="button" data-expedition="${index}" ${state.stamina < 3 ? "disabled" : ""}>探索 ϟ3</button></article>`).join("");
+  document.querySelector("#expedition-list").innerHTML = expeditions.map((expedition, index) => `<article class="expedition-card" style="--expedition-bg:${expedition.background}"><small>${expedition.code}</small><h3>${expedition.name}</h3><p>${expedition.detail}</p><div class="drop-chips">${Object.keys(expedition.drops).map(key => `<i>${materialIconMarkup(key)}<span>${materials[key].name}</span></i>`).join("")}</div><button type="button" data-expedition="${index}" ${state.stamina < 3 ? "disabled" : ""}>探索 ϟ3</button></article>`).join("");
   document.querySelector("#recipe-list").innerHTML = recipes.map(recipe => {
     const level = equipment[recipe.slot];
     const maxed = level >= recipe.max;
     const upgradeCost = getRecipeUpgradeCost(recipe, level);
     const materialReady = Object.entries(upgradeCost.materials).every(([key, amount]) => state.materials[key] >= amount);
     const ready = !maxed && materialReady && state.coins >= upgradeCost.coins;
-    const costs = Object.entries(upgradeCost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materials[key].icon} ${state.materials[key]}/${amount}</i>`).join("");
-    return `<article class="recipe-card${ready ? " ready" : ""}${maxed ? " maxed" : ""}" data-recipe-preview="${recipe.id}"><div class="recipe-icon">${recipe.icon}</div><div class="recipe-copy"><small>${recipe.type.toUpperCase()}</small><h3>${recipe.name} <b>Lv.${level}</b></h3><p>${recipe.effect}</p><div class="recipe-cost">${costs}<i class="${state.coins >= upgradeCost.coins ? "ready" : ""}">● ${formatNumber(upgradeCost.coins)}</i></div></div><button type="button" data-recipe-preview="${recipe.id}">${maxed ? "MAX" : "確認"}</button></article>`;
+    const costs = Object.entries(upgradeCost.materials).map(([key, amount]) => `<i class="${state.materials[key] >= amount ? "ready" : ""}">${materialIconMarkup(key)}<span>${state.materials[key]}/${amount}</span></i>`).join("");
+    return `<article class="recipe-card${ready ? " ready" : ""}${maxed ? " maxed" : ""}" data-recipe-preview="${recipe.id}"><div class="recipe-icon"><img src="${recipe.art}" alt="${recipe.name}" loading="lazy"></div><div class="recipe-copy"><small>${recipe.type.toUpperCase()}</small><h3>${recipe.name} <b>Lv.${level}</b></h3><p>${recipe.effect}</p><div class="recipe-cost">${costs}<i class="${state.coins >= upgradeCost.coins ? "ready" : ""}">● ${formatNumber(upgradeCost.coins)}</i></div></div><button type="button" data-recipe-preview="${recipe.id}">${maxed ? "MAX" : "確認"}</button></article>`;
   }).join("");
 }
 
@@ -1389,13 +1394,13 @@ function showRecipeConfirmation(id) {
   const upgradeCost = getRecipeUpgradeCost(recipe, level);
   const materialRows = Object.entries(upgradeCost.materials).map(([key, amount]) => {
     const enough = state.materials[key] >= amount;
-    return `<div class="craft-material-row ${enough ? "ready" : "missing"}"><i style="--material:${materials[key].color}">${materials[key].icon}</i><span><small>${materials[key].name}</small><b>所持 ${state.materials[key]} / 必要 ${amount}</b></span><strong>${enough ? "OK" : `不足 ${amount - state.materials[key]}`}</strong></div>`;
+    return `<div class="craft-material-row ${enough ? "ready" : "missing"}"><i style="--material:${materials[key].color}">${materialIconMarkup(key)}</i><span><small>${materials[key].name}</small><b>所持 ${state.materials[key]} / 必要 ${amount}</b></span><strong>${enough ? "OK" : `不足 ${amount - state.materials[key]}`}</strong></div>`;
   }).join("");
   const coinReady = state.coins >= upgradeCost.coins;
   const canCraft = !maxed && coinReady && Object.entries(upgradeCost.materials).every(([key, amount]) => state.materials[key] >= amount);
   const dialog = document.querySelector("#info-dialog");
   if (dialog.open) dialog.close();
-  document.querySelector("#dialog-content").innerHTML = `<div class="craft-confirm-dialog"><small>PERSONAL GEAR / ${recipe.type}</small><h2>${recipe.icon} ${recipe.name}</h2><p>${commander.name}専用装備　Lv.${level} → ${Math.min(recipe.max, level + 1)}</p><em>${recipe.effect}</em><div class="craft-material-list"><b>必要な資材</b>${materialRows}<div class="craft-material-row ${coinReady ? "ready" : "missing"}"><i>●</i><span><small>生成費用</small><b>所持 ${formatNumber(state.coins)} / 必要 ${formatNumber(upgradeCost.coins)}</b></span><strong>${coinReady ? "OK" : `不足 ${formatNumber(upgradeCost.coins - state.coins)}`}</strong></div></div><div class="craft-confirm-actions"><button type="button" class="secondary-button" data-dialog-close>戻る</button><button type="button" class="primary-button" data-confirm-recipe="${recipe.id}" ${canCraft ? "" : "disabled"}>${maxed ? "最大強化済み" : canCraft ? "この内容で生成" : "素材不足"}</button></div></div>`;
+  document.querySelector("#dialog-content").innerHTML = `<div class="craft-confirm-dialog"><div class="craft-confirm-head"><img src="${recipe.art}" alt="${recipe.name}"><span><small>PERSONAL GEAR / ${recipe.type}</small><h2>${recipe.name}</h2><p>${commander.name}専用装備　Lv.${level} → ${Math.min(recipe.max, level + 1)}</p><em>${recipe.effect}</em></span></div><div class="craft-material-list"><b>必要な資材</b>${materialRows}<div class="craft-material-row ${coinReady ? "ready" : "missing"}"><i class="coin-material">●</i><span><small>生成費用</small><b>所持 ${formatNumber(state.coins)} / 必要 ${formatNumber(upgradeCost.coins)}</b></span><strong>${coinReady ? "OK" : `不足 ${formatNumber(upgradeCost.coins - state.coins)}`}</strong></div></div><div class="craft-confirm-actions"><button type="button" class="secondary-button" data-dialog-close>戻る</button><button type="button" class="primary-button" data-confirm-recipe="${recipe.id}" ${canCraft ? "" : "disabled"}>${maxed ? "最大強化済み" : canCraft ? "この内容で生成" : "素材不足"}</button></div></div>`;
   dialog.showModal();
 }
 
